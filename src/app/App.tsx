@@ -193,6 +193,25 @@ export default function App() {
 function Navbar({ cartCount, onCartOpen, onAdmin }: { cartCount: number; onCartOpen: () => void; onAdmin: () => void }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [animOut, setAnimOut] = useState(false);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.width = "100%";
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+    };
+  }, [open]);
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 40);
@@ -201,12 +220,28 @@ function Navbar({ cartCount, onCartOpen, onAdmin }: { cartCount: number; onCartO
   }, []);
 
   const navStyle: React.CSSProperties = {
-    position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
+    position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999,
     backgroundColor: scrolled ? "#fff" : "rgba(255,255,255,0.93)",
     boxShadow: scrolled ? "0 1px 12px rgba(181,120,74,0.12)" : "none",
     backdropFilter: "blur(10px)",
     transition: "all 0.3s",
   };
+
+  function toggleMenu() {
+    if (open) {
+      setAnimOut(true);
+      setTimeout(() => { setOpen(false); setAnimOut(false); }, 280);
+    } else {
+      setOpen(true);
+    }
+  }
+
+  function closeMenu() {
+    setAnimOut(true);
+    setTimeout(() => { setOpen(false); setAnimOut(false); }, 280);
+  }
+
+  const navLinks = [["HOME", "#"], ["SHOP", "#products"], ["CATEGORIES", "#categories"], ["FIND US", "#location"], ["CONTACT", "#contact"]];
 
   return (
     <>
@@ -220,8 +255,8 @@ function Navbar({ cartCount, onCartOpen, onAdmin }: { cartCount: number; onCartO
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#B5784A", fontWeight: 600 }}>EMPIRE COSMETICS</div>
           </div>
 
-          <nav style={{ display: "flex", gap: 28, fontSize: 11, letterSpacing: "0.15em", fontWeight: 700, color: "#1A0F0A", flexShrink: 0 }} className="hidden md:flex">
-            {[["HOME", "#"], ["SHOP", "#products"], ["CATEGORIES", "#categories"], ["FIND US", "#location"], ["CONTACT", "#contact"]].map(([l, h]) => (
+          <nav style={{ gap: 28, fontSize: 11, letterSpacing: "0.15em", fontWeight: 700, color: "#1A0F0A", flexShrink: 0 }} className="hidden md:flex">
+            {navLinks.map(([l, h]) => (
               <a key={l} href={h} style={{ textDecoration: "none", color: "inherit", transition: "color 0.2s" }}
                 onMouseEnter={e => (e.currentTarget.style.color = "#B5784A")}
                 onMouseLeave={e => (e.currentTarget.style.color = "#1A0F0A")}
@@ -230,7 +265,7 @@ function Navbar({ cartCount, onCartOpen, onAdmin }: { cartCount: number; onCartO
           </nav>
 
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-            <button onClick={onAdmin} title="Admin" style={{ background: "none", border: "none", cursor: "pointer", padding: 8, color: "#9A7A6E", display: "none" }} className="md:block">
+            <button onClick={onAdmin} title="Admin" style={{ background: "none", border: "none", cursor: "pointer", padding: 8, color: "#9A7A6E" }} className="hidden md:block">
               <Settings size={17} />
             </button>
             <button onClick={onCartOpen} style={{ position: "relative", background: "none", border: "none", cursor: "pointer", padding: 8, color: "#1A0F0A" }}>
@@ -241,35 +276,181 @@ function Navbar({ cartCount, onCartOpen, onAdmin }: { cartCount: number; onCartO
                 </span>
               )}
             </button>
-            <button onClick={() => setOpen(!open)} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: "#1A0F0A", display: "flex" }} className="md:hidden">
-              {open ? <X size={22} /> : <Menu size={22} />}
+            <button
+              onClick={toggleMenu}
+              aria-label={open ? "Close menu" : "Open menu"}
+              style={{
+                background: "none", border: "none", cursor: "pointer",
+                padding: 8, color: "#1A0F0A", display: "flex",
+                position: "relative",
+                transition: "transform 0.3s ease",
+                transform: open ? "rotate(90deg)" : "rotate(0deg)",
+              }}
+              className="flex md:hidden"
+            >
+              <Menu
+                size={22}
+                style={{
+                  transition: "opacity 0.25s ease, transform 0.25s ease",
+                  opacity: open ? 0 : 1,
+                  transform: open ? "rotate(-90deg) scale(0.6)" : "rotate(0deg) scale(1)",
+                  position: "absolute",
+                }}
+              />
+              <X
+                size={22}
+                style={{
+                  transition: "opacity 0.25s ease, transform 0.25s ease",
+                  opacity: open ? 1 : 0,
+                  transform: open ? "rotate(0deg) scale(1)" : "rotate(90deg) scale(0.6)",
+                }}
+              />
             </button>
           </div>
         </div>
       </header>
 
-      {open && (
-        <div style={{
+      {/* Backdrop overlay */}
+      <div
+        onClick={closeMenu}
+        aria-hidden="true"
+        style={{
           position: "fixed",
-          top: 80,
-          left: 0,
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: "rgba(15, 7, 5, 0.55)",
+          zIndex: 9998,
+          opacity: open && !animOut ? 1 : 0,
+          visibility: open ? "visible" : "hidden",
+          transition: "opacity 0.3s ease, visibility 0.3s ease",
+          WebkitBackdropFilter: "blur(2px)",
+          backdropFilter: "blur(2px)",
+        }}
+      />
+
+      {/* Mobile dropdown menu — slides in from the right */}
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: "#fff",
+          width: "min(320px, 82vw)",
           zIndex: 9999,
-          padding: "24px",
-          overflowY: "auto",
-          WebkitOverflowScrolling: "touch",
+          backgroundColor: "#fff",
+          boxShadow: open && !animOut
+            ? "-12px 0 40px rgba(15, 7, 5, 0.2)"
+            : "none",
           display: "flex",
           flexDirection: "column",
-          gap: 16
+          transform: open && !animOut
+            ? "translateX(0)"
+            : "translateX(100%)",
+          transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease",
+          overflowY: "auto",
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
+        {/* Mobile menu header */}
+        <div style={{
+          padding: "24px 24px 16px",
+          borderBottom: "1px solid rgba(181,120,74,0.1)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}>
-          {[["HOME", "#"], ["SHOP", "#products"], ["CATEGORIES", "#categories"], ["FIND US", "#location"], ["CONTACT", "#contact"]].map(([l, h]) => (
-            <a key={l} href={h} onClick={() => setOpen(false)} style={{ padding: "16px 0", borderBottom: "1px solid rgba(181,120,74,0.1)", fontSize: 16, fontWeight: 700, color: "#1A0F0A", textDecoration: "none" }}>{l}</a>
-          ))}
-          <button onClick={() => { setOpen(false); onAdmin(); }} style={{ padding: "16px 0", background: "none", border: "none", cursor: "pointer", textAlign: "left", color: "#B5784A", fontSize: 16, fontWeight: 700 }}>⚙ Admin Panel</button>
+          <div style={{ lineHeight: 1.1 }}>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: "#1A0F0A", letterSpacing: "-0.02em" }}>SPLENDID</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 7, letterSpacing: "0.45em", color: "#B5784A", fontWeight: 600 }}>EMPIRE COSMETICS</div>
+          </div>
+          <button
+            onClick={closeMenu}
+            aria-label="Close menu"
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: "#5C3D2E", display: "flex" }}
+          >
+            <X size={20} />
+          </button>
         </div>
-      )}
+
+        {/* Navigation links */}
+        <div style={{ flex: 1, padding: "16px 0" }}>
+          {navLinks.map(([l, h], idx) => (
+            <a
+              key={l}
+              href={h}
+              onClick={closeMenu}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                padding: "18px 24px",
+                fontSize: 14,
+                fontWeight: 700,
+                color: "#1A0F0A",
+                textDecoration: "none",
+                letterSpacing: "0.12em",
+                borderLeft: "3px solid transparent",
+                transition: "all 0.2s ease",
+                animation: open && !animOut
+                  ? `mobileNavFadeIn 0.3s ease ${idx * 0.05}s both`
+                  : "none",
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.backgroundColor = "#FFF6F3";
+                (e.currentTarget as HTMLElement).style.borderLeftColor = "#B5784A";
+                (e.currentTarget as HTMLElement).style.color = "#B5784A";
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
+                (e.currentTarget as HTMLElement).style.borderLeftColor = "transparent";
+                (e.currentTarget as HTMLElement).style.color = "#1A0F0A";
+              }}
+            >
+              <span style={{
+                width: 6, height: 6, borderRadius: "50%",
+                backgroundColor: "#B5784A", marginRight: 14, flexShrink: 0,
+                opacity: 0.4,
+              }} />
+              {l}
+            </a>
+          ))}
+        </div>
+
+        {/* Bottom actions */}
+        <div style={{
+          padding: "20px 24px 28px",
+          borderTop: "1px solid rgba(181,120,74,0.1)",
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+        }}>
+          <button
+            onClick={() => { closeMenu(); onAdmin(); }}
+            style={{
+              width: "100%",
+              background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)",
+              color: "#fff",
+              border: "none",
+              borderRadius: 999,
+              padding: "13px 20px",
+              fontSize: 11,
+              letterSpacing: "0.15em",
+              fontWeight: 700,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              transition: "opacity 0.2s",
+              animation: open && !animOut
+                ? `mobileNavFadeIn 0.3s ease ${navLinks.length * 0.05 + 0.1}s both`
+                : "none",
+            }}
+            onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+            onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+          >
+            <Settings size={14} /> ADMIN PANEL
+          </button>
+        </div>
+      </div>
     </>
   );
 }

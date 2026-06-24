@@ -26,3 +26,15 @@ header div:last-child div[style*="zIndex: 999"] {
     display: none !important;
   }
 }
+
+/* Mobile nav link fade-in animation */
+@keyframes mobileNavFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
