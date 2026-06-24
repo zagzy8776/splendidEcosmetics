@@ -7,7 +7,12 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const ADMIN_PASSWORD = "SEC@Admin2024";
 
-app.use(cors());
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+app.use(cors({
+  origin: [FRONTEND_URL],
+  methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 app.use(express.json());
 
 // ─── PRODUCTS ───────────────────────────────────────────────────────────
