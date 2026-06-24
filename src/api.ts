@@ -2,7 +2,7 @@
 const API_BASE: string = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 export interface ProductData {
-  id?: string;
+  id: string;
   name: string;
   category: string;
   price: number;
