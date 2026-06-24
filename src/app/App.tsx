@@ -107,6 +107,11 @@ export default function App() {
   const [orderId, setOrderId] = useState("");
   const [copied, setCopied] = useState(false);
 
+  // Premium Features & Hidden Admin States
+  const [adminPromptOpen, setAdminPromptOpen] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [quizOpen, setQuizOpen] = useState(false);
+
   const cartTotal = cart.reduce((s, i) => s + i.product.price * i.quantity, 0);
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
 
@@ -168,10 +173,10 @@ export default function App() {
 
   return (
     <div style={{ fontFamily: "'Raleway', sans-serif", backgroundColor: "#FFF6F3", minHeight: "100vh" }}>
-      <Navbar cartCount={cartCount} onCartOpen={() => setCartOpen(true)} onAdmin={() => setView("admin")} />
+      <Navbar cartCount={cartCount} onCartOpen={() => setCartOpen(true)} onAdminRequest={() => setAdminPromptOpen(true)} />
       <HeroSection />
       <CategorySection active={activeCategory} onSelect={setActiveCategory} />
-      <ProductsSection products={filtered} active={activeCategory} onFilter={setActiveCategory} onAdd={addToCart} />
+      <ProductsSection products={filtered} active={activeCategory} onFilter={setActiveCategory} onAdd={addToCart} onQuickView={setQuickViewProduct} />
       <WhyUsSection />
       <TestimonialsSection />
       <LocationSection />
@@ -184,13 +189,460 @@ export default function App() {
       {checkoutStep && (
         <CheckoutModal step={checkoutStep} cart={cart} total={cartTotal} orderId={orderId} name={customerName} phone={customerPhone} onName={setCustomerName} onPhone={setCustomerPhone} onPlace={placeOrder} onWhatsApp={sendWhatsApp} onCopy={copyAccount} copied={copied} onClose={closeCheckout} />
       )}
+
+      {/* Floating Beauty Consultation Widget */}
+      <button
+        onClick={() => setQuizOpen(true)}
+        style={{
+          position: "fixed",
+          bottom: 24,
+          left: 24,
+          zIndex: 40,
+          background: "linear-gradient(135deg, #1A0F0A 0%, #2A160E 100%)",
+          color: "#FFF",
+          border: "1px solid rgba(181, 120, 74, 0.4)",
+          borderRadius: 999,
+          padding: "12px 20px",
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: "0.15em",
+          cursor: "pointer",
+          boxShadow: "0 10px 25px rgba(26,15,10,0.25)",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          transition: "transform 0.2s"
+        }}
+        onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
+        onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+      >
+        <Sparkles size={14} color="#B5784A" /> SKIN CONSULTATION QUIZ
+      </button>
+
+      {/* Floating WhatsApp Chat Widget */}
+      <div
+        className="animate-float"
+        style={{
+          position: "fixed",
+          bottom: 24,
+          right: 24,
+          zIndex: 40,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-end",
+          gap: 8
+        }}
+      >
+        <div style={{
+          background: "#fff",
+          boxShadow: "0 6px 20px rgba(26,15,10,0.12)",
+          borderRadius: 14,
+          padding: "8px 14px",
+          fontSize: 10,
+          fontWeight: 700,
+          color: "#1A0F0A",
+          letterSpacing: "0.05em",
+          border: "1px solid rgba(181,120,74,0.18)",
+          pointerEvents: "none",
+          display: "flex",
+          alignItems: "center",
+          gap: 6
+        }}>
+          <span className="whatsapp-pulse-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", display: "inline-block" }} />
+          SHADE ASSISTANT ONLINE
+        </div>
+        <a
+          href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I need some personalized beauty consulting or assistance matching my makeup shades.")}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            width: 50,
+            height: 50,
+            borderRadius: "50%",
+            background: "#22C55E",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#fff",
+            boxShadow: "0 10px 25px rgba(34,197,94,0.35)",
+            textDecoration: "none",
+            transition: "transform 0.2s"
+          }}
+          onMouseEnter={e => e.currentTarget.style.transform = "scale(1.1)"}
+          onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+          title="Chat with Beauty Consultant"
+        >
+          <MessageCircle size={24} fill="#fff" />
+        </a>
+      </div>
+
+      {/* Hidden Admin Passcode Modal */}
+      {adminPromptOpen && (
+        <PasscodeModal onClose={() => setAdminPromptOpen(false)} onSuccess={() => setView("admin")} />
+      )}
+
+      {/* Product Quick View Modal */}
+      {quickViewProduct && (
+        <ProductQuickViewModal
+          product={quickViewProduct}
+          onClose={() => setQuickViewProduct(null)}
+          onAdd={(prod, qty) => {
+            setCart(prev => {
+              const ex = prev.find(i => i.product.id === prod.id);
+              if (ex) return prev.map(i => i.product.id === prod.id ? { ...i, quantity: i.quantity + qty } : i);
+              return [...prev, { product: prod, quantity: qty }];
+            });
+            setCartOpen(true);
+          }}
+        />
+      )}
+
+      {/* Beauty Consultation Quiz Modal */}
+      {quizOpen && (
+        <BeautyQuizModal products={products} onClose={() => setQuizOpen(false)} onAdd={addToCart} />
+      )}
     </div>
   );
 }
 
 // ─── NAVBAR ───────────────────────────────────────────────────────────────────
 
-function Navbar({ cartCount, onCartOpen, onAdmin }: { cartCount: number; onCartOpen: () => void; onAdmin: () => void }) {
+interface PasscodeModalProps {
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+function PasscodeModal({ onClose, onSuccess }: PasscodeModalProps) {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(false);
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (password === ADMIN_PASSWORD) {
+      onSuccess();
+      onClose();
+    } else {
+      setError(true);
+      setTimeout(() => setError(false), 2000);
+    }
+  }
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(15, 7, 5, 0.6)", backdropFilter: "blur(4px)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div style={{ background: "#fff", borderRadius: 24, padding: 32, width: "100%", maxWidth: 400, boxShadow: "0 20px 50px rgba(0,0,0,0.15)", border: "1px solid rgba(242,184,168,0.3)" }} className="animate-modal-zoom">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#1A0F0A" }}>Admin Verification</h3>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#9A7A6E" }}><X size={20} /></button>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <p style={{ color: "#5C3D2E", fontSize: 13, marginBottom: 16, lineHeight: 1.6 }}>Please enter the administrator passcode to access management settings.</p>
+          <input
+            type="password"
+            placeholder="Enter Admin Passcode"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            style={{ width: "100%", padding: "12px 16px", borderRadius: 12, border: error ? "1.5px solid #ef4444" : "1px solid rgba(181,120,74,0.3)", outline: "none", fontSize: 14, marginBottom: 16, transition: "border-color 0.2s" }}
+          />
+          {error && <p style={{ color: "#ef4444", fontSize: 12, marginTop: -8, marginBottom: 16, fontWeight: 600 }}>Invalid passcode. Please try again.</p>}
+          <button type="submit" style={{ width: "100%", background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", border: "none", padding: "14px", borderRadius: 12, fontWeight: 700, fontSize: 12, letterSpacing: "0.15em", cursor: "pointer", boxShadow: "0 10px 20px rgba(181,120,74,0.2)" }}>
+            VERIFY PASSWORD
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+interface ProductQuickViewProps {
+  product: Product;
+  onClose: () => void;
+  onAdd: (p: Product, qty: number) => void;
+}
+
+function ProductQuickViewModal({ product: p, onClose, onAdd }: ProductQuickViewProps) {
+  const [quantity, setQuantity] = useState(1);
+
+  // Mocking luxury ingredients based on product category
+  const ingredientsMap: Record<string, string> = {
+    Foundation: "Aqua, Cyclopentasiloxane, Hyaluronic Acid, Tocopherol (Vitamin E), Shea Butter, Titanium Dioxide, Iron Oxides, Centella Asiatica Extract.",
+    Lipstick: "Jojoba Esters, Rosa Canina (Rosehip) Fruit Oil, Cera Alba (Beeswax), Copernicia Cerifera Wax, Butyrospermum Parkii, Mica, Sweet Almond Oil.",
+    Serum: "Pure 24K Gold Particles, Niacinamide (Vitamin B3), Sodium Hyaluronate, Ascorbic Acid (Vitamin C), Collagen Amino Acids, Glycerin, Chamomile Extract.",
+    Eyeliner: "Water, Acrylates Copolymer, Carbon Black, Butylene Glycol, Aloe Barbadensis Leaf Juice, Tocopheryl Acetate, Xanthan Gum, Phenoxyethanol.",
+    Moisturizer: "Organic Butyrospermum Parkii (Shea Butter), Aloe Barbadensis Leaf Juice, Squalane, Argania Spinosa Kernel Oil, Panthenol, Lavender Essential Oil.",
+    Perfume: "Alcohol Denat., Fragrance (Parfum), Benzyl Salicylate, Limonene, Linalool, Citronellol, Jasmine Flower Water, Amber Extract."
+  };
+
+  const usageMap: Record<string, string> = {
+    Foundation: "Dispense a small pump onto the back of your hand. Using a damp beauty sponge or foundation brush, buff into skin starting from the center of the face outwards for a seamless velvet matte finish.",
+    Lipstick: "Glide directly over clean lips. Start at the cupid's bow and blend outwards. Apply a second coat for maximum color intensity or top with gloss for a radiant shine.",
+    Serum: "Apply 3-4 drops onto freshly cleansed face and neck. Gently press and massage into skin using upward circular motions. Allow to dry completely before applying moisturizer.",
+    Eyeliner: "Shake well before use. Place the tip close to the lash line and sweep across from the inner corner outwards. Build pressure slightly for a bolder wing effect.",
+    Moisturizer: "Warm a pea-sized amount between fingertips. Smooth gently onto face and neck using upward strokes. Use morning and night after serums.",
+    Perfume: "Spritz lightly onto pulse points—wrists, inner elbows, and neck. Do not rub the fragrance into skin, let it settle naturally to maintain note layers."
+  };
+
+  const ingredients = ingredientsMap[p.category] || "Natural mineral pigments, botanical extracts, nourishing vitamins, and hydrating elements.";
+  const howToUse = usageMap[p.category] || "Apply a small amount to the target area and blend gently until fully absorbed.";
+
+  function handleAdd() {
+    onAdd(p, quantity);
+    onClose();
+  }
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(15, 7, 5, 0.6)", backdropFilter: "blur(4px)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div style={{ background: "#fff", borderRadius: 24, width: "100%", maxWidth: 800, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 24px 70px rgba(0,0,0,0.2)", border: "1px solid rgba(242,184,168,0.3)" }} className="animate-modal-zoom">
+        <div style={{ position: "sticky", top: 0, background: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 24px", borderBottom: "1px solid rgba(181,120,74,0.1)", zIndex: 10 }}>
+          <span style={{ fontSize: 10, letterSpacing: "0.15em", fontWeight: 700, color: "#B5784A" }}>PRODUCT QUICK VIEW</span>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#9A7A6E" }}><X size={20} /></button>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 24, padding: 24 }} className="md:grid-cols-2">
+          {/* Left: Image Container */}
+          <div style={{ position: "relative", aspectRatio: "1", borderRadius: 16, overflow: "hidden", backgroundColor: "#FFF0EB", height: "fit-content" }}>
+            <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            {p.badge && (
+              <span style={{ position: "absolute", top: 16, left: 16, background: "#B5784A", color: "#fff", fontSize: 9, letterSpacing: "0.18em", fontWeight: 700, padding: "4px 10px", borderRadius: 999 }}>{p.badge}</span>
+            )}
+            <span style={{ position: "absolute", bottom: 16, right: 16, background: p.inStock ? "rgba(34,197,94,0.9)" : "rgba(239,68,68,0.9)", color: "#fff", fontSize: 9, letterSpacing: "0.1em", fontWeight: 700, padding: "4px 10px", borderRadius: 999 }}>
+              {p.inStock ? "IN STOCK" : "OUT OF STOCK"}
+            </span>
+          </div>
+
+          {/* Right: Details Container */}
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div>
+              <div style={{ display: "flex", gap: 2, marginBottom: 8, alignItems: "center" }}>
+                {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={11} fill={i < Math.floor(p.rating) ? "#B5784A" : "none"} color="#B5784A" />)}
+                <span style={{ color: "#9A7A6E", fontSize: 11, marginLeft: 6 }}>({p.reviews} verified reviews)</span>
+              </div>
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#1A0F0A", marginBottom: 8, lineHeight: 1.25 }}>{p.name}</h2>
+              <div style={{ display: "inline-block", backgroundColor: "rgba(181,120,74,0.1)", color: "#B5784A", fontSize: 9, letterSpacing: "0.1em", fontWeight: 700, padding: "4px 8px", borderRadius: 6, marginBottom: 16 }}>
+                {p.category.toUpperCase()}
+              </div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#B5784A", marginBottom: 16 }}>
+                {fmt(p.price)}
+              </div>
+              
+              <div style={{ borderBottom: "1px solid rgba(181,120,74,0.1)", paddingBottom: 16, marginBottom: 16 }}>
+                <h4 style={{ color: "#1A0F0A", fontWeight: 700, fontSize: 11, letterSpacing: "0.08em", marginBottom: 6 }}>DESCRIPTION</h4>
+                <p style={{ color: "#5C3D2E", fontSize: 13, lineHeight: 1.6 }}>{p.description}</p>
+              </div>
+
+              <div style={{ borderBottom: "1px solid rgba(181,120,74,0.1)", paddingBottom: 16, marginBottom: 16 }}>
+                <h4 style={{ color: "#1A0F0A", fontWeight: 700, fontSize: 11, letterSpacing: "0.08em", marginBottom: 6 }}>KEY INGREDIENTS</h4>
+                <p style={{ color: "#5C3D2E", fontSize: 12, lineHeight: 1.6, fontStyle: "italic" }}>{ingredients}</p>
+              </div>
+
+              <div style={{ paddingBottom: 16, marginBottom: 16 }}>
+                <h4 style={{ color: "#1A0F0A", fontWeight: 700, fontSize: 11, letterSpacing: "0.08em", marginBottom: 6 }}>HOW TO USE</h4>
+                <p style={{ color: "#5C3D2E", fontSize: 12, lineHeight: 1.6 }}>{howToUse}</p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            {p.inStock ? (
+              <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", border: "1px solid rgba(181,120,74,0.3)", borderRadius: 12, overflow: "hidden" }}>
+                  <button onClick={() => setQuantity(q => Math.max(1, q - 1))} style={{ padding: "10px 14px", background: "none", border: "none", cursor: "pointer", color: "#5C3D2E" }}><Minus size={13} /></button>
+                  <span style={{ padding: "0 10px", fontSize: 13, fontWeight: 700, color: "#1A0F0A", minWidth: 24, textAlign: "center" }}>{quantity}</span>
+                  <button onClick={() => setQuantity(q => q + 1)} style={{ padding: "10px 14px", background: "none", border: "none", cursor: "pointer", color: "#5C3D2E" }}><Plus size={13} /></button>
+                </div>
+                <button onClick={handleAdd} style={{ flex: 1, background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", border: "none", padding: "14px", borderRadius: 12, fontWeight: 700, fontSize: 11, letterSpacing: "0.15em", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 10px 24px rgba(181,120,74,0.25)" }}>
+                  <ShoppingBag size={14} /> ADD TO CART — {fmt(p.price * quantity)}
+                </button>
+              </div>
+            ) : (
+              <div style={{ padding: "14px", textAlign: "center", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, color: "#ef4444", fontSize: 12, fontWeight: 700, backgroundColor: "rgba(239,68,68,0.05)" }}>
+                OUT OF STOCK
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface BeautyQuizModalProps {
+  products: Product[];
+  onClose: () => void;
+  onAdd: (p: Product) => void;
+}
+
+function BeautyQuizModal({ products, onClose, onAdd }: BeautyQuizModalProps) {
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useState({ skinType: "", coverage: "", undertone: "" });
+  const [recs, setRecs] = useState<Product[]>([]);
+
+  const questions = [
+    {
+      key: "skinType",
+      title: "What is your skin type?",
+      subtitle: "This helps us select formulas that hydrate or control oil.",
+      options: [
+        { label: "Dry & Flaky", desc: "Feels tight, needs intensive hydration." },
+        { label: "Oily & Shiny", desc: "Excess sebum, prone to shine, needs matte formulas." },
+        { label: "Combination", desc: "Oily in T-zone, dry on cheeks." },
+        { label: "Normal & Balanced", desc: "Smooth texture, even skin tone." }
+      ]
+    },
+    {
+      key: "coverage",
+      title: "What level of coverage do you prefer?",
+      subtitle: "From a sheer tint to full camera-ready cover.",
+      options: [
+        { label: "Sheer & Natural", desc: "Lightweight, lets your natural skin shine through." },
+        { label: "Medium & Buildable", desc: "Covers blemishes, feels natural." },
+        { label: "Full & Flawless", desc: "Maximum coverage, airbrushed finish." }
+      ]
+    },
+    {
+      key: "undertone",
+      title: "What is your skin undertone?",
+      subtitle: "This helps us pick lip and foundation shades.",
+      options: [
+        { label: "Cool (Pinkish/Rosy)", desc: "Veins look blue/purple; silver jewelry looks best." },
+        { label: "Warm (Golden/Yellow)", desc: "Veins look green; gold jewelry looks best." },
+        { label: "Neutral (Balanced)", desc: "Veins look blue-green; both metals look great." }
+      ]
+    }
+  ];
+
+  function handleSelect(optionLabel: string) {
+    const key = questions[step - 1].key;
+    const nextAnswers = { ...answers, [key]: optionLabel };
+    setAnswers(nextAnswers);
+
+    if (step < questions.length) {
+      setStep(step + 1);
+    } else {
+      const recommendedList: Product[] = [];
+
+      if (nextAnswers.skinType.includes("Dry") || nextAnswers.skinType.includes("Combination")) {
+        const serum = products.find(p => p.id === "p3");
+        if (serum) recommendedList.push(serum);
+        const moist = products.find(p => p.id === "p5");
+        if (moist) recommendedList.push(moist);
+      } else {
+        const serum = products.find(p => p.id === "p3");
+        if (serum) recommendedList.push(serum);
+      }
+
+      if (nextAnswers.coverage.includes("Full")) {
+        const found = products.find(p => p.id === "p1");
+        if (found) recommendedList.push(found);
+      } else {
+        const conc = products.find(p => p.id === "p8");
+        if (conc) recommendedList.push(conc);
+      }
+
+      if (nextAnswers.undertone.includes("Warm")) {
+        const lip = products.find(p => p.id === "p6");
+        if (lip) recommendedList.push(lip);
+      } else {
+        const lip = products.find(p => p.id === "p2");
+        if (lip) recommendedList.push(lip);
+      }
+
+      setRecs(recommendedList.filter(Boolean));
+      setStep(questions.length + 1);
+    }
+  }
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(15, 7, 5, 0.6)", backdropFilter: "blur(4px)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div style={{ background: "#fff", borderRadius: 24, width: "100%", maxWidth: 550, maxHeight: "90vh", overflowY: "auto", padding: 32, boxShadow: "0 24px 70px rgba(0,0,0,0.2)", border: "1px solid rgba(242,184,168,0.3)" }} className="animate-modal-zoom">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <span style={{ fontSize: 10, letterSpacing: "0.15em", fontWeight: 700, color: "#B5784A" }}>BEAUTY CONSULTATION</span>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#9A7A6E" }}><X size={20} /></button>
+        </div>
+
+        {step === 0 && (
+          <div style={{ textAlign: "center" }} className="animate-slide-up">
+            <Sparkles size={40} color="#B5784A" style={{ margin: "0 auto 16px" }} />
+            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#1A0F0A", marginBottom: 8 }}>Find Your Perfect Beauty Match</h3>
+            <p style={{ color: "#5C3D2E", fontSize: 13, lineHeight: 1.6, marginBottom: 24 }}>Take our 1-minute skincare & shade quiz to receive a customized routine curated especially for your unique skin tone and skin type.</p>
+            <button onClick={() => setStep(1)} style={{ background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", border: "none", padding: "14px 28px", borderRadius: 12, fontWeight: 700, fontSize: 11, letterSpacing: "0.15em", cursor: "pointer", boxShadow: "0 10px 24px rgba(181,120,74,0.2)" }}>
+              START CONSULTATION
+            </button>
+          </div>
+        )}
+
+        {step > 0 && step <= questions.length && (
+          <div className="animate-slide-up">
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#B5784A", marginBottom: 6 }}>STEP {step} OF {questions.length}</div>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#1A0F0A", marginBottom: 4 }}>{questions[step - 1].title}</h3>
+            <p style={{ color: "#9A7A6E", fontSize: 12, marginBottom: 20 }}>{questions[step - 1].subtitle}</p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {questions[step - 1].options.map(opt => (
+                <button
+                  key={opt.label}
+                  onClick={() => handleSelect(opt.label)}
+                  style={{
+                    width: "100%",
+                    textAlign: "left",
+                    padding: "16px 20px",
+                    borderRadius: 14,
+                    border: "1px solid rgba(181,120,74,0.25)",
+                    background: "linear-gradient(180deg, #FFFFFF 0%, #FFFDFD 100%)",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.borderColor = "#B5784A";
+                    (e.currentTarget as HTMLElement).style.transform = "translateX(4px)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(181,120,74,0.06)";
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(181,120,74,0.25)";
+                    (e.currentTarget as HTMLElement).style.transform = "translateX(0)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                  }}
+                >
+                  <div style={{ fontWeight: 700, color: "#1A0F0A", fontSize: 13, marginBottom: 2 }}>{opt.label}</div>
+                  <div style={{ color: "#5C3D2E", fontSize: 11 }}>{opt.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {step > questions.length && (
+          <div className="animate-slide-up">
+            <div style={{ textAlign: "center", marginBottom: 20 }}>
+              <CheckCircle size={36} color="#22c55e" style={{ margin: "0 auto 12px" }} />
+              <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#1A0F0A", marginBottom: 4 }}>Your Personalized Routine</h3>
+              <p style={{ color: "#9A7A6E", fontSize: 12 }}>Based on your {answers.skinType} skin & {answers.coverage} coverage preference:</p>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
+              {recs.map(rec => (
+                <div key={rec.id} style={{ display: "flex", gap: 14, padding: 14, borderRadius: 16, border: "1px solid rgba(181,120,74,0.15)", background: "#FFFBF9", alignItems: "center" }}>
+                  <img src={rec.image} alt={rec.name} style={{ width: 56, height: 56, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 12, color: "#1A0F0A" }}>{rec.name}</div>
+                    <div style={{ color: "#B5784A", fontWeight: 600, fontSize: 11, marginTop: 2 }}>{fmt(rec.price)}</div>
+                  </div>
+                  <button onClick={() => { onAdd(rec); }} style={{ background: "#B5784A", color: "#fff", border: "none", padding: "8px 12px", borderRadius: 8, fontSize: 10, fontWeight: 700, cursor: "pointer", transition: "background 0.2s" }} onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#8F5731")} onMouseLeave={e => (e.currentTarget.style.backgroundColor = "#B5784A")}>
+                    ADD
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={() => setStep(0)} style={{ flex: 1, border: "1px solid rgba(181,120,74,0.4)", color: "#B5784A", background: "none", padding: "12px", borderRadius: 12, fontWeight: 700, fontSize: 11, cursor: "pointer" }}>RETAKE QUIZ</button>
+              <button onClick={onClose} style={{ flex: 1, background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", border: "none", padding: "12px", borderRadius: 12, fontWeight: 700, fontSize: 11, cursor: "pointer" }}>DONE</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; onCartOpen: () => void; onAdminRequest: () => void }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [animOut, setAnimOut] = useState(false);
@@ -250,7 +702,7 @@ function Navbar({ cartCount, onCartOpen, onAdmin }: { cartCount: number; onCartO
           FREE DELIVERY IN OWERRI ON ORDERS ABOVE ₦15,000 &nbsp;·&nbsp; WHATSAPP TO ORDER NOW
         </div>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ lineHeight: 1.1, flexShrink: 0 }}>
+          <div onDoubleClick={onAdminRequest} style={{ lineHeight: 1.1, flexShrink: 0, cursor: "pointer" }} title="Double-click to enter Admin Panel (Secret)">
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#1A0F0A", letterSpacing: "-0.02em" }}>SPLENDID</div>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#B5784A", fontWeight: 600 }}>EMPIRE COSMETICS</div>
           </div>
@@ -265,9 +717,6 @@ function Navbar({ cartCount, onCartOpen, onAdmin }: { cartCount: number; onCartO
           </nav>
 
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-            <button onClick={onAdmin} title="Admin" style={{ background: "none", border: "none", cursor: "pointer", padding: 8, color: "#9A7A6E" }} className="hidden md:block">
-              <Settings size={17} />
-            </button>
             <button onClick={onCartOpen} style={{ position: "relative", background: "none", border: "none", cursor: "pointer", padding: 8, color: "#1A0F0A" }}>
               <ShoppingBag size={22} />
               {cartCount > 0 && (
@@ -420,35 +869,15 @@ function Navbar({ cartCount, onCartOpen, onAdmin }: { cartCount: number; onCartO
           borderTop: "1px solid rgba(181,120,74,0.1)",
           display: "flex",
           flexDirection: "column",
-          gap: 12,
+          gap: 8,
         }}>
-          <button
-            onClick={() => { closeMenu(); onAdmin(); }}
-            style={{
-              width: "100%",
-              background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)",
-              color: "#fff",
-              border: "none",
-              borderRadius: 999,
-              padding: "13px 20px",
-              fontSize: 11,
-              letterSpacing: "0.15em",
-              fontWeight: 700,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              transition: "opacity 0.2s",
-              animation: open && !animOut
-                ? `mobileNavFadeIn 0.3s ease ${navLinks.length * 0.05 + 0.1}s both`
-                : "none",
-            }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
-            onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
-          >
-            <Settings size={14} /> ADMIN PANEL
-          </button>
+          <div style={{ color: "#1A0F0A", fontWeight: 700, fontSize: 10, letterSpacing: "0.1em" }}>CUSTOMER ASSISTANCE</div>
+          <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: "#B5784A", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
+            <MessageCircle size={13} /> WHATSAPP CHAT
+          </a>
+          <a href="mailto:sales@splendidempires.com" style={{ textDecoration: "none", color: "#5C3D2E", fontSize: 12, display: "flex", alignItems: "center", gap: 6 }}>
+            <Eye size={13} /> sales@splendidempires.com
+          </a>
         </div>
       </div>
     </>
@@ -557,7 +986,7 @@ function CategorySection({ active, onSelect }: { active: Category; onSelect: (c:
 
 // ─── PRODUCTS ─────────────────────────────────────────────────────────────────
 
-function ProductsSection({ products, active, onFilter, onAdd }: { products: Product[]; active: Category; onFilter: (c: Category) => void; onAdd: (p: Product) => void }) {
+function ProductsSection({ products, active, onFilter, onAdd, onQuickView }: { products: Product[]; active: Category; onFilter: (c: Category) => void; onAdd: (p: Product) => void; onQuickView: (p: Product) => void }) {
   const tabs: Category[] = ["All", "Foundation", "Lipstick", "Serum", "Eyeliner", "Moisturizer", "Perfume"];
   return (
     <section id="products" style={{ background: "linear-gradient(180deg, #FFF6F3 0%, #FFFDFC 100%)" }} className="py-10 sm:py-14">
@@ -582,7 +1011,7 @@ function ProductsSection({ products, active, onFilter, onAdd }: { products: Prod
           </div>
         ) : (
           <div style={{ display: "grid" }} className="grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {products.map(p => <ProductCard key={p.id} product={p} onAdd={onAdd} />)}
+            {products.map(p => <ProductCard key={p.id} product={p} onAdd={onAdd} onQuickView={onQuickView} />)}
           </div>
         )}
       </div>
@@ -590,7 +1019,7 @@ function ProductsSection({ products, active, onFilter, onAdd }: { products: Prod
   );
 }
 
-function ProductCard({ product: p, onAdd }: { product: Product; onAdd: (p: Product) => void }) {
+function ProductCard({ product: p, onAdd, onQuickView }: { product: Product; onAdd: (p: Product) => void; onQuickView: (p: Product) => void }) {
   const [wished, setWished] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
 
@@ -605,7 +1034,7 @@ function ProductCard({ product: p, onAdd }: { product: Product; onAdd: (p: Produ
       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 30px rgba(181,120,74,0.18)"; (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)"; }}
       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(181,120,74,0.09)"; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
     >
-      <div style={{ position: "relative", aspectRatio: "1", overflow: "hidden", backgroundColor: "#FFF0EB" }}>
+      <div onClick={() => onQuickView(p)} style={{ position: "relative", aspectRatio: "1", overflow: "hidden", backgroundColor: "#FFF0EB", cursor: "pointer" }}>
         <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.5s" }}
           onMouseEnter={e => ((e.target as HTMLElement).style.transform = "scale(1.08)")}
           onMouseLeave={e => ((e.target as HTMLElement).style.transform = "scale(1)")}
@@ -613,7 +1042,7 @@ function ProductCard({ product: p, onAdd }: { product: Product; onAdd: (p: Produ
         {p.badge && (
           <span style={{ position: "absolute", top: 12, left: 12, background: "#B5784A", color: "#fff", fontSize: 9, letterSpacing: "0.18em", fontWeight: 700, padding: "4px 10px", borderRadius: 999 }}>{p.badge}</span>
         )}
-        <button onClick={() => setWished(!wished)} style={{ position: "absolute", top: 12, right: 12, width: 32, height: 32, background: "#fff", border: "none", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+        <button onClick={e => { e.stopPropagation(); setWished(!wished); }} style={{ position: "absolute", top: 12, right: 12, width: 32, height: 32, background: "#fff", border: "none", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.1)", zIndex: 10 }}>
           <Heart size={13} fill={wished ? "#B5784A" : "none"} color={wished ? "#B5784A" : "#1A0F0A"} />
         </button>
       </div>
@@ -622,11 +1051,11 @@ function ProductCard({ product: p, onAdd }: { product: Product; onAdd: (p: Produ
           {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={10} fill={i < Math.floor(p.rating) ? "#B5784A" : "none"} color="#B5784A" />)}
           <span style={{ color: "#9A7A6E", fontSize: 10, marginLeft: 4 }}>({p.reviews})</span>
         </div>
-        <h3 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, color: "#1A0F0A", lineHeight: 1.35, marginBottom: 4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }} className="text-[13px] sm:text-sm">{p.name}</h3>
+        <h3 onClick={() => onQuickView(p)} style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, color: "#1A0F0A", lineHeight: 1.35, marginBottom: 4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", cursor: "pointer" }} className="text-[13px] sm:text-sm hover:text-[#B5784A] transition-colors">{p.name}</h3>
         <p style={{ color: "#5C3D2E", fontSize: 11, lineHeight: 1.55, marginBottom: 12, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }} className="hidden sm:block">{p.description}</p>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#B5784A" }} className="text-sm sm:text-base">{fmt(p.price)}</span>
-          <button onClick={handleAdd} style={{ width: 32, height: 32, borderRadius: "50%", background: justAdded ? "#22c55e" : "#B5784A", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s", transform: justAdded ? "scale(1.15)" : "scale(1)" }}>
+          <button onClick={e => { e.stopPropagation(); handleAdd(); }} style={{ width: 32, height: 32, borderRadius: "50%", background: justAdded ? "#22c55e" : "#B5784A", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s", transform: justAdded ? "scale(1.15)" : "scale(1)" }}>
             {justAdded ? <Check size={13} /> : <Plus size={13} />}
           </button>
         </div>
@@ -705,6 +1134,21 @@ function TestimonialsSection() {
 // ─── LOCATION ─────────────────────────────────────────────────────────────────
 
 function LocationSection() {
+  const [copiedAddr, setCopiedAddr] = useState(false);
+  const [copiedEmail, setCopiedEmail] = useState(false);
+
+  function handleCopyAddr() {
+    navigator.clipboard.writeText("Shop D, World Centre, By IMSU Junction, 470 Works Layout, Owerri, Imo State");
+    setCopiedAddr(true);
+    setTimeout(() => setCopiedAddr(false), 2000);
+  }
+
+  function handleCopyEmail() {
+    navigator.clipboard.writeText("sales@splendidempires.com");
+    setCopiedEmail(true);
+    setTimeout(() => setCopiedEmail(false), 2000);
+  }
+
   return (
     <section id="location" style={{ background: "linear-gradient(180deg, #FFFDFC 0%, #FFF6F3 100%)" }} className="py-10 sm:py-14">
       <div style={{ maxWidth: 1200, margin: "0 auto" }} className="px-4 sm:px-6">
@@ -712,34 +1156,80 @@ function LocationSection() {
           <div style={{ background: "radial-gradient(circle at 18% 15%, rgba(181,120,74,0.34) 0, transparent 28%), linear-gradient(145deg, #1A0F0A 0%, #2A160E 100%)", display: "flex", flexDirection: "column", justifyContent: "center" }} className="p-6 sm:p-8 lg:p-10">
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: "#fff", marginBottom: 6 }}>Visit Our Store</h2>
             <p style={{ color: "#F2B8A8", fontSize: 13, marginBottom: 28, letterSpacing: "0.05em" }}>Luxury beauty, close to you</p>
+            
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              {[
-                { icon: <MapPin size={14} color="#B5784A" />, main: "Shop D, World Centre", sub: "By IMSU Junction, 470 Works Layout\nOwerri 460212, Imo State" },
-                { icon: <Phone size={14} color="#B5784A" />, main: "WhatsApp Us", sub: "Click to chat now" },
-                { icon: <Clock size={14} color="#B5784A" />, main: "Mon – Sat", sub: "9:00am – 7:00pm" },
-              ].map(({ icon, main, sub }, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(181,120,74,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{icon}</div>
-                  <div>
-                    <div style={{ color: "#fff", fontWeight: 600, fontSize: 12, marginBottom: 2 }}>{main}</div>
-                    <div style={{ color: "#9A7A6E", fontSize: 11, lineHeight: 1.6, whiteSpace: "pre-line" }}>{sub}</div>
-                  </div>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(181,120,74,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <MapPin size={14} color="#B5784A" />
                 </div>
-              ))}
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ color: "#fff", fontWeight: 600, fontSize: 12 }}>Shop D, World Centre</div>
+                    <button onClick={handleCopyAddr} style={{ background: "none", border: "none", color: copiedAddr ? "#22c55e" : "#B5784A", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", gap: 3, fontWeight: 700 }}>
+                      <Copy size={10} /> {copiedAddr ? "COPIED" : "COPY"}
+                    </button>
+                  </div>
+                  <div style={{ color: "#9A7A6E", fontSize: 11, lineHeight: 1.6, whiteSpace: "pre-line" }}>By IMSU Junction, 470 Works Layout{"\n"}Owerri 460212, Imo State</div>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(181,120,74,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Phone size={14} color="#B5784A" />
+                </div>
+                <div>
+                  <div style={{ color: "#fff", fontWeight: 600, fontSize: 12, marginBottom: 2 }}>WhatsApp Us</div>
+                  <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" style={{ color: "#9A7A6E", fontSize: 11, textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "#9A7A6E"}>
+                    Click to chat now
+                  </a>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(181,120,74,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Clock size={14} color="#B5784A" />
+                </div>
+                <div>
+                  <div style={{ color: "#fff", fontWeight: 600, fontSize: 12, marginBottom: 2 }}>Mon – Sat</div>
+                  <div style={{ color: "#9A7A6E", fontSize: 11, lineHeight: 1.6 }}>9:00am – 7:00pm</div>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(181,120,74,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Eye size={14} color="#B5784A" />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ color: "#fff", fontWeight: 600, fontSize: 12 }}>Email Support</div>
+                    <button onClick={handleCopyEmail} style={{ background: "none", border: "none", color: copiedEmail ? "#22c55e" : "#B5784A", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", gap: 3, fontWeight: 700 }}>
+                      <Copy size={10} /> {copiedEmail ? "COPIED" : "COPY"}
+                    </button>
+                  </div>
+                  <a href="mailto:sales@splendidempires.com" style={{ color: "#9A7A6E", fontSize: 11, textDecoration: "none" }}>sales@splendidempires.com</a>
+                </div>
+              </div>
             </div>
+
             <a href="https://maps.google.com/?q=IMSU+Junction+Works+Layout+Owerri+Imo+State" target="_blank" rel="noopener noreferrer"
               style={{ marginTop: 24, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6, background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", padding: "10px 20px", borderRadius: 999, fontSize: 10, fontWeight: 700, letterSpacing: "0.15em", textDecoration: "none", width: "fit-content", boxShadow: "0 10px 24px rgba(181,120,74,0.3)" }} className="max-sm:w-full">
               <MapPin size={13} /> GET DIRECTIONS
             </a>
           </div>
-          <div style={{ position: "relative" }} className="min-h-[240px] sm:min-h-[320px] md:min-h-full">
-            <img src="https://images.unsplash.com/photo-1676570092589-a6c09ecbb373?w=700&h=600&fit=crop" alt="Store" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(26,15,10,0.04) 0%, rgba(181,120,74,0.22) 100%)" }} />
+          <div style={{ position: "relative", minHeight: "350px" }} className="min-h-[280px] sm:min-h-[350px] md:min-h-full">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3971.493922627993!2d6.9961665!3d5.5085449!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x104259b139265ea5%3A0xc47e30d703956fc2!2sIMSU%20Junction%2C%20Owerri!5e0!3m2!1sen!2sng!4v1700000000000!5m2!1sen!2sng"
+              style={{ width: "100%", height: "100%", border: 0, minHeight: "350px" }}
+              allowFullScreen={true}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Splendid Empire Cosmetics Location Map"
+            />
             <div style={{ position: "absolute", bottom: 18, left: 18, right: 18, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(10px)", borderRadius: 16, padding: "12px 16px", boxShadow: "0 12px 30px rgba(26,15,10,0.14)" }} className="sm:right-auto sm:p-5">
               <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", fontSize: 14 }}>Splendid Empire Cosmetics</div>
               <div style={{ display: "flex", alignItems: "center", gap: 3, marginTop: 4 }}>
                 {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={10} fill="#B5784A" color="#B5784A" />)}
-                <span style={{ color: "#5C3D2E", fontSize: 10, marginLeft: 4 }}>on Google Maps</span>
+                <span style={{ color: "#5C3D2E", fontSize: 10, marginLeft: 4 }}>Owerri Store</span>
               </div>
             </div>
           </div>
@@ -752,20 +1242,50 @@ function LocationSection() {
 // ─── FOOTER ───────────────────────────────────────────────────────────────────
 
 function SiteFooter() {
+  const [copiedEmail, setCopiedEmail] = useState(false);
+
+  function handleCopyEmail() {
+    navigator.clipboard.writeText("sales@splendidempires.com");
+    setCopiedEmail(true);
+    setTimeout(() => setCopiedEmail(false), 2000);
+  }
+
   return (
     <footer id="contact" style={{ backgroundColor: "#0F0705", paddingTop: 50, paddingBottom: 28 }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 20px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 32, marginBottom: 40 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 32, marginBottom: 40 }}>
           <div>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#fff", lineHeight: 1 }}>SPLENDID</div>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#B5784A", marginBottom: 12 }}>EMPIRE COSMETICS</div>
             <p style={{ color: "#9A7A6E", fontSize: 12, lineHeight: 1.7, marginBottom: 16 }}>Owerri's premier luxury beauty destination.</p>
             <div style={{ display: "flex", gap: 10 }}>
-              {[{ href: "https://instagram.com", icon: <Instagram size={14} />, label: "Instagram" }, { href: "https://facebook.com", icon: <Facebook size={14} />, label: "Facebook" }, { href: "https://tiktok.com", icon: <TikTokIcon size={14} />, label: "TikTok" }, { href: `https://wa.me/${WHATSAPP_NUMBER}`, icon: <MessageCircle size={14} />, label: "WhatsApp" }].map(({ href, icon, label }) => (
+              {[
+                { href: "https://instagram.com/splendid_empire_cosmetics", icon: <Instagram size={14} />, label: "Instagram" },
+                { href: "https://facebook.com/splendid_empire_cosmetics", icon: <Facebook size={14} />, label: "Facebook" },
+                { href: "https://tiktok.com/@splendid_empire_cosmetics", icon: <TikTokIcon size={14} />, label: "TikTok" },
+                { href: `https://wa.me/${WHATSAPP_NUMBER}`, icon: <MessageCircle size={14} />, label: "WhatsApp" }
+              ].map(({ href, icon, label }) => (
                 <a key={label} href={href} target="_blank" rel="noopener noreferrer" title={label}
-                  style={{ width: 36, height: 36, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#9A7A6E", textDecoration: "none", transition: "all 0.2s" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#B5784A"; (e.currentTarget as HTMLElement).style.color = "#fff"; (e.currentTarget as HTMLElement).style.borderColor = "#B5784A"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "#9A7A6E"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.1)"; }}
+                  style={{
+                    width: 36, height: 36, borderRadius: "50%",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: "#9A7A6E", textDecoration: "none", transition: "all 0.25s ease"
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.background = "#B5784A";
+                    (e.currentTarget as HTMLElement).style.color = "#fff";
+                    (e.currentTarget as HTMLElement).style.borderColor = "#B5784A";
+                    (e.currentTarget as HTMLElement).style.transform = "scale(1.1)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "0 0 12px rgba(181, 120, 74, 0.4)";
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.background = "transparent";
+                    (e.currentTarget as HTMLElement).style.color = "#9A7A6E";
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.1)";
+                    (e.currentTarget as HTMLElement).style.transform = "scale(1)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                  }}
                 >{icon}</a>
               ))}
             </div>
@@ -773,9 +1293,9 @@ function SiteFooter() {
           <div>
             <h4 style={{ color: "#fff", fontWeight: 700, fontSize: 11, letterSpacing: "0.2em", marginBottom: 16 }}>QUICK LINKS</h4>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {["Home", "Shop", "Categories", "About Us", "Find Us"].map(l => (
-                <a key={l} href="#" style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none" }}
-                  onMouseEnter={e => ((e.target as HTMLElement).style.color = "#F2B8A8")}
+              {[["Home", "#"], ["Shop", "#products"], ["Categories", "#categories"], ["Find Us", "#location"], ["Contact Us", "#contact"]].map(([l, h]) => (
+                <a key={l} href={h} style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", transition: "color 0.2s" }}
+                  onMouseEnter={e => ((e.target as HTMLElement).style.color = "#B5784A")}
                   onMouseLeave={e => ((e.target as HTMLElement).style.color = "#9A7A6E")}
                 >{l}</a>
               ))}
@@ -785,8 +1305,8 @@ function SiteFooter() {
             <h4 style={{ color: "#fff", fontWeight: 700, fontSize: 11, letterSpacing: "0.2em", marginBottom: 16 }}>CATEGORIES</h4>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {["Foundation", "Lipstick", "Serum", "Eyeliner", "Moisturizer", "Perfume"].map(c => (
-                <a key={c} href="#products" style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none" }}
-                  onMouseEnter={e => ((e.target as HTMLElement).style.color = "#F2B8A8")}
+                <a key={c} href="#products" style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", transition: "color 0.2s" }}
+                  onMouseEnter={e => ((e.target as HTMLElement).style.color = "#B5784A")}
                   onMouseLeave={e => ((e.target as HTMLElement).style.color = "#9A7A6E")}
                 >{c}</a>
               ))}
@@ -795,11 +1315,19 @@ function SiteFooter() {
           <div>
             <h4 style={{ color: "#fff", fontWeight: 700, fontSize: 11, letterSpacing: "0.2em", marginBottom: 16 }}>CONTACT US</h4>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <p style={{ color: "#9A7A6E", fontSize: 13, lineHeight: 1.7 }}>Shop D, World Centre, By IMSU Junction, 470 Works Layout, Owerri 460212, Imo State</p>
-              <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
-                <MessageCircle size={13} /> WhatsApp Us
+              <p style={{ color: "#9A7A6E", fontSize: 13, lineHeight: 1.7, margin: 0 }}>Shop D, World Centre, By IMSU Junction, 470 Works Layout, Owerri 460212, Imo State</p>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <a href="mailto:sales@splendidempires.com" style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "#9A7A6E"}>
+                  sales@splendidempires.com
+                </a>
+                <button onClick={handleCopyEmail} style={{ background: "none", border: "none", color: copiedEmail ? "#22c55e" : "#B5784A", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", gap: 3, fontWeight: 700 }}>
+                  <Copy size={10} /> {copiedEmail ? "COPIED" : "COPY"}
+                </button>
+              </div>
+              <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", display: "flex", alignItems: "center", gap: 8, transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "#9A7A6E"}>
+                <MessageCircle size={13} color="#B5784A" /> WhatsApp Chat
               </a>
-              <p style={{ color: "#B5784A", fontSize: 13, fontWeight: 600 }}>Mon–Sat: 9am – 7pm</p>
+              <p style={{ color: "#B5784A", fontSize: 13, fontWeight: 600, margin: 0 }}>Mon–Sat: 9am – 7pm</p>
             </div>
           </div>
         </div>
