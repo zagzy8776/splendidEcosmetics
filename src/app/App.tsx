@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { fetchProducts, createOrder, fetchOrders, updateOrderStatus, createProduct, updateProduct, deleteProduct } from "../api";
 import {
   ShoppingBag, X, Menu, Instagram, Facebook, Phone, MapPin,
   Star, Plus, Minus, Trash2, Package, Settings, LogOut, Check,
@@ -87,7 +88,15 @@ function TikTokIcon({ size = 16 }: { size?: number }) {
 
 export default function App() {
   const [view, setView] = useState<AppView>("store");
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProducts()
+      .then(data => setProducts(data))
+      .catch(() => setProducts(INITIAL_PRODUCTS))
+      .finally(() => setLoading(false));
+  }, []);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
