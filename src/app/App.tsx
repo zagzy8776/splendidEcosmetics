@@ -214,12 +214,12 @@ function Navbar({ cartCount, onCartOpen, onAdmin }: { cartCount: number; onCartO
         FREE DELIVERY IN OWERRI ON ORDERS ABOVE ₦15,000 &nbsp;·&nbsp; WHATSAPP TO ORDER NOW
       </div>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ lineHeight: 1.1 }}>
+        <div style={{ lineHeight: 1.1, flexShrink: 0 }}>
           <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#1A0F0A", letterSpacing: "-0.02em" }}>SPLENDID</div>
           <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#B5784A", fontWeight: 600 }}>EMPIRE COSMETICS</div>
         </div>
 
-        <nav style={{ display: "flex", gap: 28, fontSize: 11, letterSpacing: "0.15em", fontWeight: 700, color: "#1A0F0A" }} className="hidden md:flex">
+        <nav style={{ display: "flex", gap: 28, fontSize: 11, letterSpacing: "0.15em", fontWeight: 700, color: "#1A0F0A", flexShrink: 0 }} className="hidden md:flex">
           {[["HOME", "#"], ["SHOP", "#products"], ["CATEGORIES", "#categories"], ["FIND US", "#location"], ["CONTACT", "#contact"]].map(([l, h]) => (
             <a key={l} href={h} style={{ textDecoration: "none", color: "inherit", transition: "color 0.2s" }}
               onMouseEnter={e => (e.currentTarget.style.color = "#B5784A")}
@@ -228,7 +228,7 @@ function Navbar({ cartCount, onCartOpen, onAdmin }: { cartCount: number; onCartO
           ))}
         </nav>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
           <button onClick={onAdmin} title="Admin" style={{ background: "none", border: "none", cursor: "pointer", padding: 8, color: "#9A7A6E", display: "none" }} className="md:block">
             <Settings size={17} />
           </button>
