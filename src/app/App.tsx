@@ -247,11 +247,24 @@ function Navbar({ cartCount, onCartOpen, onAdmin }: { cartCount: number; onCartO
       </div>
 
       {open && (
-        <div style={{ backgroundColor: "#fff", borderTop: "1px solid rgba(242,184,168,0.3)", padding: "16px 24px", display: "flex", flexDirection: "column", gap: 4 }}>
+        <div style={{
+          position: "fixed",
+          top: 80,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "#fff",
+          zIndex: 50,
+          padding: "24px",
+          overflowY: "auto",
+          display: "flex",
+          flexDirection: "column",
+          gap: 16
+        }}>
           {[["HOME", "#"], ["SHOP", "#products"], ["CATEGORIES", "#categories"], ["FIND US", "#location"], ["CONTACT", "#contact"]].map(([l, h]) => (
-            <a key={l} href={h} onClick={() => setOpen(false)} style={{ padding: "10px 0", borderBottom: "1px solid rgba(242,184,168,0.2)", fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, color: "#1A0F0A", textDecoration: "none" }}>{l}</a>
+            <a key={l} href={h} onClick={() => setOpen(false)} style={{ padding: "16px 0", borderBottom: "1px solid rgba(181,120,74,0.1)", fontSize: 16, fontWeight: 700, color: "#1A0F0A", textDecoration: "none" }}>{l}</a>
           ))}
-          <button onClick={() => { setOpen(false); onAdmin(); }} style={{ background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: "10px 0", color: "#B5784A", fontSize: 12, fontWeight: 700 }}>⚙ Admin Panel</button>
+          <button onClick={() => { setOpen(false); onAdmin(); }} style={{ padding: "16px 0", background: "none", border: "none", cursor: "pointer", textAlign: "left", color: "#B5784A", fontSize: 16, fontWeight: 700 }}>⚙ Admin Panel</button>
         </div>
       )}
     </header>
