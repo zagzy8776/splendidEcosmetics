@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { fetchProducts, createOrder, fetchOrders, updateOrderStatus, createProduct, updateProduct, deleteProduct } from "../api";
 import {
   ShoppingBag, X, Menu, Instagram, Facebook, Phone, MapPin,
@@ -210,7 +210,7 @@ function Navbar({ cartCount, onCartOpen, onAdmin }: { cartCount: number; onCartO
 
   return (
     <header style={navStyle}>
-      <div style={{ backgroundColor: "#B5784A", color: "#fff", textAlign: "center", padding: "6px 16px", fontSize: 11, letterSpacing: "0.18em", fontWeight: 700 }}>
+      <div style={{ backgroundColor: "#B5784A", color: "#fff", textAlign: "center", padding: "5px 12px", fontSize: 10, letterSpacing: "0.15em", fontWeight: 700 }} className="hidden sm:block">
         FREE DELIVERY IN OWERRI ON ORDERS ABOVE ₦15,000 &nbsp;·&nbsp; WHATSAPP TO ORDER NOW
       </div>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -262,44 +262,52 @@ function Navbar({ cartCount, onCartOpen, onAdmin }: { cartCount: number; onCartO
 
 function HeroSection() {
   return (
-    <section style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", overflow: "hidden", paddingTop: 88 }}>
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, #FFF0EB 0%, #FDE8E0 50%, #FDDDD0 100%)" }} />
+    <section style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", overflow: "hidden", paddingTop: 80, paddingBottom: 40 }}>
+      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 15% 20%, rgba(242,184,168,0.45) 0, transparent 28%), radial-gradient(circle at 85% 10%, rgba(181,120,74,0.22) 0, transparent 30%), linear-gradient(135deg, #FFF7F4 0%, #FDE8E0 52%, #F4C7B7 100%)" }} />
+
+      <div style={{ position: "absolute", inset: 0, opacity: 0.15 }} className="md:hidden">
+        <img src="https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=600&h=600&fit=crop" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", filter: "blur(40px)" }} />
+      </div>
 
       <div style={{ position: "absolute", right: 0, top: 0, width: "55%", height: "100%", overflow: "hidden" }} className="hidden md:block">
         <img src="https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=1000&h=1000&fit=crop" alt="Luxury cosmetics" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, #FDE8E0 0%, rgba(253,232,224,0.5) 40%, transparent 100%)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, #FDE8E0 0%, rgba(253,232,224,0.62) 38%, rgba(26,15,10,0.08) 100%)" }} />
       </div>
 
-      <div style={{ position: "relative", zIndex: 10, maxWidth: 1200, margin: "0 auto", padding: "80px 32px", width: "100%" }}>
-        <div style={{ maxWidth: 520 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(181,120,74,0.1)", border: "1px solid rgba(181,120,74,0.25)", borderRadius: 999, padding: "6px 16px", marginBottom: 24 }}>
-            <Sparkles size={13} color="#B5784A" />
-            <span style={{ color: "#B5784A", fontSize: 10, letterSpacing: "0.25em", fontWeight: 700 }}>OWERRI'S FINEST BEAUTY DESTINATION</span>
+      <div style={{ position: "relative", zIndex: 10, maxWidth: 1200, margin: "0 auto", width: "100%" }} className="px-4 py-8 sm:px-6 md:py-10 lg:px-8">
+        <div className="flex flex-col items-center gap-8 text-center md:max-w-[48%] md:items-start md:text-left">
+          <div className="md:hidden" style={{ width: "min(82vw, 320px)", aspectRatio: "1", borderRadius: 32, overflow: "hidden", boxShadow: "0 24px 70px rgba(181,120,74,0.26)", border: "1px solid rgba(255,255,255,0.65)" }}>
+            <img src="https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=700&h=700&fit=crop" alt="Luxury cosmetics" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
 
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(42px, 6vw, 68px)", fontWeight: 700, color: "#1A0F0A", lineHeight: 1.1, marginBottom: 20 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.58)", border: "1px solid rgba(181,120,74,0.25)", borderRadius: 999, padding: "6px 14px", marginBottom: 0, flexWrap: "wrap", justifyContent: "center", boxShadow: "0 10px 30px rgba(181,120,74,0.12)", backdropFilter: "blur(10px)" }}>
+            <Sparkles size={12} color="#B5784A" />
+            <span style={{ color: "#B5784A", fontSize: 9, letterSpacing: "0.2em", fontWeight: 700 }}>OWERRI BEAUTY LUXE</span>
+          </div>
+
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", lineHeight: 1.05, marginBottom: 0, fontSize: "clamp(34px, 9vw, 62px)" }}>
             Your Beauty,<br />
             <span style={{ color: "#B5784A", fontStyle: "italic" }}>Elevated.</span>
           </h1>
 
-          <p style={{ color: "#5C3D2E", fontSize: 17, lineHeight: 1.7, marginBottom: 36, maxWidth: 440 }}>
-            Luxury cosmetics curated for the confident woman. From foundation to fragrance — the world's finest beauty, now in Owerri & Port Harcourt.
+          <p style={{ color: "#5C3D2E", fontSize: 14, lineHeight: 1.65, marginBottom: 0, maxWidth: 500 }} className="mx-auto md:mx-0 sm:text-base">
+            Premium cosmetics, fast delivery, and easy WhatsApp ordering in Owerri.
           </p>
 
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 52 }}>
-            <a href="#products" style={{ background: "#B5784A", color: "#fff", padding: "14px 32px", borderRadius: 999, fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, textDecoration: "none", boxShadow: "0 8px 24px rgba(181,120,74,0.3)" }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }} className="w-full flex-col justify-center md:justify-start sm:w-auto sm:flex-row">
+            <a href="#products" style={{ background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", padding: "12px 28px", borderRadius: 999, fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, textDecoration: "none", boxShadow: "0 12px 28px rgba(181,120,74,0.34)", width: "100%", maxWidth: 280, textAlign: "center" }} className="sm:w-auto">
               SHOP NOW
             </a>
-            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" style={{ border: "2px solid #B5784A", color: "#B5784A", padding: "14px 32px", borderRadius: 999, fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, textDecoration: "none" }}>
+            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" style={{ border: "2px solid #B5784A", color: "#B5784A", background: "rgba(255,255,255,0.55)", padding: "12px 28px", borderRadius: 999, fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, textDecoration: "none", width: "100%", maxWidth: 280, textAlign: "center", backdropFilter: "blur(10px)" }} className="sm:w-auto">
               WHATSAPP ORDER
             </a>
           </div>
 
-          <div style={{ display: "flex", gap: 40, paddingTop: 28, borderTop: "1px solid rgba(181,120,74,0.2)" }}>
+          <div style={{ display: "flex", gap: 18, paddingTop: 20, borderTop: "1px solid rgba(181,120,74,0.2)", flexWrap: "wrap" }} className="justify-center md:justify-start">
             {[["500+", "Products"], ["1,200+", "Happy Clients"], ["5★", "Google Rating"]].map(([v, l]) => (
-              <div key={l}>
-                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: "#B5784A" }}>{v}</div>
-                <div style={{ fontSize: 10, color: "#5C3D2E", letterSpacing: "0.15em", marginTop: 2 }}>{l}</div>
+              <div key={l} style={{ minWidth: 80 }}>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#B5784A" }}>{v}</div>
+                <div style={{ fontSize: 9, color: "#5C3D2E", letterSpacing: "0.12em", marginTop: 2 }}>{l}</div>
               </div>
             ))}
           </div>
@@ -355,28 +363,28 @@ function CategorySection({ active, onSelect }: { active: Category; onSelect: (c:
 function ProductsSection({ products, active, onFilter, onAdd }: { products: Product[]; active: Category; onFilter: (c: Category) => void; onAdd: (p: Product) => void }) {
   const tabs: Category[] = ["All", "Foundation", "Lipstick", "Serum", "Eyeliner", "Moisturizer", "Perfume"];
   return (
-    <section id="products" style={{ padding: "60px 0", backgroundColor: "#FFF6F3" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: "#1A0F0A", marginBottom: 8 }}>Our Products</h2>
-          <p style={{ color: "#5C3D2E", fontSize: 13 }}>Handpicked for perfection</p>
+    <section id="products" style={{ background: "linear-gradient(180deg, #FFF6F3 0%, #FFFDFC 100%)" }} className="py-10 sm:py-14">
+      <div style={{ maxWidth: 1200, margin: "0 auto" }} className="px-3 sm:px-5 lg:px-6">
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: "#1A0F0A", marginBottom: 6 }}>Our Products</h2>
+          <p style={{ color: "#5C3D2E", fontSize: 12 }}>Beauty picks you’ll love</p>
         </div>
 
-        <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 8, marginBottom: 40, justifyContent: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 8, marginBottom: 32, justifyContent: "center", flexWrap: "wrap" }}>
           {tabs.map(tab => (
-            <button key={tab} onClick={() => onFilter(tab)} style={{ padding: "8px 20px", borderRadius: 999, fontSize: 10, letterSpacing: "0.18em", fontWeight: 700, border: `1px solid ${active === tab ? "#B5784A" : "rgba(181,120,74,0.3)"}`, background: active === tab ? "#B5784A" : "transparent", color: active === tab ? "#fff" : "#5C3D2E", cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.2s" }}>
+            <button key={tab} onClick={() => onFilter(tab)} style={{ padding: "7px 16px", borderRadius: 999, fontSize: 9, letterSpacing: "0.15em", fontWeight: 700, border: `1px solid ${active === tab ? "#B5784A" : "rgba(181,120,74,0.3)"}`, background: active === tab ? "#B5784A" : "transparent", color: active === tab ? "#fff" : "#5C3D2E", cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.2s" }}>
               {tab.toUpperCase()}
             </button>
           ))}
         </div>
 
         {products.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "80px 0", color: "#5C3D2E" }}>
-            <Package size={48} style={{ margin: "0 auto 16px", opacity: 0.2 }} />
-            <p>No products in this category right now.</p>
+          <div style={{ textAlign: "center", padding: "60px 0", color: "#5C3D2E" }}>
+            <Package size={40} style={{ margin: "0 auto 12px", opacity: 0.2 }} />
+            <p style={{ fontSize: 13 }}>No products in this category right now.</p>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 20 }}>
+          <div style={{ display: "grid" }} className="grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
             {products.map(p => <ProductCard key={p.id} product={p} onAdd={onAdd} />)}
           </div>
         )}
@@ -396,9 +404,9 @@ function ProductCard({ product: p, onAdd }: { product: Product; onAdd: (p: Produ
   }
 
   return (
-    <div style={{ backgroundColor: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 12px rgba(181,120,74,0.08)", transition: "all 0.3s" }}
+    <div style={{ background: "linear-gradient(180deg, #FFFFFF 0%, #FFF8F5 100%)", borderRadius: 16, overflow: "hidden", boxShadow: "0 8px 24px rgba(181,120,74,0.09)", transition: "all 0.3s", border: "1px solid rgba(242,184,168,0.22)" }}
       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 30px rgba(181,120,74,0.18)"; (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)"; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 12px rgba(181,120,74,0.08)"; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(181,120,74,0.09)"; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
     >
       <div style={{ position: "relative", aspectRatio: "1", overflow: "hidden", backgroundColor: "#FFF0EB" }}>
         <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.5s" }}
@@ -412,15 +420,15 @@ function ProductCard({ product: p, onAdd }: { product: Product; onAdd: (p: Produ
           <Heart size={13} fill={wished ? "#B5784A" : "none"} color={wished ? "#B5784A" : "#1A0F0A"} />
         </button>
       </div>
-      <div style={{ padding: 16 }}>
+      <div className="p-3 sm:p-4">
         <div style={{ display: "flex", gap: 2, marginBottom: 6 }}>
           {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={10} fill={i < Math.floor(p.rating) ? "#B5784A" : "none"} color="#B5784A" />)}
           <span style={{ color: "#9A7A6E", fontSize: 10, marginLeft: 4 }}>({p.reviews})</span>
         </div>
-        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, fontWeight: 600, color: "#1A0F0A", lineHeight: 1.4, marginBottom: 4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{p.name}</h3>
-        <p style={{ color: "#5C3D2E", fontSize: 11, lineHeight: 1.6, marginBottom: 12, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{p.description}</p>
+        <h3 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, color: "#1A0F0A", lineHeight: 1.35, marginBottom: 4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }} className="text-[13px] sm:text-sm">{p.name}</h3>
+        <p style={{ color: "#5C3D2E", fontSize: 11, lineHeight: 1.55, marginBottom: 12, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }} className="hidden sm:block">{p.description}</p>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#B5784A", fontSize: 16 }}>{fmt(p.price)}</span>
+          <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#B5784A" }} className="text-sm sm:text-base">{fmt(p.price)}</span>
           <button onClick={handleAdd} style={{ width: 32, height: 32, borderRadius: "50%", background: justAdded ? "#22c55e" : "#B5784A", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s", transform: justAdded ? "scale(1.15)" : "scale(1)" }}>
             {justAdded ? <Check size={13} /> : <Plus size={13} />}
           </button>
@@ -501,36 +509,36 @@ function TestimonialsSection() {
 
 function LocationSection() {
   return (
-    <section id="location" style={{ padding: "60px 0", backgroundColor: "#FFF6F3" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
-        <div style={{ borderRadius: 24, overflow: "hidden", display: "grid", gridTemplateColumns: "1fr 1fr", boxShadow: "0 20px 60px rgba(26,15,10,0.15)" }} className="location-grid">
-          <div style={{ backgroundColor: "#1A0F0A", padding: "56px 48px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 700, color: "#fff", marginBottom: 8 }}>Visit Our Store</h2>
-            <p style={{ color: "#F2B8A8", fontSize: 13, marginBottom: 36, letterSpacing: "0.05em" }}>Experience luxury beauty in person</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+    <section id="location" style={{ background: "linear-gradient(180deg, #FFFDFC 0%, #FFF6F3 100%)" }} className="py-10 sm:py-14">
+      <div style={{ maxWidth: 1200, margin: "0 auto" }} className="px-4 sm:px-6">
+        <div style={{ borderRadius: 24, overflow: "hidden", display: "grid", boxShadow: "0 24px 70px rgba(26,15,10,0.16)", border: "1px solid rgba(242,184,168,0.28)" }} className="grid-cols-1 md:grid-cols-2">
+          <div style={{ background: "radial-gradient(circle at 18% 15%, rgba(181,120,74,0.34) 0, transparent 28%), linear-gradient(145deg, #1A0F0A 0%, #2A160E 100%)", display: "flex", flexDirection: "column", justifyContent: "center" }} className="p-6 sm:p-8 lg:p-10">
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: "#fff", marginBottom: 6 }}>Visit Our Store</h2>
+            <p style={{ color: "#F2B8A8", fontSize: 13, marginBottom: 28, letterSpacing: "0.05em" }}>Luxury beauty, close to you</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {[
-                { icon: <MapPin size={16} color="#B5784A" />, main: "Shop D, World Centre", sub: "By IMSU Junction, 470 Works Layout\nOwerri 460212, Imo State" },
-                { icon: <Phone size={16} color="#B5784A" />, main: "WhatsApp Us", sub: "Click to chat now" },
-                { icon: <Clock size={16} color="#B5784A" />, main: "Mon – Sat", sub: "9:00am – 7:00pm" },
+                { icon: <MapPin size={14} color="#B5784A" />, main: "Shop D, World Centre", sub: "By IMSU Junction, 470 Works Layout\nOwerri 460212, Imo State" },
+                { icon: <Phone size={14} color="#B5784A" />, main: "WhatsApp Us", sub: "Click to chat now" },
+                { icon: <Clock size={14} color="#B5784A" />, main: "Mon – Sat", sub: "9:00am – 7:00pm" },
               ].map(({ icon, main, sub }, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(181,120,74,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{icon}</div>
+                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(181,120,74,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{icon}</div>
                   <div>
-                    <div style={{ color: "#fff", fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{main}</div>
-                    <div style={{ color: "#9A7A6E", fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-line" }}>{sub}</div>
+                    <div style={{ color: "#fff", fontWeight: 600, fontSize: 12, marginBottom: 2 }}>{main}</div>
+                    <div style={{ color: "#9A7A6E", fontSize: 11, lineHeight: 1.6, whiteSpace: "pre-line" }}>{sub}</div>
                   </div>
                 </div>
               ))}
             </div>
             <a href="https://maps.google.com/?q=IMSU+Junction+Works+Layout+Owerri+Imo+State" target="_blank" rel="noopener noreferrer"
-              style={{ marginTop: 36, display: "inline-flex", alignItems: "center", gap: 8, background: "#B5784A", color: "#fff", padding: "12px 28px", borderRadius: 999, fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textDecoration: "none", width: "fit-content" }}>
-              <MapPin size={14} /> GET DIRECTIONS
+              style={{ marginTop: 24, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6, background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", padding: "10px 20px", borderRadius: 999, fontSize: 10, fontWeight: 700, letterSpacing: "0.15em", textDecoration: "none", width: "fit-content", boxShadow: "0 10px 24px rgba(181,120,74,0.3)" }} className="max-sm:w-full">
+              <MapPin size={13} /> GET DIRECTIONS
             </a>
           </div>
-          <div style={{ position: "relative", minHeight: 320 }}>
+          <div style={{ position: "relative" }} className="min-h-[240px] sm:min-h-[320px] md:min-h-full">
             <img src="https://images.unsplash.com/photo-1676570092589-a6c09ecbb373?w=700&h=600&fit=crop" alt="Store" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            <div style={{ position: "absolute", inset: 0, background: "rgba(181,120,74,0.15)" }} />
-            <div style={{ position: "absolute", bottom: 24, left: 24, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(8px)", borderRadius: 16, padding: "12px 20px" }}>
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(26,15,10,0.04) 0%, rgba(181,120,74,0.22) 100%)" }} />
+            <div style={{ position: "absolute", bottom: 18, left: 18, right: 18, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(10px)", borderRadius: 16, padding: "12px 16px", boxShadow: "0 12px 30px rgba(26,15,10,0.14)" }} className="sm:right-auto sm:p-5">
               <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", fontSize: 14 }}>Splendid Empire Cosmetics</div>
               <div style={{ display: "flex", alignItems: "center", gap: 3, marginTop: 4 }}>
                 {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={10} fill="#B5784A" color="#B5784A" />)}
@@ -548,13 +556,13 @@ function LocationSection() {
 
 function SiteFooter() {
   return (
-    <footer id="contact" style={{ backgroundColor: "#0F0705", paddingTop: 60, paddingBottom: 32 }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 40, marginBottom: 48 }}>
+    <footer id="contact" style={{ backgroundColor: "#0F0705", paddingTop: 50, paddingBottom: 28 }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 20px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 32, marginBottom: 40 }}>
           <div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#fff", lineHeight: 1 }}>SPLENDID</div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#B5784A", marginBottom: 16 }}>EMPIRE COSMETICS</div>
-            <p style={{ color: "#9A7A6E", fontSize: 13, lineHeight: 1.7, marginBottom: 20 }}>Owerri's premier luxury beauty destination. Serving queens since 2020.</p>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#fff", lineHeight: 1 }}>SPLENDID</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#B5784A", marginBottom: 12 }}>EMPIRE COSMETICS</div>
+            <p style={{ color: "#9A7A6E", fontSize: 12, lineHeight: 1.7, marginBottom: 16 }}>Owerri's premier luxury beauty destination.</p>
             <div style={{ display: "flex", gap: 10 }}>
               {[{ href: "https://instagram.com", icon: <Instagram size={14} />, label: "Instagram" }, { href: "https://facebook.com", icon: <Facebook size={14} />, label: "Facebook" }, { href: "https://tiktok.com", icon: <TikTokIcon size={14} />, label: "TikTok" }, { href: `https://wa.me/${WHATSAPP_NUMBER}`, icon: <MessageCircle size={14} />, label: "WhatsApp" }].map(({ href, icon, label }) => (
                 <a key={label} href={href} target="_blank" rel="noopener noreferrer" title={label}
@@ -612,7 +620,7 @@ function SiteFooter() {
 function CartDrawer({ open, cart, total, onClose, onRemove, onQty, onCheckout }: { open: boolean; cart: CartItem[]; total: number; onClose: () => void; onRemove: (id: string) => void; onQty: (id: string, d: number) => void; onCheckout: () => void }) {
   return (
     <div style={{ position: "fixed", top: 0, right: 0, height: "100%", width: "min(420px, 100vw)", zIndex: 50, backgroundColor: "#fff", boxShadow: "-8px 0 40px rgba(0,0,0,0.12)", display: "flex", flexDirection: "column", transform: open ? "translateX(0)" : "translateX(100%)", transition: "transform 0.3s ease-in-out" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px", borderBottom: "1px solid rgba(242,184,168,0.3)" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(242,184,168,0.3)" }} className="px-4 py-4 sm:px-6 sm:py-5">
         <div>
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#1A0F0A" }}>Your Cart</h2>
           {cart.length > 0 && <p style={{ color: "#5C3D2E", fontSize: 12, marginTop: 2 }}>{cart.length} item{cart.length !== 1 ? "s" : ""}</p>}
@@ -623,7 +631,7 @@ function CartDrawer({ open, cart, total, onClose, onRemove, onQty, onCheckout }:
       </div>
 
       {cart.length === 0 ? (
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: 32, color: "#5C3D2E" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, color: "#5C3D2E" }} className="p-6 sm:p-8">
           <ShoppingBag size={52} style={{ opacity: 0.15 }} />
           <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 500 }}>Your cart is empty</p>
           <p style={{ fontSize: 13, color: "#9A7A6E", textAlign: "center" }}>Add some luxury to your life!</p>
@@ -631,10 +639,10 @@ function CartDrawer({ open, cart, total, onClose, onRemove, onQty, onCheckout }:
         </div>
       ) : (
         <>
-          <div style={{ flex: 1, overflowY: "auto", padding: "20px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }} className="gap-3 p-3 sm:gap-4 sm:p-5">
             {cart.map(({ product: p, quantity: q }) => (
-              <div key={p.id} style={{ display: "flex", gap: 16, backgroundColor: "#FFF6F3", borderRadius: 14, padding: 14 }}>
-                <img src={p.image} alt={p.name} style={{ width: 68, height: 68, borderRadius: 10, objectFit: "cover", flexShrink: 0 }} />
+              <div key={p.id} style={{ display: "flex", background: "linear-gradient(180deg, #FFF8F5 0%, #FFF1EB 100%)", borderRadius: 14, border: "1px solid rgba(242,184,168,0.28)" }} className="gap-3 p-3 sm:gap-4 sm:p-3.5">
+                <img src={p.image} alt={p.name} style={{ borderRadius: 10, objectFit: "cover", flexShrink: 0 }} className="h-14 w-14 sm:h-[68px] sm:w-[68px]" />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <h4 style={{ fontSize: 13, fontWeight: 600, color: "#1A0F0A", lineHeight: 1.4, marginBottom: 4 }}>{p.name}</h4>
                   <p style={{ fontFamily: "'Playfair Display', serif", color: "#B5784A", fontWeight: 700, fontSize: 14, marginBottom: 10 }}>{fmt(p.price)}</p>
@@ -650,12 +658,12 @@ function CartDrawer({ open, cart, total, onClose, onRemove, onQty, onCheckout }:
               </div>
             ))}
           </div>
-          <div style={{ padding: "20px 24px", borderTop: "1px solid rgba(242,184,168,0.3)", backgroundColor: "#fff" }}>
+          <div style={{ borderTop: "1px solid rgba(242,184,168,0.3)", backgroundColor: "#fff" }} className="p-4 sm:p-6">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <span style={{ color: "#5C3D2E", fontWeight: 500, fontSize: 14 }}>Subtotal</span>
-              <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: "#B5784A" }}>{fmt(total)}</span>
+              <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#B5784A" }} className="text-xl sm:text-2xl">{fmt(total)}</span>
             </div>
-            <button onClick={onCheckout} style={{ width: "100%", background: "#B5784A", color: "#fff", border: "none", borderRadius: 999, padding: "16px 24px", fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 6px 20px rgba(181,120,74,0.3)" }}>
+            <button onClick={onCheckout} style={{ width: "100%", background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", border: "none", borderRadius: 999, padding: "14px 20px", fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 8px 22px rgba(181,120,74,0.32)" }}>
               PROCEED TO CHECKOUT <ChevronRight size={16} />
             </button>
             <p style={{ textAlign: "center", color: "#9A7A6E", fontSize: 10, marginTop: 10 }}>Secure bank transfer · Confirmed via WhatsApp</p>
