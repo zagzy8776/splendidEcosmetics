@@ -9,3 +9,12 @@ header[style*="zIndex: 50"] > div:last-child {
   z-index: 9999 !important; 
   background: #fff !important;
 }
+
+/* Extra safety for mobile dropdown */
+header div:last-child > div:last-child,
+header div:last-child nav,
+header div:last-child div[style*="position: fixed"],
+header div:last-child div[style*="zIndex: 999"] {
+  z-index: 9999 !important;
+  position: relative !important;
+}
