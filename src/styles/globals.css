@@ -1,0 +1,11 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+#root { min-height: 100vh; }
+
+/* Ensure mobile menu and fixed elements render above everything */
+header[style*="zIndex: 50"] { z-index: 9999 !important; }
+header[style*="zIndex: 50"] > div:last-child { 
+  position: relative; 
+  z-index: 9999 !important; 
+  background: #fff !important;
+}
