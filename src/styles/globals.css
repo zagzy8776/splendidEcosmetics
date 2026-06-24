@@ -18,3 +18,11 @@ header div:last-child div[style*="zIndex: 999"] {
   z-index: 9999 !important;
   position: relative !important;
 }
+
+/* Force desktop nav hidden on screens below 768px */
+@media (max-width: 767px) {
+  nav.hidden\:md\:flex,
+  [class*="hidden md:flex"] {
+    display: none !important;
+  }
+}

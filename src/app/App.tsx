@@ -209,42 +209,44 @@ function Navbar({ cartCount, onCartOpen, onAdmin }: { cartCount: number; onCartO
   };
 
   return (
-    <header style={navStyle}>
-      <div style={{ backgroundColor: "#B5784A", color: "#fff", textAlign: "center", padding: "5px 12px", fontSize: 10, letterSpacing: "0.15em", fontWeight: 700 }} className="hidden sm:block">
-        FREE DELIVERY IN OWERRI ON ORDERS ABOVE ₦15,000 &nbsp;·&nbsp; WHATSAPP TO ORDER NOW
-      </div>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ lineHeight: 1.1, flexShrink: 0 }}>
-          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#1A0F0A", letterSpacing: "-0.02em" }}>SPLENDID</div>
-          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#B5784A", fontWeight: 600 }}>EMPIRE COSMETICS</div>
+    <>
+      <header style={navStyle}>
+        <div style={{ backgroundColor: "#B5784A", color: "#fff", textAlign: "center", padding: "5px 12px", fontSize: 10, letterSpacing: "0.15em", fontWeight: 700 }} className="hidden sm:block">
+          FREE DELIVERY IN OWERRI ON ORDERS ABOVE ₦15,000 &nbsp;·&nbsp; WHATSAPP TO ORDER NOW
         </div>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ lineHeight: 1.1, flexShrink: 0 }}>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#1A0F0A", letterSpacing: "-0.02em" }}>SPLENDID</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#B5784A", fontWeight: 600 }}>EMPIRE COSMETICS</div>
+          </div>
 
-        <nav style={{ display: "flex", gap: 28, fontSize: 11, letterSpacing: "0.15em", fontWeight: 700, color: "#1A0F0A", flexShrink: 0 }} className="hidden md:flex">
-          {[["HOME", "#"], ["SHOP", "#products"], ["CATEGORIES", "#categories"], ["FIND US", "#location"], ["CONTACT", "#contact"]].map(([l, h]) => (
-            <a key={l} href={h} style={{ textDecoration: "none", color: "inherit", transition: "color 0.2s" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "#B5784A")}
-              onMouseLeave={e => (e.currentTarget.style.color = "#1A0F0A")}
-            >{l}</a>
-          ))}
-        </nav>
+          <nav style={{ display: "flex", gap: 28, fontSize: 11, letterSpacing: "0.15em", fontWeight: 700, color: "#1A0F0A", flexShrink: 0 }} className="hidden md:flex">
+            {[["HOME", "#"], ["SHOP", "#products"], ["CATEGORIES", "#categories"], ["FIND US", "#location"], ["CONTACT", "#contact"]].map(([l, h]) => (
+              <a key={l} href={h} style={{ textDecoration: "none", color: "inherit", transition: "color 0.2s" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "#B5784A")}
+                onMouseLeave={e => (e.currentTarget.style.color = "#1A0F0A")}
+              >{l}</a>
+            ))}
+          </nav>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-          <button onClick={onAdmin} title="Admin" style={{ background: "none", border: "none", cursor: "pointer", padding: 8, color: "#9A7A6E", display: "none" }} className="md:block">
-            <Settings size={17} />
-          </button>
-          <button onClick={onCartOpen} style={{ position: "relative", background: "none", border: "none", cursor: "pointer", padding: 8, color: "#1A0F0A" }}>
-            <ShoppingBag size={22} />
-            {cartCount > 0 && (
-              <span style={{ position: "absolute", top: 0, right: 0, width: 20, height: 20, background: "#B5784A", color: "#fff", fontSize: 10, fontWeight: 700, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {cartCount}
-              </span>
-            )}
-          </button>
-          <button onClick={() => setOpen(!open)} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: "#1A0F0A", display: "flex" }} className="md:hidden">
-            {open ? <X size={22} /> : <Menu size={22} />}
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+            <button onClick={onAdmin} title="Admin" style={{ background: "none", border: "none", cursor: "pointer", padding: 8, color: "#9A7A6E", display: "none" }} className="md:block">
+              <Settings size={17} />
+            </button>
+            <button onClick={onCartOpen} style={{ position: "relative", background: "none", border: "none", cursor: "pointer", padding: 8, color: "#1A0F0A" }}>
+              <ShoppingBag size={22} />
+              {cartCount > 0 && (
+                <span style={{ position: "absolute", top: 0, right: 0, width: 20, height: 20, background: "#B5784A", color: "#fff", fontSize: 10, fontWeight: 700, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {cartCount}
+                </span>
+              )}
+            </button>
+            <button onClick={() => setOpen(!open)} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: "#1A0F0A", display: "flex" }} className="md:hidden">
+              {open ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
         </div>
-      </div>
+      </header>
 
       {open && (
         <div style={{
@@ -254,9 +256,10 @@ function Navbar({ cartCount, onCartOpen, onAdmin }: { cartCount: number; onCartO
           right: 0,
           bottom: 0,
           backgroundColor: "#fff",
-          zIndex: 50,
+          zIndex: 9999,
           padding: "24px",
           overflowY: "auto",
+          WebkitOverflowScrolling: "touch",
           display: "flex",
           flexDirection: "column",
           gap: 16
@@ -267,7 +270,7 @@ function Navbar({ cartCount, onCartOpen, onAdmin }: { cartCount: number; onCartO
           <button onClick={() => { setOpen(false); onAdmin(); }} style={{ padding: "16px 0", background: "none", border: "none", cursor: "pointer", textAlign: "left", color: "#B5784A", fontSize: 16, fontWeight: 700 }}>⚙ Admin Panel</button>
         </div>
       )}
-    </header>
+    </>
   );
 }
 
