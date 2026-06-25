@@ -190,91 +190,6 @@ export default function App() {
         <CheckoutModal step={checkoutStep} cart={cart} total={cartTotal} orderId={orderId} name={customerName} phone={customerPhone} onName={setCustomerName} onPhone={setCustomerPhone} onPlace={placeOrder} onWhatsApp={sendWhatsApp} onCopy={copyAccount} copied={copied} onClose={closeCheckout} />
       )}
 
-      {/* Floating Beauty Consultation Widget */}
-      <button
-        onClick={() => setQuizOpen(true)}
-        style={{
-          position: "fixed",
-          bottom: 24,
-          left: 24,
-          zIndex: 40,
-          background: "linear-gradient(135deg, #1A0F0A 0%, #2A160E 100%)",
-          color: "#FFF",
-          border: "1px solid rgba(181, 120, 74, 0.4)",
-          borderRadius: 999,
-          padding: "12px 20px",
-          fontSize: 10,
-          fontWeight: 700,
-          letterSpacing: "0.15em",
-          cursor: "pointer",
-          boxShadow: "0 10px 25px rgba(26,15,10,0.25)",
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          transition: "transform 0.2s"
-        }}
-        onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
-        onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-      >
-        <Sparkles size={14} color="#B5784A" /> SKIN CONSULTATION QUIZ
-      </button>
-
-      {/* Floating WhatsApp Chat Widget */}
-      <div
-        className="animate-float"
-        style={{
-          position: "fixed",
-          bottom: 24,
-          right: 24,
-          zIndex: 40,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-end",
-          gap: 8
-        }}
-      >
-        <div style={{
-          background: "#fff",
-          boxShadow: "0 6px 20px rgba(26,15,10,0.12)",
-          borderRadius: 14,
-          padding: "8px 14px",
-          fontSize: 10,
-          fontWeight: 700,
-          color: "#1A0F0A",
-          letterSpacing: "0.05em",
-          border: "1px solid rgba(181,120,74,0.18)",
-          pointerEvents: "none",
-          display: "flex",
-          alignItems: "center",
-          gap: 6
-        }}>
-          <span className="whatsapp-pulse-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", display: "inline-block" }} />
-          SHADE ASSISTANT ONLINE
-        </div>
-        <a
-          href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I need some personalized beauty consulting or assistance matching my makeup shades.")}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            width: 50,
-            height: 50,
-            borderRadius: "50%",
-            background: "#22C55E",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#fff",
-            boxShadow: "0 10px 25px rgba(34,197,94,0.35)",
-            textDecoration: "none",
-            transition: "transform 0.2s"
-          }}
-          onMouseEnter={e => e.currentTarget.style.transform = "scale(1.1)"}
-          onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-          title="Chat with Beauty Consultant"
-        >
-          <MessageCircle size={24} fill="#fff" />
-        </a>
-      </div>
 
       {/* Hidden Admin Passcode Modal */}
       {adminPromptOpen && (
@@ -671,6 +586,31 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
     return () => window.removeEventListener("scroll", h);
   }, []);
 
+  const [activeSection, setActiveSection] = useState("home");
+
+  useEffect(() => {
+    const handleScrollSpy = () => {
+      const sections = ["home", "products", "categories", "location", "contact"];
+      const scrollPosition = window.scrollY + 120;
+
+      for (const section of sections) {
+        const el = document.getElementById(section);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPosition >= top && scrollPosition < top + height) {
+            setActiveSection(section);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScrollSpy);
+    handleScrollSpy();
+    return () => window.removeEventListener("scroll", handleScrollSpy);
+  }, []);
+
   const navStyle: React.CSSProperties = {
     position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999,
     backgroundColor: scrolled ? "#fff" : "rgba(255,255,255,0.93)",
@@ -693,7 +633,7 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
     setTimeout(() => { setOpen(false); setAnimOut(false); }, 280);
   }
 
-  const navLinks = [["HOME", "#"], ["SHOP", "#products"], ["CATEGORIES", "#categories"], ["FIND US", "#location"], ["CONTACT", "#contact"]];
+  const navLinks = [["HOME", "#home"], ["SHOP", "#products"], ["CATEGORIES", "#categories"], ["FIND US", "#location"], ["CONTACT", "#contact"]];
 
   return (
     <>
@@ -708,12 +648,16 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
           </div>
 
           <nav style={{ gap: 28, fontSize: 11, letterSpacing: "0.15em", fontWeight: 700, color: "#1A0F0A", flexShrink: 0 }} className="hidden md:flex">
-            {navLinks.map(([l, h]) => (
-              <a key={l} href={h} style={{ textDecoration: "none", color: "inherit", transition: "color 0.2s" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "#B5784A")}
-                onMouseLeave={e => (e.currentTarget.style.color = "#1A0F0A")}
-              >{l}</a>
-            ))}
+            {navLinks.map(([l, h]) => {
+              const targetSection = h.substring(1);
+              const isActive = activeSection === targetSection;
+              return (
+                <a key={l} href={h} style={{ textDecoration: "none", color: isActive ? "#B5784A" : "inherit", transition: "color 0.2s" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "#B5784A")}
+                  onMouseLeave={e => (e.currentTarget.style.color = isActive ? "#B5784A" : "#1A0F0A")}
+                >{l}</a>
+              );
+            })}
           </nav>
 
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
@@ -822,45 +766,50 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
 
         {/* Navigation links */}
         <div style={{ flex: 1, padding: "16px 0" }}>
-          {navLinks.map(([l, h], idx) => (
-            <a
-              key={l}
-              href={h}
-              onClick={closeMenu}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                padding: "18px 24px",
-                fontSize: 14,
-                fontWeight: 700,
-                color: "#1A0F0A",
-                textDecoration: "none",
-                letterSpacing: "0.12em",
-                borderLeft: "3px solid transparent",
-                transition: "all 0.2s ease",
-                animation: open && !animOut
-                  ? `mobileNavFadeIn 0.3s ease ${idx * 0.05}s both`
-                  : "none",
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.backgroundColor = "#FFF6F3";
-                (e.currentTarget as HTMLElement).style.borderLeftColor = "#B5784A";
-                (e.currentTarget as HTMLElement).style.color = "#B5784A";
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
-                (e.currentTarget as HTMLElement).style.borderLeftColor = "transparent";
-                (e.currentTarget as HTMLElement).style.color = "#1A0F0A";
-              }}
-            >
-              <span style={{
-                width: 6, height: 6, borderRadius: "50%",
-                backgroundColor: "#B5784A", marginRight: 14, flexShrink: 0,
-                opacity: 0.4,
-              }} />
-              {l}
-            </a>
-          ))}
+          {navLinks.map(([l, h], idx) => {
+            const targetSection = h.substring(1);
+            const isActive = activeSection === targetSection;
+            return (
+              <a
+                key={l}
+                href={h}
+                onClick={closeMenu}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "18px 24px",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: isActive ? "#B5784A" : "#1A0F0A",
+                  textDecoration: "none",
+                  letterSpacing: "0.12em",
+                  borderLeft: `3px solid ${isActive ? "#B5784A" : "transparent"}`,
+                  backgroundColor: isActive ? "#FFF6F3" : "transparent",
+                  transition: "all 0.2s ease",
+                  animation: open && !animOut
+                    ? `mobileNavFadeIn 0.3s ease ${idx * 0.05}s both`
+                    : "none",
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.backgroundColor = "#FFF6F3";
+                  (e.currentTarget as HTMLElement).style.borderLeftColor = "#B5784A";
+                  (e.currentTarget as HTMLElement).style.color = "#B5784A";
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.backgroundColor = isActive ? "#FFF6F3" : "transparent";
+                  (e.currentTarget as HTMLElement).style.borderLeftColor = isActive ? "#B5784A" : "transparent";
+                  (e.currentTarget as HTMLElement).style.color = isActive ? "#B5784A" : "#1A0F0A";
+                }}
+              >
+                <span style={{
+                  width: 6, height: 6, borderRadius: "50%",
+                  backgroundColor: "#B5784A", marginRight: 14, flexShrink: 0,
+                  opacity: isActive ? 1 : 0.4,
+                }} />
+                {l}
+              </a>
+            );
+          })}
         </div>
 
         {/* Bottom actions */}
@@ -875,8 +824,8 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
           <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: "#B5784A", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
             <MessageCircle size={13} /> WHATSAPP CHAT
           </a>
-          <a href="mailto:sales@splendidempires.com" style={{ textDecoration: "none", color: "#5C3D2E", fontSize: 12, display: "flex", alignItems: "center", gap: 6 }}>
-            <Eye size={13} /> sales@splendidempires.com
+          <a href="mailto:obilodoris15@gmail.com" style={{ textDecoration: "none", color: "#5C3D2E", fontSize: 12, display: "flex", alignItems: "center", gap: 6 }}>
+            <Eye size={13} /> obilodoris15@gmail.com
           </a>
         </div>
       </div>
@@ -888,7 +837,7 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
 
 function HeroSection() {
   return (
-    <section style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", overflow: "hidden", paddingTop: 80, paddingBottom: 40 }}>
+    <section id="home" style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", overflow: "hidden", paddingTop: 80, paddingBottom: 40 }}>
       <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 15% 20%, rgba(242,184,168,0.45) 0, transparent 28%), radial-gradient(circle at 85% 10%, rgba(181,120,74,0.22) 0, transparent 30%), linear-gradient(135deg, #FFF7F4 0%, #FDE8E0 52%, #F4C7B7 100%)" }} />
 
       <div style={{ position: "absolute", inset: 0, opacity: 0.15 }} className="md:hidden">
@@ -942,7 +891,12 @@ function HeroSection() {
 
       {/* Social sidebar */}
       <div style={{ position: "absolute", right: 20, top: "50%", transform: "translateY(-50%)", zIndex: 10, display: "flex", flexDirection: "column", gap: 10 }} className="hidden md:flex">
-        {[{ href: "https://instagram.com", icon: <Instagram size={15} />, label: "Instagram" }, { href: "https://facebook.com", icon: <Facebook size={15} />, label: "Facebook" }, { href: "https://tiktok.com", icon: <TikTokIcon size={15} />, label: "TikTok" }, { href: `https://wa.me/${WHATSAPP_NUMBER}`, icon: <MessageCircle size={15} />, label: "WhatsApp" }].map(({ href, icon, label }) => (
+        {[
+          { href: "https://www.instagram.com/owerriskincarevendor15?igsh=NnN6bW14bzlsNmp2&utm_source=qr", icon: <Instagram size={15} />, label: "Instagram" },
+          { href: "https://www.facebook.com/share/1DxNBDKZcb/?mibextid=wwXIfr", icon: <Facebook size={15} />, label: "Facebook" },
+          { href: "https://www.tiktok.com/@owerriskincarevendor15?_r=1&_t=ZS-97Rwyw2sb1J", icon: <TikTokIcon size={15} />, label: "TikTok" },
+          { href: `https://wa.me/${WHATSAPP_NUMBER}`, icon: <MessageCircle size={15} />, label: "WhatsApp" }
+        ].map(({ href, icon, label }) => (
           <a key={label} href={href} target="_blank" rel="noopener noreferrer" title={label}
             style={{ width: 36, height: 36, background: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#B5784A", textDecoration: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.1)", transition: "all 0.2s" }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#B5784A"; (e.currentTarget as HTMLElement).style.color = "#fff"; }}
@@ -965,13 +919,32 @@ function CategorySection({ active, onSelect }: { active: Category; onSelect: (c:
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: "#1A0F0A", marginBottom: 8 }}>Shop By Category</h2>
           <p style={{ color: "#5C3D2E", fontSize: 13, letterSpacing: "0.05em" }}>Find your perfect beauty essential</p>
         </div>
-        <div style={{ display: "flex", gap: 24, overflowX: "auto", paddingBottom: 8, justifyContent: "center", flexWrap: "wrap" }}>
+        <div 
+          className="flex gap-4 sm:gap-6 overflow-x-auto pb-2 no-scrollbar flex-nowrap sm:flex-wrap justify-start sm:justify-center w-full px-4 sm:px-0 scroll-smooth"
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
           {cats.map(cat => {
             const isActive = active === cat;
             const img = cat === "All" ? "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=150&h=150&fit=crop" : CAT_IMAGES[cat as Exclude<Category, "All">];
             return (
-              <button key={cat} onClick={() => onSelect(cat)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 80, height: 80, borderRadius: "50%", overflow: "hidden", border: `3px solid ${isActive ? "#B5784A" : "transparent"}`, boxShadow: isActive ? "0 6px 20px rgba(181,120,74,0.25)" : "none", transform: isActive ? "scale(1.1)" : "scale(1)", transition: "all 0.3s" }}>
+              <button 
+                key={cat} 
+                onClick={() => {
+                  onSelect(cat);
+                  document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+                }} 
+                className="flex flex-col items-center gap-2 flex-shrink-0"
+                style={{ background: "none", border: "none", cursor: "pointer" }}
+              >
+                <div 
+                  className="w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] rounded-full overflow-hidden flex-shrink-0"
+                  style={{ 
+                    border: `3px solid ${isActive ? "#B5784A" : "transparent"}`, 
+                    boxShadow: isActive ? "0 6px 20px rgba(181,120,74,0.25)" : "none", 
+                    transform: isActive ? "scale(1.1)" : "scale(1)", 
+                    transition: "all 0.3s" 
+                  }}
+                >
                   <img src={img} alt={cat} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 </div>
                 <span style={{ fontSize: 10, letterSpacing: "0.12em", fontWeight: 700, color: isActive ? "#B5784A" : "#5C3D2E" }}>{cat.toUpperCase()}</span>
@@ -988,6 +961,17 @@ function CategorySection({ active, onSelect }: { active: Category; onSelect: (c:
 
 function ProductsSection({ products, active, onFilter, onAdd, onQuickView }: { products: Product[]; active: Category; onFilter: (c: Category) => void; onAdd: (p: Product) => void; onQuickView: (p: Product) => void }) {
   const tabs: Category[] = ["All", "Foundation", "Lipstick", "Serum", "Eyeliner", "Moisturizer", "Perfume"];
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [active]);
+
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedProducts = products.slice(startIndex, startIndex + itemsPerPage);
+
   return (
     <section id="products" style={{ background: "linear-gradient(180deg, #FFF6F3 0%, #FFFDFC 100%)" }} className="py-10 sm:py-14">
       <div style={{ maxWidth: 1200, margin: "0 auto" }} className="px-3 sm:px-5 lg:px-6">
@@ -1010,9 +994,90 @@ function ProductsSection({ products, active, onFilter, onAdd, onQuickView }: { p
             <p style={{ fontSize: 13 }}>No products in this category right now.</p>
           </div>
         ) : (
-          <div style={{ display: "grid" }} className="grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {products.map(p => <ProductCard key={p.id} product={p} onAdd={onAdd} onQuickView={onQuickView} />)}
-          </div>
+          <>
+            <div style={{ display: "grid" }} className="grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
+              {paginatedProducts.map(p => <ProductCard key={p.id} product={p} onAdd={onAdd} onQuickView={onQuickView} />)}
+            </div>
+
+            {totalPages > 1 && (
+              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginTop: 40 }}>
+                <button
+                  onClick={() => {
+                    if (currentPage > 1) {
+                      setCurrentPage(currentPage - 1);
+                      document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                  disabled={currentPage === 1}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: 999,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: "0.08em",
+                    border: "1px solid rgba(181, 120, 74, 0.3)",
+                    background: "transparent",
+                    color: currentPage === 1 ? "#d1d5db" : "#5C3D2E",
+                    cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                    transition: "all 0.2s"
+                  }}
+                >
+                  PREV
+                </button>
+                {Array.from({ length: totalPages }).map((_, i) => {
+                  const pageNum = i + 1;
+                  const isPageActive = pageNum === currentPage;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => {
+                        setCurrentPage(pageNum);
+                        document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: "50%",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        border: isPageActive ? "none" : "1px solid rgba(181, 120, 74, 0.2)",
+                        background: isPageActive ? "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)" : "transparent",
+                        color: isPageActive ? "#fff" : "#5C3D2E",
+                        cursor: "pointer",
+                        boxShadow: isPageActive ? "0 4px 12px rgba(181,120,74,0.2)" : "none",
+                        transition: "all 0.2s"
+                      }}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+                <button
+                  onClick={() => {
+                    if (currentPage < totalPages) {
+                      setCurrentPage(currentPage + 1);
+                      document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                  disabled={currentPage === totalPages}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: 999,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: "0.08em",
+                    border: "1px solid rgba(181, 120, 74, 0.3)",
+                    background: "transparent",
+                    color: currentPage === totalPages ? "#d1d5db" : "#5C3D2E",
+                    cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                    transition: "all 0.2s"
+                  }}
+                >
+                  NEXT
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>
@@ -1144,7 +1209,7 @@ function LocationSection() {
   }
 
   function handleCopyEmail() {
-    navigator.clipboard.writeText("sales@splendidempires.com");
+    navigator.clipboard.writeText("obilodoris15@gmail.com");
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2000);
   }
@@ -1206,7 +1271,7 @@ function LocationSection() {
                       <Copy size={10} /> {copiedEmail ? "COPIED" : "COPY"}
                     </button>
                   </div>
-                  <a href="mailto:sales@splendidempires.com" style={{ color: "#9A7A6E", fontSize: 11, textDecoration: "none" }}>sales@splendidempires.com</a>
+                  <a href="mailto:obilodoris15@gmail.com" style={{ color: "#9A7A6E", fontSize: 11, textDecoration: "none" }}>obilodoris15@gmail.com</a>
                 </div>
               </div>
             </div>
@@ -1245,7 +1310,7 @@ function SiteFooter() {
   const [copiedEmail, setCopiedEmail] = useState(false);
 
   function handleCopyEmail() {
-    navigator.clipboard.writeText("sales@splendidempires.com");
+    navigator.clipboard.writeText("obilodoris15@gmail.com");
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2000);
   }
@@ -1260,9 +1325,9 @@ function SiteFooter() {
             <p style={{ color: "#9A7A6E", fontSize: 12, lineHeight: 1.7, marginBottom: 16 }}>Owerri's premier luxury beauty destination.</p>
             <div style={{ display: "flex", gap: 10 }}>
               {[
-                { href: "https://instagram.com/splendid_empire_cosmetics", icon: <Instagram size={14} />, label: "Instagram" },
-                { href: "https://facebook.com/splendid_empire_cosmetics", icon: <Facebook size={14} />, label: "Facebook" },
-                { href: "https://tiktok.com/@splendid_empire_cosmetics", icon: <TikTokIcon size={14} />, label: "TikTok" },
+                { href: "https://www.instagram.com/owerriskincarevendor15?igsh=NnN6bW14bzlsNmp2&utm_source=qr", icon: <Instagram size={14} />, label: "Instagram" },
+                { href: "https://www.facebook.com/share/1DxNBDKZcb/?mibextid=wwXIfr", icon: <Facebook size={14} />, label: "Facebook" },
+                { href: "https://www.tiktok.com/@owerriskincarevendor15?_r=1&_t=ZS-97Rwyw2sb1J", icon: <TikTokIcon size={14} />, label: "TikTok" },
                 { href: `https://wa.me/${WHATSAPP_NUMBER}`, icon: <MessageCircle size={14} />, label: "WhatsApp" }
               ].map(({ href, icon, label }) => (
                 <a key={label} href={href} target="_blank" rel="noopener noreferrer" title={label}
@@ -1317,8 +1382,8 @@ function SiteFooter() {
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <p style={{ color: "#9A7A6E", fontSize: 13, lineHeight: 1.7, margin: 0 }}>Shop D, World Centre, By IMSU Junction, 470 Works Layout, Owerri 460212, Imo State</p>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <a href="mailto:sales@splendidempires.com" style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "#9A7A6E"}>
-                  sales@splendidempires.com
+                <a href="mailto:obilodoris15@gmail.com" style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "#9A7A6E"}>
+                  obilodoris15@gmail.com
                 </a>
                 <button onClick={handleCopyEmail} style={{ background: "none", border: "none", color: copiedEmail ? "#22c55e" : "#B5784A", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", gap: 3, fontWeight: 700 }}>
                   <Copy size={10} /> {copiedEmail ? "COPIED" : "COPY"}
