@@ -5,7 +5,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 4000;
-const ADMIN_PASSWORD = "SEC@Admin2024";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "SEC@Admin2024";
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 app.use(cors({

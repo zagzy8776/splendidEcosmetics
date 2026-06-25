@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { fetchProducts, createOrder, fetchOrders, updateOrderStatus, createProduct, updateProduct, deleteProduct } from "../api";
+import { fetchProducts, createOrder, fetchOrders, updateOrderStatus, createProduct, updateProduct, deleteProduct, adminLogin } from "../api";
 import {
   ShoppingBag, X, Menu, Instagram, Facebook, Phone, MapPin,
   Star, Plus, Minus, Trash2, Package, Settings, LogOut, Check,
@@ -268,13 +268,26 @@ function PasscodeModal({ onClose, onSuccess }: PasscodeModalProps) {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      onSuccess();
-      onClose();
-    } else {
-      setError(true);
-      setTimeout(() => setError(false), 2000);
-    }
+    adminLogin(password)
+      .then(res => {
+        if (res.authenticated) {
+          onSuccess();
+          onClose();
+        } else {
+          setError(true);
+          setTimeout(() => setError(false), 2000);
+        }
+      })
+      .catch(err => {
+        console.error("Login request failed:", err);
+        if (password === ADMIN_PASSWORD) {
+          onSuccess();
+          onClose();
+        } else {
+          setError(true);
+          setTimeout(() => setError(false), 2000);
+        }
+      });
   }
 
   return (
@@ -1651,8 +1664,24 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
   const [tab, setTab] = useState<AdminTab>("orders");
 
   function login() {
-    if (pw === ADMIN_PASSWORD) { setAuthed(true); setErr(""); }
-    else setErr("Incorrect password. Try again.");
+    adminLogin(pw)
+      .then(res => {
+        if (res.authenticated) {
+          setAuthed(true);
+          setErr("");
+        } else {
+          setErr("Incorrect password. Try again.");
+        }
+      })
+      .catch(err => {
+        console.error("Login request failed:", err);
+        if (pw === ADMIN_PASSWORD) {
+          setAuthed(true);
+          setErr("");
+        } else {
+          setErr("Incorrect password. Try again.");
+        }
+      });
   }
 
   if (!authed) {
@@ -1947,6 +1976,9 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
             <div style={{ gridColumn: "1 / -1" }}>
               <label style={labelStyle}>Image URL</label>
               <input value={form.image} onChange={e => sf("image")(e.target.value)} placeholder="Paste an image URL (leave blank for default)" style={inputStyle} />
+              <p style={{ fontSize: 11, color: "#8E7366", marginTop: 6, lineHeight: 1.4 }}>
+                <strong>Tip:</strong> You can upload your product images for free to <a href="https://postimages.org/" target="_blank" rel="noreferrer" style={{ color: "#B5784A", textDecoration: "underline" }}>Postimages</a> or <a href="https://imgbb.com/" target="_blank" rel="noreferrer" style={{ color: "#B5784A", textDecoration: "underline" }}>Imgbb</a>. After uploading, copy the <strong>Direct Link</strong> (must end in .jpg or .png) and paste it here.
+              </p>
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
               <label style={labelStyle}>Description</label>
