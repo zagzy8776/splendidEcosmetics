@@ -180,7 +180,7 @@ export default function App() {
       <WhyUsSection />
       <TestimonialsSection />
       <LocationSection />
-      <SiteFooter />
+      <SiteFooter onSelectCategory={setActiveCategory} />
 
       {cartOpen && <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 40 }} onClick={() => setCartOpen(false)} />}
 
@@ -633,6 +633,17 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
     setTimeout(() => { setOpen(false); setAnimOut(false); }, 280);
   }
 
+  const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    closeMenu();
+    setTimeout(() => {
+      const element = document.getElementById(targetId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    }, open ? 300 : 0);
+  };
+
   const navLinks = [["HOME", "#home"], ["SHOP", "#products"], ["CATEGORIES", "#categories"], ["FIND US", "#location"], ["CONTACT", "#contact"]];
 
   return (
@@ -652,7 +663,9 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
               const targetSection = h.substring(1);
               const isActive = activeSection === targetSection;
               return (
-                <a key={l} href={h} style={{ textDecoration: "none", color: isActive ? "#B5784A" : "inherit", transition: "color 0.2s" }}
+                <a key={l} href={h} 
+                  onClick={e => handleScrollTo(e, targetSection)}
+                  style={{ textDecoration: "none", color: isActive ? "#B5784A" : "inherit", transition: "color 0.2s" }}
                   onMouseEnter={e => (e.currentTarget.style.color = "#B5784A")}
                   onMouseLeave={e => (e.currentTarget.style.color = isActive ? "#B5784A" : "#1A0F0A")}
                 >{l}</a>
@@ -773,7 +786,7 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
               <a
                 key={l}
                 href={h}
-                onClick={closeMenu}
+                onClick={e => handleScrollTo(e, targetSection)}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -962,7 +975,7 @@ function CategorySection({ active, onSelect }: { active: Category; onSelect: (c:
 function ProductsSection({ products, active, onFilter, onAdd, onQuickView }: { products: Product[]; active: Category; onFilter: (c: Category) => void; onAdd: (p: Product) => void; onQuickView: (p: Product) => void }) {
   const tabs: Category[] = ["All", "Foundation", "Lipstick", "Serum", "Eyeliner", "Moisturizer", "Perfume"];
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 6;
 
   useEffect(() => {
     setCurrentPage(1);
@@ -995,7 +1008,7 @@ function ProductsSection({ products, active, onFilter, onAdd, onQuickView }: { p
           </div>
         ) : (
           <>
-            <div style={{ display: "grid" }} className="grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
+            <div style={{ display: "grid" }} className="grid-cols-3 gap-2 sm:gap-4 lg:gap-6">
               {paginatedProducts.map(p => <ProductCard key={p.id} product={p} onAdd={onAdd} onQuickView={onQuickView} />)}
             </div>
 
@@ -1105,23 +1118,25 @@ function ProductCard({ product: p, onAdd, onQuickView }: { product: Product; onA
           onMouseLeave={e => ((e.target as HTMLElement).style.transform = "scale(1)")}
         />
         {p.badge && (
-          <span style={{ position: "absolute", top: 12, left: 12, background: "#B5784A", color: "#fff", fontSize: 9, letterSpacing: "0.18em", fontWeight: 700, padding: "4px 10px", borderRadius: 999 }}>{p.badge}</span>
+          <span style={{ position: "absolute", top: 8, left: 8, background: "#B5784A", color: "#fff", fontSize: 8, letterSpacing: "0.1em", fontWeight: 700, padding: "2px 6px", borderRadius: 999 }}>{p.badge}</span>
         )}
-        <button onClick={e => { e.stopPropagation(); setWished(!wished); }} style={{ position: "absolute", top: 12, right: 12, width: 32, height: 32, background: "#fff", border: "none", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.1)", zIndex: 10 }}>
-          <Heart size={13} fill={wished ? "#B5784A" : "none"} color={wished ? "#B5784A" : "#1A0F0A"} />
+        <button onClick={e => { e.stopPropagation(); setWished(!wished); }} style={{ position: "absolute", top: 8, right: 8, width: 26, height: 26, background: "#fff", border: "none", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.1)", zIndex: 10 }}>
+          <Heart size={11} fill={wished ? "#B5784A" : "none"} color={wished ? "#B5784A" : "#1A0F0A"} />
         </button>
       </div>
-      <div className="p-3 sm:p-4">
-        <div style={{ display: "flex", gap: 2, marginBottom: 6 }}>
-          {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={10} fill={i < Math.floor(p.rating) ? "#B5784A" : "none"} color="#B5784A" />)}
-          <span style={{ color: "#9A7A6E", fontSize: 10, marginLeft: 4 }}>({p.reviews})</span>
+      <div className="p-2 sm:p-4">
+        <div style={{ display: "flex", gap: 1, marginBottom: 4, alignItems: "center" }}>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star key={i} size={8} fill={i < Math.floor(p.rating) ? "#B5784A" : "none"} color="#B5784A" className="w-[8px] h-[8px] sm:w-[10px] sm:h-[10px]" />
+          ))}
+          <span style={{ color: "#9A7A6E", fontSize: 9, marginLeft: 2 }} className="text-[8px] sm:text-[10px]">({p.reviews})</span>
         </div>
-        <h3 onClick={() => onQuickView(p)} style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, color: "#1A0F0A", lineHeight: 1.35, marginBottom: 4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", cursor: "pointer" }} className="text-[13px] sm:text-sm hover:text-[#B5784A] transition-colors">{p.name}</h3>
+        <h3 onClick={() => onQuickView(p)} style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, color: "#1A0F0A", lineHeight: 1.35, marginBottom: 4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", cursor: "pointer" }} className="text-[11px] sm:text-sm hover:text-[#B5784A] transition-colors">{p.name}</h3>
         <p style={{ color: "#5C3D2E", fontSize: 11, lineHeight: 1.55, marginBottom: 12, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }} className="hidden sm:block">{p.description}</p>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#B5784A" }} className="text-sm sm:text-base">{fmt(p.price)}</span>
-          <button onClick={e => { e.stopPropagation(); handleAdd(); }} style={{ width: 32, height: 32, borderRadius: "50%", background: justAdded ? "#22c55e" : "#B5784A", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s", transform: justAdded ? "scale(1.15)" : "scale(1)" }}>
-            {justAdded ? <Check size={13} /> : <Plus size={13} />}
+          <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#B5784A" }} className="text-xs sm:text-base">{fmt(p.price)}</span>
+          <button onClick={e => { e.stopPropagation(); handleAdd(); }} className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-white cursor-pointer transition-all duration-200" style={{ border: "none", background: justAdded ? "#22c55e" : "#B5784A", transform: justAdded ? "scale(1.15)" : "scale(1)" }}>
+            {justAdded ? <Check size={11} className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Plus size={11} className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
           </button>
         </div>
       </div>
@@ -1276,20 +1291,18 @@ function LocationSection() {
               </div>
             </div>
 
-            <a href="https://maps.google.com/?q=IMSU+Junction+Works+Layout+Owerri+Imo+State" target="_blank" rel="noopener noreferrer"
+            <a href="https://www.google.com/maps/search/?api=1&query=Shop+D+World+Centre+IMSU+Junction+Works+Layout+Owerri+Imo+State" target="_blank" rel="noopener noreferrer"
               style={{ marginTop: 24, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6, background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", padding: "10px 20px", borderRadius: 999, fontSize: 10, fontWeight: 700, letterSpacing: "0.15em", textDecoration: "none", width: "fit-content", boxShadow: "0 10px 24px rgba(181,120,74,0.3)" }} className="max-sm:w-full">
               <MapPin size={13} /> GET DIRECTIONS
             </a>
           </div>
-          <div style={{ position: "relative", minHeight: "350px" }} className="min-h-[280px] sm:min-h-[350px] md:min-h-full">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3971.493922627993!2d6.9961665!3d5.5085449!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x104259b139265ea5%3A0xc47e30d703956fc2!2sIMSU%20Junction%2C%20Owerri!5e0!3m2!1sen!2sng!4v1700000000000!5m2!1sen!2sng"
-              style={{ width: "100%", height: "100%", border: 0, minHeight: "350px" }}
-              allowFullScreen={true}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="Splendid Empire Cosmetics Location Map"
+          <div style={{ position: "relative", minHeight: "350px" }} className="min-h-[280px] sm:min-h-[350px] md:min-h-full overflow-hidden">
+            <img 
+              src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&h=600&fit=crop" 
+              alt="Splendid Empire Cosmetics Store storefront display" 
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(26,15,10,0.5) 0%, transparent 100%)" }} />
             <div style={{ position: "absolute", bottom: 18, left: 18, right: 18, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(10px)", borderRadius: 16, padding: "12px 16px", boxShadow: "0 12px 30px rgba(26,15,10,0.14)" }} className="sm:right-auto sm:p-5">
               <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", fontSize: 14 }}>Splendid Empire Cosmetics</div>
               <div style={{ display: "flex", alignItems: "center", gap: 3, marginTop: 4 }}>
@@ -1306,7 +1319,7 @@ function LocationSection() {
 
 // ─── FOOTER ───────────────────────────────────────────────────────────────────
 
-function SiteFooter() {
+function SiteFooter({ onSelectCategory }: { onSelectCategory?: (c: Category) => void }) {
   const [copiedEmail, setCopiedEmail] = useState(false);
 
   function handleCopyEmail() {
@@ -1315,14 +1328,22 @@ function SiteFooter() {
     setTimeout(() => setCopiedEmail(false), 2000);
   }
 
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
-    <footer id="contact" style={{ backgroundColor: "#0F0705", paddingTop: 50, paddingBottom: 28 }}>
+    <footer id="contact" style={{ backgroundColor: "#110B09", borderTop: "1px solid rgba(181, 120, 74, 0.25)", paddingTop: 60, paddingBottom: 28 }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 20px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 32, marginBottom: 40 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 36, marginBottom: 48 }}>
           <div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#fff", lineHeight: 1 }}>SPLENDID</div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#B5784A", marginBottom: 12 }}>EMPIRE COSMETICS</div>
-            <p style={{ color: "#9A7A6E", fontSize: 12, lineHeight: 1.7, marginBottom: 16 }}>Owerri's premier luxury beauty destination.</p>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#fff", lineHeight: 1, letterSpacing: "-0.01em" }}>SPLENDID</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#B5784A", marginBottom: 16, fontWeight: 600 }}>EMPIRE COSMETICS</div>
+            <p style={{ color: "#9A7A6E", fontSize: 13, lineHeight: 1.7, marginBottom: 20 }}>Owerri's premier luxury beauty destination. Discover curated skincare, foundation, and fragrance lines designed to elevate your unique glow.</p>
             <div style={{ display: "flex", gap: 10 }}>
               {[
                 { href: "https://www.instagram.com/owerriskincarevendor15?igsh=NnN6bW14bzlsNmp2&utm_source=qr", icon: <Instagram size={14} />, label: "Instagram" },
@@ -1333,7 +1354,7 @@ function SiteFooter() {
                 <a key={label} href={href} target="_blank" rel="noopener noreferrer" title={label}
                   style={{
                     width: 36, height: 36, borderRadius: "50%",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    border: "1px solid rgba(181, 120, 74, 0.25)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     color: "#9A7A6E", textDecoration: "none", transition: "all 0.25s ease"
                   }}
@@ -1347,7 +1368,7 @@ function SiteFooter() {
                   onMouseLeave={e => {
                     (e.currentTarget as HTMLElement).style.background = "transparent";
                     (e.currentTarget as HTMLElement).style.color = "#9A7A6E";
-                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.1)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(181, 120, 74, 0.25)";
                     (e.currentTarget as HTMLElement).style.transform = "scale(1)";
                     (e.currentTarget as HTMLElement).style.boxShadow = "none";
                   }}
@@ -1356,10 +1377,12 @@ function SiteFooter() {
             </div>
           </div>
           <div>
-            <h4 style={{ color: "#fff", fontWeight: 700, fontSize: 11, letterSpacing: "0.2em", marginBottom: 16 }}>QUICK LINKS</h4>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {[["Home", "#"], ["Shop", "#products"], ["Categories", "#categories"], ["Find Us", "#location"], ["Contact Us", "#contact"]].map(([l, h]) => (
-                <a key={l} href={h} style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", transition: "color 0.2s" }}
+            <h4 style={{ color: "#fff", fontWeight: 700, fontSize: 11, letterSpacing: "0.2em", marginBottom: 20 }}>QUICK LINKS</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {[["Home", "home"], ["Shop Products", "products"], ["Shop Categories", "categories"], ["Find Our Store", "location"], ["Contact Support", "contact"]].map(([l, id]) => (
+                <a key={l} href={`#${id}`} 
+                  onClick={e => scrollToSection(e, id)}
+                  style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", transition: "color 0.2s" }}
                   onMouseEnter={e => ((e.target as HTMLElement).style.color = "#B5784A")}
                   onMouseLeave={e => ((e.target as HTMLElement).style.color = "#9A7A6E")}
                 >{l}</a>
@@ -1367,10 +1390,19 @@ function SiteFooter() {
             </div>
           </div>
           <div>
-            <h4 style={{ color: "#fff", fontWeight: 700, fontSize: 11, letterSpacing: "0.2em", marginBottom: 16 }}>CATEGORIES</h4>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <h4 style={{ color: "#fff", fontWeight: 700, fontSize: 11, letterSpacing: "0.2em", marginBottom: 20 }}>CATEGORIES</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {["Foundation", "Lipstick", "Serum", "Eyeliner", "Moisturizer", "Perfume"].map(c => (
-                <a key={c} href="#products" style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", transition: "color 0.2s" }}
+                <a key={c} href="#products" 
+                  onClick={e => {
+                    e.preventDefault();
+                    if (onSelectCategory) {
+                      onSelectCategory(c as Category);
+                    }
+                    const el = document.getElementById("products");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", transition: "color 0.2s" }}
                   onMouseEnter={e => ((e.target as HTMLElement).style.color = "#B5784A")}
                   onMouseLeave={e => ((e.target as HTMLElement).style.color = "#9A7A6E")}
                 >{c}</a>
@@ -1378,8 +1410,8 @@ function SiteFooter() {
             </div>
           </div>
           <div>
-            <h4 style={{ color: "#fff", fontWeight: 700, fontSize: 11, letterSpacing: "0.2em", marginBottom: 16 }}>CONTACT US</h4>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <h4 style={{ color: "#fff", fontWeight: 700, fontSize: 11, letterSpacing: "0.2em", marginBottom: 20 }}>CONTACT INFORMATION</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <p style={{ color: "#9A7A6E", fontSize: 13, lineHeight: 1.7, margin: 0 }}>Shop D, World Centre, By IMSU Junction, 470 Works Layout, Owerri 460212, Imo State</p>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <a href="mailto:obilodoris15@gmail.com" style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "#9A7A6E"}>
@@ -1390,9 +1422,9 @@ function SiteFooter() {
                 </button>
               </div>
               <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", display: "flex", alignItems: "center", gap: 8, transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "#9A7A6E"}>
-                <MessageCircle size={13} color="#B5784A" /> WhatsApp Chat
+                <MessageCircle size={13} color="#B5784A" /> WhatsApp Support
               </a>
-              <p style={{ color: "#B5784A", fontSize: 13, fontWeight: 600, margin: 0 }}>Mon–Sat: 9am – 7pm</p>
+              <p style={{ color: "#B5784A", fontSize: 13, fontWeight: 600, margin: 0 }}>Mon–Sat: 9:00am – 7:00pm</p>
             </div>
           </div>
         </div>
