@@ -1857,9 +1857,37 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<PForm>(EMPTY);
   const [fErr, setFErr] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
   function openAdd() { setForm(EMPTY); setEditId(null); setFErr(""); setShowForm(true); }
   function openEdit(p: Product) { setForm({ name: p.name, category: p.category, price: String(p.price), image: p.image, description: p.description, badge: p.badge || "", inStock: p.inStock }); setEditId(p.id); setFErr(""); setShowForm(true); }
+
+  async function uploadImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploading(true);
+    setFErr("");
+    try {
+      const data = new FormData();
+      data.append("file", file);
+      data.append("upload_preset", "splendid_ecosmetics");
+      const res = await fetch("https://api.cloudinary.com/v1_1/djup7klv2/image/upload", {
+        method: "POST",
+        body: data,
+      });
+      const json = await res.json();
+      if (json.secure_url) {
+        sf("image")(json.secure_url);
+      } else {
+        setFErr("Failed to upload image. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      setFErr("An error occurred during upload.");
+    } finally {
+      setIsUploading(false);
+    }
+  }
 
   function save() {
     if (!form.name.trim()) { setFErr("Product name is required."); return; }
@@ -1974,11 +2002,23 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
               <input value={form.badge} onChange={e => sf("badge")(e.target.value)} placeholder="e.g. NEW, HOT, BESTSELLER" style={inputStyle} />
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
-              <label style={labelStyle}>Image URL</label>
-              <input value={form.image} onChange={e => sf("image")(e.target.value)} placeholder="Paste an image URL (leave blank for default)" style={inputStyle} />
-              <p style={{ fontSize: 11, color: "#8E7366", marginTop: 6, lineHeight: 1.4 }}>
-                <strong>Tip:</strong> You can upload your product images for free to <a href="https://postimages.org/" target="_blank" rel="noreferrer" style={{ color: "#B5784A", textDecoration: "underline" }}>Postimages</a> or <a href="https://imgbb.com/" target="_blank" rel="noreferrer" style={{ color: "#B5784A", textDecoration: "underline" }}>Imgbb</a>. After uploading, copy the <strong>Direct Link</strong> (must end in .jpg or .png) and paste it here.
-              </p>
+              <label style={labelStyle}>Product Image</label>
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <div style={{ flex: 1, position: "relative" }}>
+                  <input type="file" accept="image/*" onChange={uploadImage} disabled={isUploading} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%" }} />
+                  <div style={{ ...inputStyle, display: "flex", alignItems: "center", justifyContent: "center", background: "#fff", cursor: "pointer", color: isUploading ? "#B5784A" : "#8E7366", borderStyle: "dashed" }}>
+                    {isUploading ? "Uploading to Cloudinary..." : "Click to select a picture from your device"}
+                  </div>
+                </div>
+                <div style={{ fontSize: 12, color: "#8E7366", fontWeight: 600 }}>OR</div>
+                <input value={form.image} onChange={e => sf("image")(e.target.value)} placeholder="Paste an image URL" style={{ ...inputStyle, flex: 1 }} />
+              </div>
+              {form.image && (
+                <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 12 }}>
+                  <img src={form.image} alt="Preview" style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 8, border: "1px solid rgba(242,184,168,0.6)" }} />
+                  <span style={{ fontSize: 11, color: "#10b981", fontWeight: 600 }}>Image ready!</span>
+                </div>
+              )}
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
               <label style={labelStyle}>Description</label>
