@@ -39,13 +39,29 @@ export async function createOrder(order: OrderData) {
     body: JSON.stringify(order),
   });
   if (!res.ok) throw new Error("Failed to create order");
-  return res.json();
+  const data = await res.json();
+  return {
+    ...data,
+    createdAt: new Date(data.createdAt),
+    items: data.items.map((i: any) => ({
+      product: { id: i.productId, name: i.name, price: Number(i.price) },
+      quantity: i.quantity
+    }))
+  };
 }
 
 export async function fetchOrders() {
   const res = await fetch(`${API_BASE}/api/orders`);
   if (!res.ok) throw new Error("Failed to fetch orders");
-  return res.json();
+  const data = await res.json();
+  return data.map((o: any) => ({
+    ...o,
+    createdAt: new Date(o.createdAt),
+    items: o.items.map((i: any) => ({
+      product: { id: i.productId, name: i.name, price: Number(i.price) },
+      quantity: i.quantity
+    }))
+  }));
 }
 
 export async function updateOrderStatus(id: string, status: string) {
@@ -55,7 +71,15 @@ export async function updateOrderStatus(id: string, status: string) {
     body: JSON.stringify({ status }),
   });
   if (!res.ok) throw new Error("Failed to update order");
-  return res.json();
+  const data = await res.json();
+  return {
+    ...data,
+    createdAt: new Date(data.createdAt),
+    items: data.items.map((i: any) => ({
+      product: { id: i.productId, name: i.name, price: Number(i.price) },
+      quantity: i.quantity
+    }))
+  };
 }
 
 export async function createProduct(data: ProductData) {

@@ -96,6 +96,16 @@ export default function App() {
       .then(data => setProducts(data))
       .catch(() => setProducts(INITIAL_PRODUCTS))
       .finally(() => setLoading(false));
+
+    fetchOrders()
+      .then(data => {
+        const typedOrders = data.map((o: any) => ({
+          ...o,
+          status: o.status as OrderStatus
+        }));
+        setOrders(typedOrders);
+      })
+      .catch(err => console.error("Failed to load orders from database:", err));
   }, []);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -141,7 +151,32 @@ export default function App() {
   }
 
   function placeOrder() {
-    setOrders(prev => [{ id: orderId, customerName, phone: customerPhone, items: [...cart], total: cartTotal, status: "pending", createdAt: new Date() }, ...prev]);
+    const payload = {
+      id: orderId,
+      customerName,
+      phone: customerPhone,
+      total: cartTotal,
+      status: "pending" as const,
+      items: cart.map(i => ({
+        product: { id: i.product.id, name: i.product.name, price: i.product.price },
+        quantity: i.quantity
+      }))
+    };
+
+    createOrder(payload)
+      .then(savedOrder => {
+        // Map any required format if needed (api client already does parse dates and items)
+        const typedOrder = {
+          ...savedOrder,
+          status: savedOrder.status as OrderStatus
+        };
+        setOrders(prev => [typedOrder, ...prev]);
+      })
+      .catch(err => {
+        console.error("Failed to save order to database:", err);
+        setOrders(prev => [{ id: orderId, customerName, phone: customerPhone, items: [...cart], total: cartTotal, status: "pending", createdAt: new Date() }, ...prev]);
+      });
+
     setCheckoutStep("payment");
   }
 
@@ -1696,7 +1731,23 @@ const NEXT_LABEL: Record<OrderStatus, string | null> = { pending: "Mark Verifyin
 
 function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.Dispatch<React.SetStateAction<Order[]>> }) {
   function advance(id: string) {
-    setOrders(prev => prev.map(o => { if (o.id !== id) return o; const n = NEXT[o.status]; return n ? { ...o, status: n } : o; }));
+    const o = orders.find(ord => ord.id === id);
+    if (!o) return;
+    const n = NEXT[o.status];
+    if (!n) return;
+
+    updateOrderStatus(id, n)
+      .then(updated => {
+        const typedUpdated = {
+          ...updated,
+          status: updated.status as OrderStatus
+        };
+        setOrders(prev => prev.map(item => item.id === id ? typedUpdated : item));
+      })
+      .catch(err => {
+        console.error("Failed to update order status in database:", err);
+        setOrders(prev => prev.map(item => item.id === id ? { ...item, status: n } : item));
+      });
   }
 
   function waCustomer(o: Order) {
@@ -1784,14 +1835,79 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
   function save() {
     if (!form.name.trim()) { setFErr("Product name is required."); return; }
     if (!form.price || isNaN(Number(form.price))) { setFErr("Enter a valid price."); return; }
-    const data: Product = { id: editId || "p" + Date.now(), name: form.name.trim(), category: form.category, price: Number(form.price), image: form.image.trim() || "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=500&h=500&fit=crop", description: form.description.trim(), badge: form.badge.trim() || undefined, inStock: form.inStock, rating: 4.8, reviews: 0 };
-    if (editId) setProducts(prev => prev.map(p => p.id === editId ? { ...data, rating: p.rating, reviews: p.reviews } : p));
-    else setProducts(prev => [...prev, data]);
-    setShowForm(false); setEditId(null); setFErr("");
+    
+    if (editId) {
+      const updateData = {
+        name: form.name.trim(),
+        category: form.category,
+        price: Number(form.price),
+        image: form.image.trim() || "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=500&h=500&fit=crop",
+        description: form.description.trim(),
+        badge: form.badge.trim() || undefined,
+        inStock: form.inStock
+      };
+      
+      updateProduct(editId, updateData)
+        .then(updated => {
+          setProducts(prev => prev.map(p => p.id === editId ? { ...p, ...updated } : p));
+          setShowForm(false); setEditId(null); setFErr("");
+        })
+        .catch(err => {
+          console.error("Failed to update product in database:", err);
+          setFErr("Failed to update product in database.");
+        });
+    } else {
+      const createData = {
+        id: "",
+        name: form.name.trim(),
+        category: form.category,
+        price: Number(form.price),
+        image: form.image.trim() || "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=500&h=500&fit=crop",
+        description: form.description.trim(),
+        badge: form.badge.trim() || undefined,
+        inStock: form.inStock,
+        rating: 4.8,
+        reviews: 0
+      };
+      
+      createProduct(createData)
+        .then(created => {
+          setProducts(prev => [created, ...prev]);
+          setShowForm(false); setEditId(null); setFErr("");
+        })
+        .catch(err => {
+          console.error("Failed to create product in database:", err);
+          setFErr("Failed to create product in database.");
+        });
+    }
   }
 
-  function del(id: string) { if (window.confirm("Delete this product?")) setProducts(prev => prev.filter(p => p.id !== id)); }
-  function toggle(id: string) { setProducts(prev => prev.map(p => p.id === id ? { ...p, inStock: !p.inStock } : p)); }
+  function del(id: string) {
+    if (window.confirm("Delete this product?")) {
+      deleteProduct(id)
+        .then(() => {
+          setProducts(prev => prev.filter(p => p.id !== id));
+        })
+        .catch(err => {
+          console.error("Failed to delete product in database:", err);
+          alert("Failed to delete product in database.");
+        });
+    }
+  }
+
+  function toggle(id: string) {
+    const p = products.find(prod => prod.id === id);
+    if (!p) return;
+    
+    updateProduct(id, { inStock: !p.inStock })
+      .then(updated => {
+        setProducts(prev => prev.map(item => item.id === id ? { ...item, inStock: updated.inStock } : item));
+      })
+      .catch(err => {
+        console.error("Failed to toggle product stock in database:", err);
+      });
+  }
+
   function sf(k: keyof PForm) { return (v: string | boolean) => setForm(f => ({ ...f, [k]: v })); }
 
   const inputStyle: React.CSSProperties = { width: "100%", border: "1px solid rgba(242,184,168,0.6)", borderRadius: 10, padding: "10px 14px", fontSize: 13, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" };
