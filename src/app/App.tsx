@@ -610,6 +610,21 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
   const [scrolled, setScrolled] = useState(false);
   const [animOut, setAnimOut] = useState(false);
 
+  const clickCount = useRef(0);
+  const clickTimeout = useRef<any>(null);
+
+  const handleSecretClick = () => {
+    clickCount.current += 1;
+    if (clickCount.current >= 3) {
+      onAdminRequest();
+      clickCount.current = 0;
+    }
+    clearTimeout(clickTimeout.current);
+    clickTimeout.current = setTimeout(() => {
+      clickCount.current = 0;
+    }, 400);
+  };
+
   // Lock body scroll when mobile menu is open
   useEffect(() => {
     if (open) {
@@ -661,9 +676,7 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
 
   const navStyle: React.CSSProperties = {
     position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999,
-    backgroundColor: scrolled ? "#fff" : "rgba(255,255,255,0.93)",
     boxShadow: scrolled ? "0 1px 12px rgba(181,120,74,0.12)" : "none",
-    backdropFilter: "blur(10px)",
     transition: "all 0.3s",
   };
 
@@ -696,12 +709,12 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
 
   return (
     <>
-      <header style={navStyle}>
+      <header className="glass" style={navStyle}>
         <div style={{ backgroundColor: "#B5784A", color: "#fff", textAlign: "center", padding: "5px 12px", fontSize: 10, letterSpacing: "0.15em", fontWeight: 700 }} className="hidden sm:block">
           FREE DELIVERY IN OWERRI ON ORDERS ABOVE ₦15,000 &nbsp;·&nbsp; WHATSAPP TO ORDER NOW
         </div>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div onDoubleClick={onAdminRequest} style={{ lineHeight: 1.1, flexShrink: 0, cursor: "pointer" }} title="Double-click to enter Admin Panel (Secret)">
+          <div onClick={handleSecretClick} style={{ lineHeight: 1.1, flexShrink: 0, cursor: "pointer", userSelect: "none", WebkitUserSelect: "none" }} title="Tap 3 times fast to enter Admin Panel">
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#1A0F0A", letterSpacing: "-0.02em" }}>SPLENDID</div>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#B5784A", fontWeight: 600 }}>EMPIRE COSMETICS</div>
           </div>
