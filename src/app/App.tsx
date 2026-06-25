@@ -1291,7 +1291,7 @@ function LocationSection() {
               </div>
             </div>
 
-            <a href="https://www.google.com/maps/search/?api=1&query=Shop+D+World+Centre+IMSU+Junction+Works+Layout+Owerri+Imo+State" target="_blank" rel="noopener noreferrer"
+            <a href="https://share.google/0alXyLa5msMwqjFq6" target="_blank" rel="noopener noreferrer"
               style={{ marginTop: 24, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6, background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", padding: "10px 20px", borderRadius: 999, fontSize: 10, fontWeight: 700, letterSpacing: "0.15em", textDecoration: "none", width: "fit-content", boxShadow: "0 10px 24px rgba(181,120,74,0.3)" }} className="max-sm:w-full">
               <MapPin size={13} /> GET DIRECTIONS
             </a>

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://splendidecosmetics.onrender.com/sitemap.xml
+Sitemap: https://splendid-ecosmetics.vercel.app/sitemap.xml
