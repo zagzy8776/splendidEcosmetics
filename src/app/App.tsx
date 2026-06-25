@@ -45,7 +45,7 @@ interface Order {
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
-const WHATSAPP_NUMBER = "2348012345678";
+const WHATSAPP_NUMBER = "2348104748683";
 const BANK_NAME = "Access Bank";
 const BANK_ACCOUNT_NAME = "Splendid Empire Cosmetics";
 const BANK_ACCOUNT_NUMBER = "0123456789";
