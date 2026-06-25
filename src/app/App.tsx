@@ -1552,7 +1552,7 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, onName, onPhon
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 60, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: 0 }} className="sm:items-center sm:p-4">
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }} />
-      <div style={{ position: "relative", backgroundColor: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 480, maxHeight: "95vh", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 -20px 60px rgba(0,0,0,0.2)" }}>
+      <div className="glass" style={{ position: "relative", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 480, maxHeight: "95vh", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 -20px 60px rgba(0,0,0,0.2)" }}>
 
         <div style={{ background: "#B5784A", padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div>
@@ -1687,7 +1687,7 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
   if (!authed) {
     return (
       <div style={{ minHeight: "100vh", backgroundColor: "#1A0F0A", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'Raleway', sans-serif" }}>
-        <div style={{ backgroundColor: "#fff", borderRadius: 24, padding: 40, width: "100%", maxWidth: 360, boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+        <div className="glass" style={{ borderRadius: 24, padding: 40, width: "100%", maxWidth: 360, boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
           <div style={{ textAlign: "center", marginBottom: 32 }}>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: "#1A0F0A" }}>SPLENDID</div>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 9, letterSpacing: "0.45em", color: "#B5784A", marginBottom: 12 }}>EMPIRE COSMETICS</div>
