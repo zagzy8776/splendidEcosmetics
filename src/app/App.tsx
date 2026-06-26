@@ -1364,97 +1364,33 @@ function LocationSection() {
   );
 }
 
+
 // ─── FAQ SECTION ──────────────────────────────────────────────────────────────
-// Visible on-page FAQ — matches the FAQPage schema in index.html.
-// Google uses matching visible content + schema to award rich result snippets.
 
 function FAQSection() {
   const [open, setOpen] = React.useState<number | null>(null);
-
   const faqs = [
-    {
-      q: "Where is the best cosmetics store in Owerri?",
-      a: "Splendid Empire Cosmetics is Owerri's most trusted beauty store, located at Shop D, World Centre, by IMSU Junction, 470 Works Layout, Owerri, Imo State. We stock authentic foundations, serums, lipsticks, moisturizers, eyeliners, and luxury perfumes — all curated for Nigerian skin tones."
-    },
-    {
-      q: "Do you offer same-day delivery in Owerri?",
-      a: "Yes. We offer same-day delivery within Owerri on orders placed before 5pm, and next-day delivery to Port Harcourt and other parts of Imo State. Message us on WhatsApp at +2348104748683 to arrange delivery."
-    },
-    {
-      q: "Are your cosmetics 100% authentic?",
-      a: "Absolutely. Every product at Splendid Empire Cosmetics is sourced directly from certified, authorised distributors. We do not stock counterfeit or unverified products. What you see is what you get — genuine, quality beauty."
-    },
-    {
-      q: "How do I place an order?",
-      a: "Shop directly on our website — add items to your cart, enter your name and WhatsApp number, then make a bank transfer to our Access Bank account. Once you notify us on WhatsApp, we verify and start packing immediately. You can also walk into our store in Works Layout, Owerri."
-    },
-    {
-      q: "Do you deliver to Port Harcourt?",
-      a: "Yes. We offer next-day delivery to Port Harcourt, and we can arrange shipping to other cities across Nigeria. Contact us on WhatsApp to confirm delivery to your specific location."
-    },
-    {
-      q: "What cosmetic products do you sell?",
-      a: "We sell a full range: foundations, concealers, lip glosses, lipsticks, brightening serums, moisturizers, precision eyeliners, and luxury perfumes — all handpicked for Nigerian skin tones and climate. New stock arrives regularly."
-    },
+    { q: "Where is the best cosmetics store in Owerri?", a: "Splendid Empire Cosmetics is Owerri's most trusted beauty store, located at Shop D, World Centre, by IMSU Junction, 470 Works Layout, Owerri, Imo State. We stock authentic foundations, serums, lipsticks, moisturizers, eyeliners, and luxury perfumes — all curated for Nigerian skin tones." },
+    { q: "Do you offer same-day delivery in Owerri?", a: "Yes. We offer same-day delivery within Owerri on orders placed before 5pm, and next-day delivery to Port Harcourt and other parts of Imo State. Message us on WhatsApp at +2348104748683 to arrange delivery." },
+    { q: "Are your cosmetics 100% authentic?", a: "Absolutely. Every product at Splendid Empire Cosmetics is sourced directly from certified, authorised distributors. We do not stock counterfeit or unverified products. What you see is what you get — genuine, quality beauty." },
+    { q: "How do I place an order?", a: "Shop directly on our website — add items to your cart, enter your name and WhatsApp number, then make a bank transfer to our Access Bank account. Once you notify us on WhatsApp, we verify and start packing immediately. You can also walk into our store in Works Layout, Owerri." },
+    { q: "Do you deliver to Port Harcourt?", a: "Yes. We offer next-day delivery to Port Harcourt, and we can arrange shipping to other cities across Nigeria. Contact us on WhatsApp to confirm delivery to your specific location." },
+    { q: "What cosmetic products do you sell?", a: "We sell a full range: foundations, concealers, lip glosses, lipsticks, brightening serums, moisturizers, precision eyeliners, and luxury perfumes — all handpicked for Nigerian skin tones and climate. New stock arrives regularly." },
   ];
-
   return (
     <section style={{ padding: "60px 0", backgroundColor: "#FFF6F3" }}>
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "0 24px" }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <p style={{ color: "#B5784A", fontSize: 10, letterSpacing: "0.25em", fontWeight: 700, marginBottom: 10 }}>EVERYTHING YOU NEED TO KNOW</p>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: "#1A0F0A", marginBottom: 8 }}>
-            Frequently Asked Questions
-          </h2>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: "#1A0F0A", marginBottom: 8 }}>Frequently Asked Questions</h2>
           <p style={{ color: "#5C3D2E", fontSize: 13 }}>About Splendid Empire Cosmetics, Owerri</p>
         </div>
-
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {faqs.map((faq, i) => (
-            <div
-              key={i}
-              style={{
-                borderRadius: 14,
-                border: "1px solid rgba(181,120,74,0.18)",
-                overflow: "hidden",
-                backgroundColor: open === i ? "#fff" : "rgba(255,255,255,0.6)",
-                transition: "all 0.2s",
-              }}
-            >
-              <button
-                onClick={() => setOpen(open === i ? null : i)}
-                aria-expanded={open === i}
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "18px 22px",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  gap: 16,
-                }}
-              >
-                <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, color: "#1A0F0A", fontSize: 15, lineHeight: 1.4 }}>
-                  {faq.q}
-                </span>
-                <span style={{
-                  flexShrink: 0,
-                  width: 24,
-                  height: 24,
-                  borderRadius: "50%",
-                  background: open === i ? "#B5784A" : "rgba(181,120,74,0.12)",
-                  color: open === i ? "#fff" : "#B5784A",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 16,
-                  fontWeight: 700,
-                  transition: "all 0.2s",
-                  transform: open === i ? "rotate(45deg)" : "rotate(0deg)",
-                }}>+</span>
+            <div key={i} style={{ borderRadius: 14, border: "1px solid rgba(181,120,74,0.18)", overflow: "hidden", backgroundColor: open === i ? "#fff" : "rgba(255,255,255,0.6)", transition: "all 0.2s" }}>
+              <button onClick={() => setOpen(open === i ? null : i)} aria-expanded={open === i} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 22px", background: "none", border: "none", cursor: "pointer", textAlign: "left", gap: 16 }}>
+                <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, color: "#1A0F0A", fontSize: 15, lineHeight: 1.4 }}>{faq.q}</span>
+                <span style={{ flexShrink: 0, width: 24, height: 24, borderRadius: "50%", background: open === i ? "#B5784A" : "rgba(181,120,74,0.12)", color: open === i ? "#fff" : "#B5784A", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, transition: "all 0.2s", transform: open === i ? "rotate(45deg)" : "rotate(0deg)" }}>+</span>
               </button>
               {open === i && (
                 <div style={{ padding: "0 22px 20px", borderTop: "1px solid rgba(181,120,74,0.1)" }}>
@@ -1464,28 +1400,9 @@ function FAQSection() {
             </div>
           ))}
         </div>
-
         <div style={{ textAlign: "center", marginTop: 36 }}>
-          <p style={{ color: "#5C3D2E", fontSize: 13, marginBottom: 12 }}>Still have a question? We're one message away.</p>
-          <a
-            href="https://wa.me/2348104748683"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              background: "#25D366",
-              color: "#fff",
-              padding: "12px 24px",
-              borderRadius: 999,
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: "0.15em",
-              textDecoration: "none",
-              boxShadow: "0 8px 20px rgba(37,211,102,0.25)",
-            }}
-          >
+          <p style={{ color: "#5C3D2E", fontSize: 13, marginBottom: 12 }}>Still have a question? We are one message away.</p>
+          <a href="https://wa.me/2348104748683" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#25D366", color: "#fff", padding: "12px 24px", borderRadius: 999, fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", textDecoration: "none", boxShadow: "0 8px 20px rgba(37,211,102,0.25)" }}>
             <MessageCircle size={14} /> ASK US ON WHATSAPP
           </a>
         </div>
@@ -1495,36 +1412,13 @@ function FAQSection() {
 }
 
 // ─── SEO SECTION ──────────────────────────────────────────────────────────────
-// ─── SEO SECTION ──────────────────────────────────────────────────────────────
-// sr-only: crawlers and screen readers see it, users do not.
-// ─── SEO SECTION ──────────────────────────────────────────────────────────────
-// Visually hidden but fully rendered in the DOM for Googlebot (which executes JS).
-// sr-only technique: crawlers and screen readers see it, users do not.
+// Visually hidden but fully DOM-rendered for Googlebot.
 
 function SEOSection() {
   return (
-    <section
-      aria-label="About Splendid Empire Cosmetics Owerri"
-      style={{
-        position: "absolute",
-        width: 1,
-        height: 1,
-        padding: 0,
-        margin: -1,
-        overflow: "hidden",
-        clip: "rect(0,0,0,0)",
-        whiteSpace: "nowrap",
-        border: 0,
-      }}
-    >
+    <section aria-label="About Splendid Empire Cosmetics Owerri" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}>
       <h2>Number One Cosmetics Store in Owerri — Splendid Empire Cosmetics</h2>
-      <p>
-        Splendid Empire Cosmetics is the best cosmetics store in Owerri, Imo State, Nigeria.
-        We have served over 1,200 clients across Owerri, Port Harcourt, and Imo State.
-        Our store is at Shop D, World Centre, by IMSU Junction, 470 Works Layout, Owerri 460212.
-        Open Monday to Saturday, 9:00am to 7:00pm.
-      </p>
-
+      <p>Splendid Empire Cosmetics is the best cosmetics store in Owerri, Imo State, Nigeria. We have served over 1,200 clients across Owerri, Port Harcourt, and Imo State. Our store is at Shop D, World Centre, by IMSU Junction, 470 Works Layout, Owerri 460212. Open Monday to Saturday, 9am to 7pm.</p>
       <h3>Why Splendid Empire Is Owerri Number One Beauty Store</h3>
       <ul>
         <li>Best cosmetics store in Owerri — 5-star rated by over 1,200 clients</li>
@@ -1533,126 +1427,733 @@ function SEOSection() {
         <li>Same-day cosmetics delivery in Owerri on orders before 5pm</li>
         <li>Next-day delivery to Port Harcourt and across Imo State</li>
         <li>Easy WhatsApp ordering — +2348104748683</li>
-        <li>Largest selection of cosmetics in Owerri</li>
+        <li>Largest selection of cosmetics in Owerri — foundations, serums, lipsticks, perfumes, eyeliners, moisturizers</li>
         <li>Products curated for Nigerian skin tones and climate</li>
         <li>Trusted by makeup artists and skincare lovers in Owerri</li>
         <li>Located near IMSU Junction, Works Layout — easy to find</li>
       </ul>
-
       <h3>Buy Foundation in Owerri</h3>
-      <p>
-        Looking for the best foundation in Owerri? Splendid Empire Cosmetics stocks full-coverage
-        velvet matte liquid foundations that blend seamlessly into all Nigerian skin tones from fair
-        to deep ebony. 24-hour wear, flawless finish. Buy foundation in Owerri at our Works Layout
-        store or order online with same-day delivery. Keywords: foundation vendor Owerri, buy
-        foundation Owerri, liquid foundation Owerri, matte foundation Nigeria, full coverage
-        foundation Owerri, foundation for dark skin Owerri, concealer Owerri.
-      </p>
-
+      <p>Looking for the best foundation in Owerri? Splendid Empire Cosmetics stocks full-coverage velvet matte liquid foundations for all Nigerian skin tones. 24-hour wear. Keywords: foundation vendor Owerri, buy foundation Owerri, liquid foundation Owerri, matte foundation Nigeria, full coverage foundation Owerri, foundation for dark skin Owerri, concealer Owerri.</p>
       <h3>Buy Serum in Owerri — Brightening and Anti-Ageing Serums</h3>
-      <p>
-        Shop authentic brightening serums in Owerri. Our 24K gold-infused glow serum contains
-        niacinamide, sodium hyaluronate, ascorbic acid Vitamin C, and collagen amino acids.
-        Visibly radiant skin in 7 days. Perfect for hyperpigmentation, dark spots, and uneven skin
-        tone. Keywords: serum vendor Owerri, brightening serum Owerri, Vitamin C serum Owerri,
-        niacinamide serum Owerri, anti-ageing serum Imo State, glow serum Nigeria, authentic serum
-        Owerri, skincare serum delivery Owerri.
-      </p>
-
+      <p>Authentic brightening serums in Owerri. 24K gold-infused glow serum with niacinamide, sodium hyaluronate, vitamin C, and collagen. Radiant skin in 7 days. Keywords: serum vendor Owerri, brightening serum Owerri, Vitamin C serum Owerri, niacinamide serum Owerri, glow serum Nigeria, skincare serum delivery Owerri.</p>
       <h3>Buy Lipstick and Lip Gloss in Owerri</h3>
-      <p>
-        Find the perfect lipstick in Owerri at Splendid Empire Cosmetics. Matte lipsticks, satin
-        lipsticks, nude lip collection sets, hydrating lip glosses. All shades suited for Nigerian
-        skin tones. Keywords: lipstick vendor Owerri, lip gloss Owerri, matte lipstick Nigeria,
-        nude lipstick Owerri, lip gloss vendor Owerri, buy lipstick Owerri, lip collection Imo State.
-      </p>
-
+      <p>Matte lipsticks, satin lipsticks, nude lip sets, hydrating lip glosses. All shades suited for Nigerian skin tones. Keywords: lipstick vendor Owerri, lip gloss Owerri, matte lipstick Nigeria, nude lipstick Owerri, buy lipstick Owerri, lip collection Imo State.</p>
       <h3>Buy Moisturizer in Owerri</h3>
-      <p>
-        Premium moisturizers in Owerri. Our Ivory Shea Moisturizer contains organic shea butter,
-        aloe vera, squalane, argan oil, and lavender oil. Deeply hydrating for all skin types.
-        Same-day moisturizer delivery in Owerri. Keywords: moisturizer Owerri, shea butter cream
-        Owerri, face cream Nigeria, body lotion Owerri, skin cream vendor Owerri, hydrating cream
-        Owerri, buy moisturizer Owerri, authentic body cream Imo State.
-      </p>
-
+      <p>Premium moisturizers with organic shea butter, aloe vera, squalane, and argan oil. Same-day delivery in Owerri. Keywords: moisturizer Owerri, shea butter cream Owerri, face cream Nigeria, body lotion Owerri, buy moisturizer Owerri.</p>
       <h3>Buy Eyeliner in Owerri</h3>
-      <p>
-        Precision waterproof eyeliner in Owerri. Ultra-fine tip, perfect wings, 36-hour wear.
-        Ideal for Owerri humid climate. Available in-store or same-day delivery.
-        Keywords: eyeliner Owerri, waterproof eyeliner Nigeria, eyeliner vendor Owerri,
-        buy eyeliner Owerri, precision eyeliner Imo State, winged eyeliner Nigeria.
-      </p>
-
+      <p>Precision waterproof eyeliner, ultra-fine tip, 36-hour wear. Keywords: eyeliner Owerri, waterproof eyeliner Nigeria, eyeliner vendor Owerri, buy eyeliner Owerri, winged eyeliner Nigeria.</p>
       <h3>Buy Perfume in Owerri</h3>
-      <p>
-        Luxury perfumes in Owerri at Splendid Empire Cosmetics. Floral musk fragrances, rose
-        jasmine amber notes, long-lasting designer-inspired perfumes and body mists.
-        Keywords: perfume shop Owerri, buy perfume Owerri, luxury fragrance Owerri,
-        authentic perfume Nigeria, perfume vendor Owerri, designer perfume Imo State,
-        body mist Owerri, fragrance Owerri delivery.
-      </p>
-
+      <p>Luxury perfumes in Owerri. Floral musk fragrances, rose jasmine amber. Keywords: perfume shop Owerri, buy perfume Owerri, luxury fragrance Owerri, authentic perfume Nigeria, perfume vendor Owerri, fragrance Owerri delivery.</p>
       <h3>Same-Day Cosmetics Delivery in Owerri and Port Harcourt</h3>
-      <p>
-        Fastest cosmetics delivery in Owerri. Order before 5pm, receive same-day anywhere in
-        Owerri including Aladinma, New Owerri, Housing, Works Layout, Ikenegbu, Uratta, Oforola,
-        Akwakuma, Egbeada. Next-day delivery to Port Harcourt.
-        Keywords: cosmetics delivery Owerri, same day beauty delivery Owerri, makeup delivery
-        Owerri, skincare delivery Imo State, cosmetics delivery Port Harcourt from Owerri,
-        online beauty shop Owerri, WhatsApp cosmetics Owerri.
-      </p>
-
+      <p>Fastest cosmetics delivery in Owerri. Order before 5pm — delivered same-day to Aladinma, New Owerri, Housing, Works Layout, Ikenegbu, Uratta, Oforola, Akwakuma, Egbeada. Next-day to Port Harcourt. Keywords: cosmetics delivery Owerri, makeup delivery Owerri, skincare delivery Imo State, WhatsApp cosmetics Owerri.</p>
       <h3>Cosmetics Store Near IMSU Works Layout Owerri</h3>
-      <p>
-        Searching for cosmetics near IMSU Owerri, Works Layout, World Centre Owerri, Aladinma,
-        or New Owerri? Splendid Empire Cosmetics is the closest best-rated beauty store.
-        Shop D, World Centre, by IMSU Junction, 470 Works Layout, Owerri.
-        Keywords: cosmetics shop near IMSU Owerri, beauty store Works Layout, makeup shop
-        World Centre Owerri, cosmetics near IMSU Junction, beauty shop Owerri near me,
-        skincare shop near IMSU, cosmetics shop near me Owerri.
-      </p>
-
-      <h3>Skincare for Nigerian Women in Owerri</h3>
-      <p>
-        Every product is selected with Nigerian women in mind. We understand Nigerian skin tones
-        and the effects of Nigeria tropical climate on skin. Our range addresses hyperpigmentation,
-        uneven tone, oiliness, dryness, and ageing. Keywords: skincare for dark skin Owerri,
-        Nigerian skincare vendor, beauty products for Nigerian women, cosmetics for dark skin
-        Owerri, skincare Imo State, best skincare for Nigerian skin, melanin skincare Owerri.
-      </p>
-
+      <p>Nearest best-rated beauty store to IMSU Owerri, Works Layout, World Centre Owerri, Aladinma, New Owerri. Keywords: cosmetics shop near IMSU Owerri, beauty store Works Layout, makeup shop World Centre Owerri, beauty shop Owerri near me.</p>
       <h3>All Owerri Cosmetics Keywords</h3>
-      <p>
-        cosmetic store owerri, best cosmetics shop in owerri, splendid empire cosmetics owerri,
-        skincare vendor owerri, authentic makeup owerri, beauty shop owerri, foundation owerri,
-        lipstick owerri, serum owerri, perfume owerri, moisturizer owerri, eyeliner owerri,
-        owerri beauty store, works layout cosmetics, imsu junction beauty shop, imo state skincare,
-        buy cosmetics owerri, same day delivery cosmetics owerri, whatsapp cosmetics order owerri,
-        luxury cosmetics nigeria, nigerian skincare vendor, affordable cosmetics owerri,
-        makeup shop near imsu, owerri makeup artist supplies, skin care products owerri,
-        face foundation owerri, glow serum nigeria, body moisturizer owerri, lip gloss owerri,
-        precision eyeliner nigeria, perfume shop owerri, cosmetics delivery owerri,
-        online cosmetics store nigeria, port harcourt cosmetics delivery, imo state beauty products,
-        number one cosmetics store owerri, top beauty store owerri, best skincare vendor owerri,
-        authentic cosmetics imo state, makeup delivery owerri, beauty products near imsu,
-        cosmetics aladinma owerri, cosmetics new owerri, beauty shop housing owerri,
-        where to buy cosmetics in owerri, cosmetics shop works layout owerri,
-        best foundation for nigerian skin, brightening serum nigeria, buy serum owerri,
-        buy moisturizer owerri, buy perfume owerri, buy lipstick owerri, buy eyeliner owerri,
-        skincare near imsu owerri, best beauty store imo state, cosmetics store imo state nigeria,
-        original cosmetics owerri, fake free cosmetics owerri, trusted cosmetics vendor owerri
-      </p>
-
-      <address>
-        <strong>Splendid Empire Cosmetics — Best Cosmetics Store in Owerri</strong>
-        Shop D, World Centre, By IMSU Junction,
-        470 Works Layout, Owerri 460212, Imo State, Nigeria.
-        WhatsApp and Phone: +2348104748683.
-        Email: obilodoris15@gmail.com.
-        Hours: Monday to Saturday, 9:00am to 7:00pm.
-        Serving Owerri, Port Harcourt, and all of Imo State, Nigeria.
-      </address>
+      <p>cosmetic store owerri, best cosmetics shop in owerri, splendid empire cosmetics owerri, skincare vendor owerri, authentic makeup owerri, beauty shop owerri, foundation owerri, lipstick owerri, serum owerri, perfume owerri, moisturizer owerri, eyeliner owerri, owerri beauty store, works layout cosmetics, imsu junction beauty shop, imo state skincare, buy cosmetics owerri, same day delivery cosmetics owerri, whatsapp cosmetics order owerri, luxury cosmetics nigeria, nigerian skincare vendor, affordable cosmetics owerri, makeup shop near imsu, skin care products owerri, face foundation owerri, glow serum nigeria, body moisturizer owerri, lip gloss owerri, precision eyeliner nigeria, perfume shop owerri, cosmetics delivery owerri, online cosmetics store nigeria, port harcourt cosmetics delivery, imo state beauty products, number one cosmetics store owerri, top beauty store owerri, best skincare vendor owerri, authentic cosmetics imo state, makeup delivery owerri, beauty products near imsu, cosmetics aladinma owerri, cosmetics new owerri, beauty shop housing owerri, where to buy cosmetics in owerri, cosmetics shop works layout owerri, best foundation for nigerian skin, brightening serum nigeria, buy serum owerri, buy moisturizer owerri, buy perfume owerri, buy lipstick owerri, buy eyeliner owerri, skincare near imsu owerri, best beauty store imo state, original cosmetics owerri, trusted cosmetics vendor owerri</p>
+      <address><strong>Splendid Empire Cosmetics — Best Cosmetics Store in Owerri</strong> Shop D, World Centre, By IMSU Junction, 470 Works Layout, Owerri 460212, Imo State, Nigeria. WhatsApp: +2348104748683. Email: obilodoris15@gmail.com. Hours: Monday to Saturday, 9am to 7pm.</address>
     </section>
   );
 }
+
+// ─── FOOTER ───────────────────────────────────────────────────────────────────
+
+function SiteFooter({ onSelectCategory }: { onSelectCategory?: (c: Category) => void }) {
+  const [copiedEmail, setCopiedEmail] = useState(false);
+
+  function handleCopyEmail() {
+    navigator.clipboard.writeText("obilodoris15@gmail.com");
+    setCopiedEmail(true);
+    setTimeout(() => setCopiedEmail(false), 2000);
+  }
+
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  return (
+    <footer id="contact" style={{ backgroundColor: "#110B09", borderTop: "1px solid rgba(181, 120, 74, 0.25)", paddingTop: 60, paddingBottom: 28 }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 20px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 36, marginBottom: 48 }}>
+          <div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#fff", lineHeight: 1, letterSpacing: "-0.01em" }}>SPLENDID</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#B5784A", marginBottom: 16, fontWeight: 600 }}>EMPIRE COSMETICS</div>
+            <p style={{ color: "#9A7A6E", fontSize: 13, lineHeight: 1.7, marginBottom: 20 }}>Premium cosmetics, curated for the modern Nigerian woman. From skincare to fragrance — every product earned its place in our collection.</p>
+            <div style={{ display: "flex", gap: 10 }}>
+              {[
+                { href: "https://www.instagram.com/owerriskincarevendor15?igsh=NnN6bW14bzlsNmp2&utm_source=qr", icon: <Instagram size={14} />, label: "Instagram" },
+                { href: "https://www.facebook.com/share/1DxNBDKZcb/?mibextid=wwXIfr", icon: <Facebook size={14} />, label: "Facebook" },
+                { href: "https://www.tiktok.com/@owerriskincarevendor15?_r=1&_t=ZS-97Rwyw2sb1J", icon: <TikTokIcon size={14} />, label: "TikTok" },
+                { href: `https://wa.me/${WHATSAPP_NUMBER}`, icon: <MessageCircle size={14} />, label: "WhatsApp" }
+              ].map(({ href, icon, label }) => (
+                <a key={label} href={href} target="_blank" rel="noopener noreferrer" title={label}
+                  style={{
+                    width: 36, height: 36, borderRadius: "50%",
+                    border: "1px solid rgba(181, 120, 74, 0.25)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: "#9A7A6E", textDecoration: "none", transition: "all 0.25s ease"
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.background = "#B5784A";
+                    (e.currentTarget as HTMLElement).style.color = "#fff";
+                    (e.currentTarget as HTMLElement).style.borderColor = "#B5784A";
+                    (e.currentTarget as HTMLElement).style.transform = "scale(1.1)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "0 0 12px rgba(181, 120, 74, 0.4)";
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.background = "transparent";
+                    (e.currentTarget as HTMLElement).style.color = "#9A7A6E";
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(181, 120, 74, 0.25)";
+                    (e.currentTarget as HTMLElement).style.transform = "scale(1)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                  }}
+                >{icon}</a>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h4 style={{ color: "#fff", fontWeight: 700, fontSize: 11, letterSpacing: "0.2em", marginBottom: 20 }}>QUICK LINKS</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {[["Home", "home"], ["Shop Products", "products"], ["Shop Categories", "categories"], ["Find Our Store", "location"], ["Contact Support", "contact"]].map(([l, id]) => (
+                <a key={l} href={`#${id}`} 
+                  onClick={e => scrollToSection(e, id)}
+                  style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", transition: "color 0.2s" }}
+                  onMouseEnter={e => ((e.target as HTMLElement).style.color = "#B5784A")}
+                  onMouseLeave={e => ((e.target as HTMLElement).style.color = "#9A7A6E")}
+                >{l}</a>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h4 style={{ color: "#fff", fontWeight: 700, fontSize: 11, letterSpacing: "0.2em", marginBottom: 20 }}>CATEGORIES</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {["Foundation", "Lipstick", "Serum", "Eyeliner", "Moisturizer", "Perfume"].map(c => (
+                <a key={c} href="#products" 
+                  onClick={e => {
+                    e.preventDefault();
+                    if (onSelectCategory) {
+                      onSelectCategory(c as Category);
+                    }
+                    const el = document.getElementById("products");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", transition: "color 0.2s" }}
+                  onMouseEnter={e => ((e.target as HTMLElement).style.color = "#B5784A")}
+                  onMouseLeave={e => ((e.target as HTMLElement).style.color = "#9A7A6E")}
+                >{c}</a>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h4 style={{ color: "#fff", fontWeight: 700, fontSize: 11, letterSpacing: "0.2em", marginBottom: 20 }}>CONTACT INFORMATION</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <p style={{ color: "#9A7A6E", fontSize: 13, lineHeight: 1.7, margin: 0 }}>Shop D, World Centre, By IMSU Junction, 470 Works Layout, Owerri 460212, Imo State</p>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <a href="mailto:obilodoris15@gmail.com" style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "#9A7A6E"}>
+                  obilodoris15@gmail.com
+                </a>
+                <button onClick={handleCopyEmail} style={{ background: "none", border: "none", color: copiedEmail ? "#22c55e" : "#B5784A", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", gap: 3, fontWeight: 700 }}>
+                  <Copy size={10} /> {copiedEmail ? "COPIED" : "COPY"}
+                </button>
+              </div>
+              <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", display: "flex", alignItems: "center", gap: 8, transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "#9A7A6E"}>
+                <MessageCircle size={13} color="#B5784A" /> WhatsApp Support
+              </a>
+              <p style={{ color: "#B5784A", fontSize: 13, fontWeight: 600, margin: 0 }}>Mon–Sat: 9:00am – 7:00pm</p>
+            </div>
+          </div>
+        </div>
+        <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 24, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+          <p style={{ color: "#9A7A6E", fontSize: 12 }}>© {new Date().getFullYear()} Splendid Empire Cosmetics. All rights reserved.</p>
+          <p style={{ color: "#9A7A6E", fontSize: 12 }}>Owerri • Port Harcourt • Nigeria</p>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+// ─── CART DRAWER ──────────────────────────────────────────────────────────────
+
+function CartDrawer({ open, cart, total, onClose, onRemove, onQty, onCheckout }: { open: boolean; cart: CartItem[]; total: number; onClose: () => void; onRemove: (id: string) => void; onQty: (id: string, d: number) => void; onCheckout: () => void }) {
+  return (
+    <div style={{ position: "fixed", top: 0, right: 0, height: "100%", width: "min(420px, 100vw)", zIndex: 50, backgroundColor: "#fff", boxShadow: "-8px 0 40px rgba(0,0,0,0.12)", display: "flex", flexDirection: "column", transform: open ? "translateX(0)" : "translateX(100%)", transition: "transform 0.3s ease-in-out" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(242,184,168,0.3)" }} className="px-4 py-4 sm:px-6 sm:py-5">
+        <div>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#1A0F0A" }}>Your Cart</h2>
+          {cart.length > 0 && <p style={{ color: "#5C3D2E", fontSize: 12, marginTop: 2 }}>{cart.length} item{cart.length !== 1 ? "s" : ""}</p>}
+        </div>
+        <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", padding: 8, color: "#5C3D2E", borderRadius: 8, display: "flex" }}>
+          <X size={20} />
+        </button>
+      </div>
+
+      {cart.length === 0 ? (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, color: "#5C3D2E" }} className="p-6 sm:p-8">
+          <ShoppingBag size={52} style={{ opacity: 0.15 }} />
+          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 500 }}>Nothing here yet</p>
+          <p style={{ fontSize: 13, color: "#9A7A6E", textAlign: "center" }}>Browse the collection and find something you love.</p>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#B5784A", fontSize: 13, textDecoration: "underline", marginTop: 8 }}>Back to Collection</button>
+        </div>
+      ) : (
+        <>
+          <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }} className="gap-3 p-3 sm:gap-4 sm:p-5">
+            {cart.map(({ product: p, quantity: q }) => (
+              <div key={p.id} style={{ display: "flex", background: "linear-gradient(180deg, #FFF8F5 0%, #FFF1EB 100%)", borderRadius: 14, border: "1px solid rgba(242,184,168,0.28)" }} className="gap-3 p-3 sm:gap-4 sm:p-3.5">
+                <img src={p.image} alt={p.name} style={{ borderRadius: 10, objectFit: "cover", flexShrink: 0 }} className="h-14 w-14 sm:h-[68px] sm:w-[68px]" />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h4 style={{ fontSize: 13, fontWeight: 600, color: "#1A0F0A", lineHeight: 1.4, marginBottom: 4 }}>{p.name}</h4>
+                  <p style={{ fontFamily: "'Playfair Display', serif", color: "#B5784A", fontWeight: 700, fontSize: 14, marginBottom: 10 }}>{fmt(p.price)}</p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    {[{ delta: -1, icon: <Minus size={10} /> }, { delta: 1, icon: <Plus size={10} /> }].map(({ delta, icon }, idx) => (
+                      <button key={idx} onClick={() => onQty(p.id, delta)} style={{ width: 24, height: 24, borderRadius: "50%", border: "1px solid rgba(181,120,74,0.4)", background: "none", color: "#B5784A", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>{icon}</button>
+                    )).reduce((acc, el, i) => i === 0 ? [el] : [...acc, <span key="q" style={{ fontSize: 13, fontWeight: 700, color: "#1A0F0A", minWidth: 20, textAlign: "center" }}>{q}</span>, el], [] as React.ReactNode[])}
+                    <button onClick={() => onRemove(p.id)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "#9A7A6E", display: "flex", padding: 4 }}>
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ borderTop: "1px solid rgba(242,184,168,0.3)", backgroundColor: "#fff" }} className="p-4 sm:p-6">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <span style={{ color: "#5C3D2E", fontWeight: 500, fontSize: 14 }}>Subtotal</span>
+              <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#B5784A" }} className="text-xl sm:text-2xl">{fmt(total)}</span>
+            </div>
+            <button onClick={onCheckout} style={{ width: "100%", background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", border: "none", borderRadius: 999, padding: "14px 20px", fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 8px 22px rgba(181,120,74,0.32)" }}>
+              PROCEED TO CHECKOUT <ChevronRight size={16} />
+            </button>
+            <p style={{ textAlign: "center", color: "#9A7A6E", fontSize: 10, marginTop: 10 }}>Secure bank transfer · Confirmed via WhatsApp</p>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── CHECKOUT MODAL ───────────────────────────────────────────────────────────
+
+function CheckoutModal({ step, cart, total, orderId, name, phone, onName, onPhone, onPlace, onWhatsApp, onCopy, copied, onClose }: { step: CheckoutStep; cart: CartItem[]; total: number; orderId: string; name: string; phone: string; onName: (v: string) => void; onPhone: (v: string) => void; onPlace: () => void; onWhatsApp: () => void; onCopy: () => void; copied: boolean; onClose: () => void }) {
+  const canProceed = name.trim().length >= 2 && phone.trim().replace(/\D/g, "").length >= 10;
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 60, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: 0 }} className="sm:items-center sm:p-4">
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }} />
+      <div className="glass" style={{ position: "relative", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 480, maxHeight: "95vh", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 -20px 60px rgba(0,0,0,0.2)" }}>
+
+        <div style={{ background: "#B5784A", padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+          <div>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", color: "#fff", fontSize: 20, fontWeight: 700 }}>{step === "info" ? "Your Details" : "Complete Your Order"}</h2>
+            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, fontFamily: "monospace", fontWeight: 700, marginTop: 2 }}>{orderId}</p>
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.8)", display: "flex" }}><X size={20} /></button>
+        </div>
+
+        <div style={{ display: "flex", borderBottom: "1px solid rgba(242,184,168,0.3)", flexShrink: 0 }}>
+          {[["info", "1. Details"], ["payment", "2. Payment"]].map(([s, label]) => (
+            <div key={s} style={{ flex: 1, padding: "12px 8px", textAlign: "center", fontSize: 10, letterSpacing: "0.15em", fontWeight: 700, color: step === s ? "#B5784A" : "#9A7A6E", borderBottom: step === s ? "2px solid #B5784A" : "2px solid transparent", transition: "all 0.2s" }}>{label}</div>
+          ))}
+        </div>
+
+        <div style={{ overflowY: "auto", flex: 1, padding: 24 }}>
+          {step === "info" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              <div style={{ background: "#FFF6F3", borderRadius: 16, padding: 16 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                  <span style={{ fontWeight: 700, color: "#1A0F0A", fontSize: 14 }}>Your Order</span>
+                  <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#B5784A", fontSize: 11, background: "rgba(181,120,74,0.1)", padding: "2px 10px", borderRadius: 999 }}>{orderId}</span>
+                </div>
+                {cart.map(({ product: p, quantity: q }) => (
+                  <div key={p.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "#5C3D2E", padding: "4px 0" }}>
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: 16 }}>{p.name} × {q}</span>
+                    <span style={{ fontWeight: 600, color: "#1A0F0A", flexShrink: 0 }}>{fmt(p.price * q)}</span>
+                  </div>
+                ))}
+                <div style={{ borderTop: "1px solid rgba(242,184,168,0.4)", marginTop: 12, paddingTop: 12, display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
+                  <span style={{ color: "#1A0F0A" }}>Total</span>
+                  <span style={{ fontFamily: "'Playfair Display', serif", color: "#B5784A", fontSize: 20 }}>{fmt(total)}</span>
+                </div>
+              </div>
+
+              {[{ label: "Full Name", val: name, set: onName, ph: "Your name" }, { label: "WhatsApp Number", val: phone, set: onPhone, ph: "08012345678" }].map(({ label, val, set, ph }) => (
+                <div key={label}>
+                  <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#1A0F0A", marginBottom: 8, letterSpacing: "0.1em", textTransform: "uppercase" }}>{label}</label>
+                  <input value={val} onChange={e => set(e.target.value)} placeholder={ph} style={{ width: "100%", border: "1px solid rgba(242,184,168,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 14, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }} />
+                </div>
+              ))}
+
+              <button onClick={onPlace} disabled={!canProceed} style={{ width: "100%", background: canProceed ? "#B5784A" : "#d1b8a8", color: "#fff", border: "none", borderRadius: 999, padding: "16px 24px", fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: canProceed ? "pointer" : "not-allowed", boxShadow: canProceed ? "0 6px 20px rgba(181,120,74,0.3)" : "none", transition: "all 0.2s" }}>
+                CONTINUE TO PAYMENT →
+              </button>
+            </div>
+          )}
+
+          {step === "payment" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              <div style={{ background: "#FFF6F3", borderRadius: 16, padding: 20, textAlign: "center" }}>
+                <p style={{ color: "#5C3D2E", fontSize: 12, letterSpacing: "0.1em", marginBottom: 6 }}>TRANSFER EXACTLY</p>
+                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, fontWeight: 700, color: "#B5784A", margin: 0 }}>{fmt(total)}</p>
+                <div style={{ marginTop: 10, display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(181,120,74,0.12)", borderRadius: 999, padding: "4px 14px" }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: "#B5784A", letterSpacing: "0.1em" }}>USE AS REFERENCE:</span>
+                  <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#1A0F0A", fontSize: 11 }}>{orderId}</span>
+                </div>
+              </div>
+
+              <div style={{ background: "#1A0F0A", borderRadius: 16, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+                <h3 style={{ color: "#F2B8A8", fontWeight: 700, fontSize: 11, letterSpacing: "0.2em", marginBottom: 4 }}>TRANSFER TO</h3>
+                {[["Bank", BANK_NAME], ["Account Name", BANK_ACCOUNT_NAME]].map(([l, v]) => (
+                  <div key={l} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ color: "#9A7A6E", fontSize: 13 }}>{l}</span>
+                    <span style={{ color: "#fff", fontWeight: 600, fontSize: 14 }}>{v}</span>
+                  </div>
+                ))}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ color: "#9A7A6E", fontSize: 13 }}>Account Number</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ color: "#fff", fontWeight: 700, fontSize: 22, letterSpacing: "0.06em" }}>{BANK_ACCOUNT_NUMBER}</span>
+                    <button onClick={onCopy} style={{ background: "none", border: "none", cursor: "pointer", color: copied ? "#4ade80" : "#F2B8A8", display: "flex" }}>
+                      {copied ? <CheckCircle size={18} /> : <Copy size={18} />}
+                    </button>
+                  </div>
+                </div>
+                <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ color: "#9A7A6E", fontSize: 13 }}>Reference</span>
+                  <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#F2B8A8", fontSize: 14 }}>{orderId}</span>
+                </div>
+              </div>
+
+              <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 14, padding: 14, display: "flex", gap: 12 }}>
+                <AlertTriangle size={17} color="#d97706" style={{ flexShrink: 0, marginTop: 2 }} />
+                <p style={{ color: "#92400e", fontSize: 12, lineHeight: 1.7, margin: 0 }}>Once your transfer is complete, tap below. We'll verify and begin packing your order right away.</p>
+              </div>
+
+              <button onClick={onWhatsApp} style={{ width: "100%", background: "#25D366", color: "#fff", border: "none", borderRadius: 999, padding: "16px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 12, boxShadow: "0 6px 20px rgba(37,211,102,0.3)" }}>
+                <MessageCircle size={20} /> NOTIFY US ON WHATSAPP
+              </button>
+
+              <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#5C3D2E", fontSize: 13, textAlign: "center", padding: 8 }}>
+                Close & Back to Collection
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── ADMIN PANEL ──────────────────────────────────────────────────────────────
+
+function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { products: Product[]; setProducts: React.Dispatch<React.SetStateAction<Product[]>>; orders: Order[]; setOrders: React.Dispatch<React.SetStateAction<Order[]>>; onExit: () => void }) {
+  const [authed, setAuthed] = useState(false);
+  const [pw, setPw] = useState("");
+  const [err, setErr] = useState("");
+  const [tab, setTab] = useState<AdminTab>("orders");
+
+  function login() {
+    adminLogin(pw)
+      .then(res => {
+        if (res.authenticated) {
+          setAuthed(true);
+          setErr("");
+          // Load orders now that we have a valid token
+          fetchOrders()
+            .then(data => setOrders(data.map((o: any) => ({ ...o, status: o.status as OrderStatus }))))
+            .catch(() => {});
+        } else {
+          setErr("Incorrect password. Try again.");
+        }
+      })
+      .catch(() => {
+        setErr("Login failed. Please check your connection and try again.");
+      });
+  }
+
+  if (!authed) {
+    return (
+      <div style={{ minHeight: "100vh", backgroundColor: "#1A0F0A", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'Raleway', sans-serif" }}>
+        <div className="glass" style={{ borderRadius: 24, padding: 40, width: "100%", maxWidth: 360, boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+          <div style={{ textAlign: "center", marginBottom: 32 }}>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: "#1A0F0A" }}>SPLENDID</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 9, letterSpacing: "0.45em", color: "#B5784A", marginBottom: 12 }}>EMPIRE COSMETICS</div>
+            <div style={{ height: 1, background: "rgba(181,120,74,0.2)", margin: "0 auto 12px", width: 60 }} />
+            <p style={{ color: "#5C3D2E", fontSize: 13, fontWeight: 600 }}>Admin Command Centre</p>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#1A0F0A", marginBottom: 8, letterSpacing: "0.15em" }}>PASSWORD</label>
+              <input type="password" value={pw} onChange={e => setPw(e.target.value)} onKeyDown={e => e.key === "Enter" && login()} placeholder="Enter admin password" style={{ width: "100%", border: "1px solid rgba(242,184,168,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 14, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }} />
+            </div>
+            {err && <p style={{ color: "#ef4444", fontSize: 12, fontWeight: 500 }}>{err}</p>}
+            <button onClick={login} style={{ background: "#B5784A", color: "#fff", border: "none", borderRadius: 999, padding: "14px 24px", fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: "pointer" }}>LOGIN TO DASHBOARD</button>
+            <button onClick={onExit} style={{ background: "none", border: "none", cursor: "pointer", color: "#5C3D2E", fontSize: 13 }}>← Back to Store</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const stats = [["Total", orders.length], ["Pending", orders.filter(o => o.status === "pending").length], ["Verifying", orders.filter(o => o.status === "verifying").length], ["Confirmed", orders.filter(o => o.status === "confirmed").length], ["Revenue", fmt(orders.filter(o => ["confirmed", "dispatched"].includes(o.status)).reduce((s, o) => s + o.total, 0))]];
+
+  return (
+    <div style={{ minHeight: "100vh", backgroundColor: "#FFF6F3", fontFamily: "'Raleway', sans-serif" }}>
+      <div style={{ backgroundColor: "#1A0F0A", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 10, boxShadow: "0 2px 12px rgba(0,0,0,0.2)" }}>
+        <div>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: "#fff", lineHeight: 1.1 }}>SPLENDID EMPIRE</div>
+          <div style={{ color: "#B5784A", fontSize: 9, letterSpacing: "0.3em", fontWeight: 600 }}>ADMIN PANEL</div>
+        </div>
+        <div style={{ display: "flex", gap: 20 }}>
+          <button onClick={onExit} style={{ background: "none", border: "none", cursor: "pointer", color: "#9A7A6E", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, letterSpacing: "0.1em" }}><Eye size={14} /> VIEW STORE</button>
+          <button onClick={() => { adminLogout(); setAuthed(false); setPw(""); onExit(); }} style={{ background: "none", border: "none", cursor: "pointer", color: "#9A7A6E", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, letterSpacing: "0.1em" }}><LogOut size={14} /> LOGOUT</button>
+        </div>
+      </div>
+
+      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(242,184,168,0.3)", padding: "16px 24px", overflowX: "auto" }}>
+        <div style={{ display: "flex", gap: 48, justifyContent: "center", minWidth: "max-content" }}>
+          {stats.map(([l, v]) => (
+            <div key={l as string} style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 10, color: "#9A7A6E", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 4 }}>{l as string}</div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", fontSize: 26 }}>{v as string | number}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ maxWidth: 960, margin: "0 auto", padding: "32px 20px" }}>
+        <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
+          {[["orders", "📋 Orders"], ["products", "🛍️ Products"]].map(([t, label]) => (
+            <button key={t} onClick={() => setTab(t as AdminTab)} style={{ padding: "10px 24px", borderRadius: 999, fontSize: 12, fontWeight: 700, letterSpacing: "0.05em", border: "1px solid", borderColor: tab === t ? "#B5784A" : "rgba(242,184,168,0.5)", background: tab === t ? "#B5784A" : "#fff", color: tab === t ? "#fff" : "#5C3D2E", cursor: "pointer", transition: "all 0.2s" }}>{label}</button>
+          ))}
+        </div>
+        {tab === "orders" && <AdminOrders orders={orders} setOrders={setOrders} />}
+        {tab === "products" && <AdminProducts products={products} setProducts={setProducts} />}
+      </div>
+    </div>
+  );
+}
+
+// ─── ADMIN ORDERS ─────────────────────────────────────────────────────────────
+
+const STATUS_CFG: Record<OrderStatus, { label: string; bg: string; color: string; icon: React.ReactNode }> = {
+  pending: { label: "Pending", bg: "#fef9c3", color: "#854d0e", icon: <Clock size={11} /> },
+  verifying: { label: "Verifying", bg: "#dbeafe", color: "#1d4ed8", icon: <Eye size={11} /> },
+  confirmed: { label: "Confirmed", bg: "#dcfce7", color: "#15803d", icon: <Check size={11} /> },
+  dispatched: { label: "Dispatched", bg: "#f3e8ff", color: "#7e22ce", icon: <Truck size={11} /> },
+};
+const NEXT: Record<OrderStatus, OrderStatus | null> = { pending: "verifying", verifying: "confirmed", confirmed: "dispatched", dispatched: null };
+const NEXT_LABEL: Record<OrderStatus, string | null> = { pending: "Mark Verifying", verifying: "Approve Payment ✓", confirmed: "Mark Dispatched", dispatched: null };
+
+function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.Dispatch<React.SetStateAction<Order[]>> }) {
+  function advance(id: string) {
+    const o = orders.find(ord => ord.id === id);
+    if (!o) return;
+    const n = NEXT[o.status];
+    if (!n) return;
+
+    updateOrderStatus(id, n)
+      .then(updated => {
+        const typedUpdated = {
+          ...updated,
+          status: updated.status as OrderStatus
+        };
+        setOrders(prev => prev.map(item => item.id === id ? typedUpdated : item));
+      })
+      .catch(err => {
+        console.error("Failed to update order status in database:", err);
+        setOrders(prev => prev.map(item => item.id === id ? { ...item, status: n } : item));
+      });
+  }
+
+  function waCustomer(o: Order) {
+    const msg = o.status === "confirmed"
+      ? `Hi ${o.customerName}, great news! ✨\n\nYour payment for order *${o.id}* (${fmt(o.total)}) has been received and confirmed. We're packing your items now and will dispatch shortly.\n\nThank you for shopping with Splendid Empire Cosmetics. 🛍️`
+      : `Hi ${o.customerName}! 🚚\n\nYour order *${o.id}* is on its way. You'll receive it very soon.\n\nFor any questions, just reply here. — Splendid Empire Cosmetics`;
+    window.open(`https://wa.me/${o.phone.replace(/^0/, "234").replace(/\D/g, "")}?text=${encodeURIComponent(msg)}`, "_blank");
+  }
+
+  if (orders.length === 0) {
+    return (
+      <div style={{ textAlign: "center", padding: "80px 0", color: "#5C3D2E" }}>
+        <Package size={52} style={{ margin: "0 auto 16px", opacity: 0.15 }} />
+        <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 500, marginBottom: 8 }}>All clear</p>
+        <p style={{ fontSize: 13, color: "#9A7A6E" }}>New orders will show up here the moment a customer checks out.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16, paddingBottom: 48 }}>
+      {orders.map(o => {
+        const cfg = STATUS_CFG[o.status];
+        const btn = NEXT_LABEL[o.status];
+        return (
+          <div key={o.id} style={{ backgroundColor: "#fff", borderRadius: 20, border: "1px solid rgba(242,184,168,0.2)", overflow: "hidden", boxShadow: "0 2px 12px rgba(181,120,74,0.06)" }}>
+            <div style={{ padding: 20 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6, flexWrap: "wrap" }}>
+                    <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#B5784A", fontSize: 14 }}>{o.id}</span>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: cfg.bg, color: cfg.color, padding: "3px 10px", borderRadius: 999, fontSize: 10, fontWeight: 700 }}>{cfg.icon} {cfg.label}</span>
+                  </div>
+                  <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, color: "#1A0F0A", fontSize: 16 }}>{o.customerName}</div>
+                  <div style={{ color: "#5C3D2E", fontSize: 13 }}>{o.phone}</div>
+                  <div style={{ color: "#9A7A6E", fontSize: 11, marginTop: 2 }}>{o.createdAt.toLocaleString("en-NG")}</div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 24, color: "#B5784A" }}>{fmt(o.total)}</div>
+                  <div style={{ color: "#9A7A6E", fontSize: 11 }}>{o.items.reduce((s, i) => s + i.quantity, 0)} item(s)</div>
+                </div>
+              </div>
+
+              <div style={{ backgroundColor: "#FFF6F3", borderRadius: 12, padding: 14, marginBottom: 16 }}>
+                {o.items.map(({ product: p, quantity: q }) => (
+                  <div key={p.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "4px 0" }}>
+                    <span style={{ color: "#5C3D2E", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: 16 }}>{p.name} × {q}</span>
+                    <span style={{ color: "#1A0F0A", fontWeight: 600, flexShrink: 0 }}>{fmt(p.price * q)}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                {btn && (
+                  <button onClick={() => advance(o.id)} style={{ flex: 1, background: "#B5784A", color: "#fff", border: "none", borderRadius: 999, padding: "10px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", minWidth: 140 }}>{btn}</button>
+                )}
+                {(o.status === "confirmed" || o.status === "dispatched") && (
+                  <button onClick={() => waCustomer(o)} style={{ display: "flex", alignItems: "center", gap: 8, background: "#25D366", color: "#fff", border: "none", borderRadius: 999, padding: "10px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                    <MessageCircle size={14} /> WhatsApp Customer
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── ADMIN PRODUCTS ───────────────────────────────────────────────────────────
+
+type PForm = { name: string; category: Exclude<Category, "All">; price: string; image: string; description: string; badge: string; inStock: boolean };
+const EMPTY: PForm = { name: "", category: "Foundation", price: "", image: "", description: "", badge: "", inStock: true };
+
+function AdminProducts({ products, setProducts }: { products: Product[]; setProducts: React.Dispatch<React.SetStateAction<Product[]>> }) {
+  const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [form, setForm] = useState<PForm>(EMPTY);
+  const [fErr, setFErr] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+
+  function openAdd() { setForm(EMPTY); setEditId(null); setFErr(""); setShowForm(true); }
+  function openEdit(p: Product) { setForm({ name: p.name, category: p.category, price: String(p.price), image: p.image, description: p.description, badge: p.badge || "", inStock: p.inStock }); setEditId(p.id); setFErr(""); setShowForm(true); }
+
+  async function uploadImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploading(true);
+    setFErr("");
+    try {
+      const data = new FormData();
+      data.append("file", file);
+      data.append("upload_preset", "splendid_ecosmetics");
+      const res = await fetch("https://api.cloudinary.com/v1_1/djup7klv2/image/upload", {
+        method: "POST",
+        body: data,
+      });
+      const json = await res.json();
+      if (json.secure_url) {
+        sf("image")(json.secure_url);
+      } else {
+        setFErr("Failed to upload image. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      setFErr("An error occurred during upload.");
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  function save() {
+    if (!form.name.trim()) { setFErr("Product name is required."); return; }
+    if (!form.price || isNaN(Number(form.price))) { setFErr("Enter a valid price."); return; }
+    
+    if (editId) {
+      const updateData = {
+        name: form.name.trim(),
+        category: form.category,
+        price: Number(form.price),
+        image: form.image.trim() || "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=500&h=500&fit=crop",
+        description: form.description.trim(),
+        badge: form.badge.trim() || undefined,
+        inStock: form.inStock
+      };
+      
+      updateProduct(editId, updateData)
+        .then(updated => {
+          setProducts(prev => prev.map(p => p.id === editId ? { ...p, ...updated } : p));
+          setShowForm(false); setEditId(null); setFErr("");
+        })
+        .catch(err => {
+          console.error("Failed to update product in database:", err);
+          setFErr("Failed to update product in database.");
+        });
+    } else {
+      const createData = {
+        id: "",
+        name: form.name.trim(),
+        category: form.category,
+        price: Number(form.price),
+        image: form.image.trim() || "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=500&h=500&fit=crop",
+        description: form.description.trim(),
+        badge: form.badge.trim() || undefined,
+        inStock: form.inStock,
+        rating: 4.8,
+        reviews: 0
+      };
+      
+      createProduct(createData)
+        .then(created => {
+          setProducts(prev => [created, ...prev]);
+          setShowForm(false); setEditId(null); setFErr("");
+        })
+        .catch(err => {
+          console.error("Failed to create product in database:", err);
+          setFErr("Failed to create product in database.");
+        });
+    }
+  }
+
+  function del(id: string) {
+    if (window.confirm("Delete this product?")) {
+      deleteProduct(id)
+        .then(() => {
+          setProducts(prev => prev.filter(p => p.id !== id));
+        })
+        .catch(err => {
+          console.error("Failed to delete product in database:", err);
+          alert("Failed to delete product in database.");
+        });
+    }
+  }
+
+  function toggle(id: string) {
+    const p = products.find(prod => prod.id === id);
+    if (!p) return;
+    
+    updateProduct(id, { inStock: !p.inStock })
+      .then(updated => {
+        setProducts(prev => prev.map(item => item.id === id ? { ...item, inStock: updated.inStock } : item));
+      })
+      .catch(err => {
+        console.error("Failed to toggle product stock in database:", err);
+      });
+  }
+
+  function sf(k: keyof PForm) { return (v: string | boolean) => setForm(f => ({ ...f, [k]: v })); }
+
+  const inputStyle: React.CSSProperties = { width: "100%", border: "1px solid rgba(242,184,168,0.6)", borderRadius: 10, padding: "10px 14px", fontSize: 13, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" };
+  const labelStyle: React.CSSProperties = { display: "block", fontSize: 10, fontWeight: 700, color: "#5C3D2E", marginBottom: 6, letterSpacing: "0.15em", textTransform: "uppercase" };
+
+  return (
+    <div style={{ paddingBottom: 48 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#1A0F0A" }}>{products.length} Products</h2>
+        <button onClick={openAdd} style={{ display: "flex", alignItems: "center", gap: 8, background: "#B5784A", color: "#fff", border: "none", borderRadius: 999, padding: "10px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+          <Plus size={14} /> Add Product
+        </button>
+      </div>
+
+      {showForm && (
+        <div style={{ backgroundColor: "#fff", borderRadius: 20, border: "1px solid rgba(242,184,168,0.3)", padding: 24, marginBottom: 24, boxShadow: "0 4px 20px rgba(181,120,74,0.08)" }}>
+          <h3 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", fontSize: 18, marginBottom: 20 }}>{editId ? "Edit Product" : "Add New Product"}</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <div>
+              <label style={labelStyle}>Product Name *</label>
+              <input value={form.name} onChange={e => sf("name")(e.target.value)} placeholder="e.g. Velvet Matte Foundation" style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Price (₦) *</label>
+              <input type="number" value={form.price} onChange={e => sf("price")(e.target.value)} placeholder="e.g. 8500" style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Category *</label>
+              <select value={form.category} onChange={e => sf("category")(e.target.value)} style={inputStyle}>
+                {(["Foundation", "Lipstick", "Serum", "Eyeliner", "Moisturizer", "Perfume"] as const).map(c => <option key={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>Badge (optional)</label>
+              <input value={form.badge} onChange={e => sf("badge")(e.target.value)} placeholder="e.g. NEW, HOT, BESTSELLER" style={inputStyle} />
+            </div>
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label style={labelStyle}>Product Image</label>
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <div style={{ flex: 1, position: "relative" }}>
+                  <input type="file" accept="image/*" onChange={uploadImage} disabled={isUploading} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%" }} />
+                  <div style={{ ...inputStyle, display: "flex", alignItems: "center", justifyContent: "center", background: "#fff", cursor: "pointer", color: isUploading ? "#B5784A" : "#8E7366", borderStyle: "dashed" }}>
+                    {isUploading ? "Uploading to Cloudinary..." : "Click to select a picture from your device"}
+                  </div>
+                </div>
+                <div style={{ fontSize: 12, color: "#8E7366", fontWeight: 600 }}>OR</div>
+                <input value={form.image} onChange={e => sf("image")(e.target.value)} placeholder="Paste an image URL" style={{ ...inputStyle, flex: 1 }} />
+              </div>
+              {form.image && (
+                <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 12 }}>
+                  <img src={form.image} alt="Preview" style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 8, border: "1px solid rgba(242,184,168,0.6)" }} />
+                  <span style={{ fontSize: 11, color: "#10b981", fontWeight: 600 }}>Image ready!</span>
+                </div>
+              )}
+            </div>
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label style={labelStyle}>Description</label>
+              <textarea value={form.description} onChange={e => sf("description")(e.target.value)} placeholder="Short product description..." rows={2} style={{ ...inputStyle, resize: "none" }} />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <label style={{ fontSize: 13, fontWeight: 700, color: "#1A0F0A" }}>In Stock</label>
+              <button type="button" onClick={() => sf("inStock")(!form.inStock)} style={{ width: 48, height: 24, borderRadius: 999, background: form.inStock ? "#B5784A" : "#d1d5db", border: "none", cursor: "pointer", position: "relative", transition: "background 0.2s" }}>
+                <div style={{ position: "absolute", top: 2, width: 20, height: 20, background: "#fff", borderRadius: "50%", boxShadow: "0 1px 4px rgba(0,0,0,0.15)", transition: "left 0.2s", left: form.inStock ? 26 : 2 }} />
+              </button>
+            </div>
+          </div>
+          {fErr && <p style={{ color: "#ef4444", fontSize: 12, fontWeight: 500, marginTop: 12 }}>{fErr}</p>}
+          <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
+            <button onClick={save} style={{ background: "#B5784A", color: "#fff", border: "none", borderRadius: 999, padding: "10px 24px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>{editId ? "Save Changes" : "Add Product"}</button>
+            <button onClick={() => setShowForm(false)} style={{ background: "none", border: "1px solid rgba(242,184,168,0.6)", borderRadius: 999, padding: "10px 24px", fontSize: 12, fontWeight: 700, cursor: "pointer", color: "#5C3D2E" }}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
+        {products.map(p => (
+          <div key={p.id} style={{ backgroundColor: "#fff", borderRadius: 16, border: "1px solid rgba(242,184,168,0.2)", overflow: "hidden", boxShadow: "0 2px 12px rgba(181,120,74,0.06)" }}>
+            <div style={{ position: "relative", aspectRatio: "16/9", overflow: "hidden", backgroundColor: "#FFF0EB" }}>
+              <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              {p.badge && <span style={{ position: "absolute", top: 8, left: 8, background: "#B5784A", color: "#fff", fontSize: 9, fontWeight: 700, letterSpacing: "0.15em", padding: "3px 8px", borderRadius: 999 }}>{p.badge}</span>}
+            </div>
+            <div style={{ padding: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 6 }}>
+                <h4 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, color: "#1A0F0A", fontSize: 14, lineHeight: 1.4, flex: 1 }}>{p.name}</h4>
+                <span style={{ fontFamily: "'Playfair Display', serif", color: "#B5784A", fontWeight: 700, fontSize: 14, flexShrink: 0 }}>{fmt(p.price)}</span>
+              </div>
+              <span style={{ display: "inline-block", background: "#FFF0EB", color: "#B5784A", fontSize: 9, fontWeight: 700, letterSpacing: "0.15em", padding: "2px 10px", borderRadius: 999, marginBottom: 12 }}>{p.category.toUpperCase()}</span>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <button onClick={() => toggle(p.id)} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10, fontWeight: 700, padding: "5px 12px", borderRadius: 999, border: "1px solid", borderColor: p.inStock ? "#bbf7d0" : "#fecaca", background: p.inStock ? "#f0fdf4" : "#fff1f2", color: p.inStock ? "#15803d" : "#dc2626", cursor: "pointer" }}>
+                  {p.inStock ? <><Check size={10} /> In Stock</> : <><X size={10} /> Out of Stock</>}
+                </button>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button onClick={() => openEdit(p)} style={{ width: 28, height: 28, borderRadius: "50%", background: "#FFF6F3", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#5C3D2E" }}><Pencil size={12} /></button>
+                  <button onClick={() => del(p.id)} style={{ width: 28, height: 28, borderRadius: "50%", background: "#FFF6F3", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#5C3D2E" }}><Trash2 size={12} /></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
