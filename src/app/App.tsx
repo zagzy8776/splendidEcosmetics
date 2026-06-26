@@ -172,7 +172,7 @@ export default function App() {
 
   function sendWhatsApp() {
     const lines = cart.map(i => `• ${i.product.name} x${i.quantity} — ${fmt(i.product.price * i.quantity)}`).join("\n");
-    const msg = `Hi! I have made a bank transfer of *${fmt(cartTotal)}* for my order *${orderId}*.\n\nItems ordered:\n${lines}\n\nMy name: *${customerName}*\nPhone: *${customerPhone}*\n\nKindly confirm my payment. Thank you!`;
+    const msg = `Hello, Splendid Empire! 👋\n\nI've completed a bank transfer of *${fmt(cartTotal)}* for order *${orderId}*.\n\n*Items:*\n${lines}\n\n*Name:* ${customerName}\n*Phone:* ${customerPhone}\n\nPlease confirm receipt when convenient. Thank you!`;
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
     setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: "verifying" } : o));
   }
@@ -425,7 +425,7 @@ function BeautyQuizModal({ products, onClose, onAdd }: BeautyQuizModalProps) {
     {
       key: "skinType",
       title: "What is your skin type?",
-      subtitle: "This helps us select formulas that hydrate or control oil.",
+      subtitle: "Helps us match the right formula to your skin.",
       options: [
         { label: "Dry & Flaky", desc: "Feels tight, needs intensive hydration." },
         { label: "Oily & Shiny", desc: "Excess sebum, prone to shine, needs matte formulas." },
@@ -436,7 +436,7 @@ function BeautyQuizModal({ products, onClose, onAdd }: BeautyQuizModalProps) {
     {
       key: "coverage",
       title: "What level of coverage do you prefer?",
-      subtitle: "From a sheer tint to full camera-ready cover.",
+      subtitle: "From barely-there to full cover.",
       options: [
         { label: "Sheer & Natural", desc: "Lightweight, lets your natural skin shine through." },
         { label: "Medium & Buildable", desc: "Covers blemishes, feels natural." },
@@ -446,7 +446,7 @@ function BeautyQuizModal({ products, onClose, onAdd }: BeautyQuizModalProps) {
     {
       key: "undertone",
       title: "What is your skin undertone?",
-      subtitle: "This helps us pick lip and foundation shades.",
+      subtitle: "Helps us find shades that complement your complexion.",
       options: [
         { label: "Cool (Pinkish/Rosy)", desc: "Veins look blue/purple; silver jewelry looks best." },
         { label: "Warm (Golden/Yellow)", desc: "Veins look green; gold jewelry looks best." },
@@ -507,10 +507,10 @@ function BeautyQuizModal({ products, onClose, onAdd }: BeautyQuizModalProps) {
         {step === 0 && (
           <div style={{ textAlign: "center" }} className="animate-slide-up">
             <Sparkles size={40} color="#B5784A" style={{ margin: "0 auto 16px" }} />
-            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#1A0F0A", marginBottom: 8 }}>Find Your Perfect Beauty Match</h3>
-            <p style={{ color: "#5C3D2E", fontSize: 13, lineHeight: 1.6, marginBottom: 24 }}>Take our 1-minute skincare & shade quiz to receive a customized routine curated especially for your unique skin tone and skin type.</p>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#1A0F0A", marginBottom: 8 }}>Your Personalised Beauty Edit</h3>
+            <p style={{ color: "#5C3D2E", fontSize: 13, lineHeight: 1.6, marginBottom: 24 }}>Answer three quick questions and we'll recommend products matched to your skin type, tone, and finish preference.</p>
             <button onClick={() => setStep(1)} style={{ background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", border: "none", padding: "14px 28px", borderRadius: 12, fontWeight: 700, fontSize: 11, letterSpacing: "0.15em", cursor: "pointer", boxShadow: "0 10px 24px rgba(181,120,74,0.2)" }}>
-              START CONSULTATION
+              BEGIN MY EDIT
             </button>
           </div>
         )}
@@ -695,7 +695,7 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
     <>
       <header className="glass" style={navStyle}>
         <div style={{ backgroundColor: "#B5784A", color: "#fff", textAlign: "center", padding: "5px 12px", fontSize: 10, letterSpacing: "0.15em", fontWeight: 700 }} className="hidden sm:block">
-          FREE DELIVERY IN OWERRI ON ORDERS ABOVE ₦15,000 &nbsp;·&nbsp; WHATSAPP TO ORDER NOW
+          FREE DELIVERY IN OWERRI ON ORDERS ABOVE ₦15,000 &nbsp;·&nbsp; ORDER VIA WHATSAPP IN MINUTES
         </div>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div onClick={handleSecretClick} style={{ lineHeight: 1.1, flexShrink: 0, cursor: "pointer", userSelect: "none", WebkitUserSelect: "none" }} title="Tap 3 times fast to enter Admin Panel">
@@ -878,7 +878,7 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
           flexDirection: "column",
           gap: 8,
         }}>
-          <div style={{ color: "#1A0F0A", fontWeight: 700, fontSize: 10, letterSpacing: "0.1em" }}>CUSTOMER ASSISTANCE</div>
+          <div style={{ color: "#1A0F0A", fontWeight: 700, fontSize: 10, letterSpacing: "0.1em" }}>NEED HELP\?</div>
           <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: "#B5784A", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
             <MessageCircle size={13} /> WHATSAPP CHAT
           </a>
@@ -915,16 +915,16 @@ function HeroSection() {
 
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.58)", border: "1px solid rgba(181,120,74,0.25)", borderRadius: 999, padding: "6px 14px", marginBottom: 0, flexWrap: "wrap", justifyContent: "center", boxShadow: "0 10px 30px rgba(181,120,74,0.12)", backdropFilter: "blur(10px)" }}>
             <Sparkles size={12} color="#B5784A" />
-            <span style={{ color: "#B5784A", fontSize: 9, letterSpacing: "0.2em", fontWeight: 700 }}>OWERRI BEAUTY LUXE</span>
+            <span style={{ color: "#B5784A", fontSize: 9, letterSpacing: "0.2em", fontWeight: 700 }}>OWERRI'S LUXURY BEAUTY DESTINATION</span>
           </div>
 
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", lineHeight: 1.05, marginBottom: 0, fontSize: "clamp(34px, 9vw, 62px)" }}>
-            Your Beauty,<br />
-            <span style={{ color: "#B5784A", fontStyle: "italic" }}>Elevated.</span>
+            Luxury Beauty,<br />
+            <span style={{ color: "#B5784A", fontStyle: "italic" }}>Delivered.</span>
           </h1>
 
           <p style={{ color: "#5C3D2E", fontSize: 14, lineHeight: 1.65, marginBottom: 0, maxWidth: 500 }} className="mx-auto md:mx-0 sm:text-base">
-            Premium cosmetics, fast delivery, and easy WhatsApp ordering in Owerri.
+            Authentic cosmetics. Same-day delivery in Owerri. Order in minutes via WhatsApp.
           </p>
 
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }} className="w-full flex-col justify-center md:justify-start sm:w-auto sm:flex-row">
@@ -937,7 +937,7 @@ function HeroSection() {
           </div>
 
           <div style={{ display: "flex", gap: 18, paddingTop: 20, borderTop: "1px solid rgba(181,120,74,0.2)", flexWrap: "wrap" }} className="justify-center md:justify-start">
-            {[["500+", "Products"], ["1,200+", "Happy Clients"], ["5★", "Google Rating"]].map(([v, l]) => (
+            {[["500+", "Products"], ["1,200+", "Satisfied Clients"], ["5★", "Google Rating"]].map(([v, l]) => (
               <div key={l} style={{ minWidth: 80 }}>
                 <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#B5784A" }}>{v}</div>
                 <div style={{ fontSize: 9, color: "#5C3D2E", letterSpacing: "0.12em", marginTop: 2 }}>{l}</div>
@@ -975,7 +975,7 @@ function CategorySection({ active, onSelect }: { active: Category; onSelect: (c:
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: "#1A0F0A", marginBottom: 8 }}>Shop By Category</h2>
-          <p style={{ color: "#5C3D2E", fontSize: 13, letterSpacing: "0.05em" }}>Find your perfect beauty essential</p>
+          <p style={{ color: "#5C3D2E", fontSize: 13, letterSpacing: "0.05em" }}>Find your signature look</p>
         </div>
         <div 
           className="flex gap-4 sm:gap-6 overflow-x-auto pb-2 no-scrollbar flex-nowrap sm:flex-wrap justify-start sm:justify-center w-full px-4 sm:px-0 scroll-smooth"
@@ -1034,7 +1034,7 @@ function ProductsSection({ products, active, onFilter, onAdd, onQuickView }: { p
     <section id="products" style={{ background: "linear-gradient(180deg, #FFF6F3 0%, #FFFDFC 100%)" }} className="py-10 sm:py-14">
       <div style={{ maxWidth: 1200, margin: "0 auto" }} className="px-3 sm:px-5 lg:px-6">
         <div style={{ textAlign: "center", marginBottom: 28 }}>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: "#1A0F0A", marginBottom: 6 }}>Our Products</h2>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: "#1A0F0A", marginBottom: 6 }}>Our Collection</h2>
           <p style={{ color: "#5C3D2E", fontSize: 12 }}>Beauty picks you’ll love</p>
         </div>
 
@@ -1049,7 +1049,7 @@ function ProductsSection({ products, active, onFilter, onAdd, onQuickView }: { p
         {products.length === 0 ? (
           <div style={{ textAlign: "center", padding: "60px 0", color: "#5C3D2E" }}>
             <Package size={40} style={{ margin: "0 auto 12px", opacity: 0.2 }} />
-            <p style={{ fontSize: 13 }}>No products in this category right now.</p>
+            <p style={{ fontSize: 13 }}>Nothing here just yet — check back soon.</p>
           </div>
         ) : (
           <>
@@ -1196,15 +1196,15 @@ function WhyUsSection() {
     <section style={{ padding: "60px 0", backgroundColor: "#1A0F0A" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
         <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: "#fff", marginBottom: 8 }}>Why Choose Us</h2>
-          <p style={{ color: "#9A7A6E", fontSize: 13 }}>The Splendid Empire difference</p>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: "#fff", marginBottom: 8 }}>The Splendid Difference</h2>
+          <p style={{ color: "#9A7A6E", fontSize: 13 }}>Why discerning clients choose us</p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 32 }}>
           {[
-            { icon: <Shield size={30} />, title: "100% Authentic", desc: "All products sourced directly from certified distributors. No fakes, ever." },
-            { icon: <Truck size={30} />, title: "Fast Delivery", desc: "Same-day in Owerri. Next-day delivery across Port Harcourt." },
-            { icon: <MessageCircle size={30} />, title: "WhatsApp Support", desc: "Chat with us anytime. We respond within minutes." },
-            { icon: <Star size={30} />, title: "Premium Quality", desc: "The world's leading beauty brands, curated for you." },
+            { icon: <Shield size={30} />, title: "Certified Authentic", desc: "Every item sourced directly from authorised distributors. Zero compromises on quality." },
+            { icon: <Truck size={30} />, title: "Swift Delivery", desc: "Same-day within Owerri. Next-day to Port Harcourt." },
+            { icon: <MessageCircle size={30} />, title: "WhatsApp Support", desc: "Direct line to our team. We respond within minutes, every time." },
+            { icon: <Star size={30} />, title: "Premium Quality", desc: "Global brands curated specifically for Nigerian skin tones and climate." },
           ].map(({ icon, title, desc }) => (
             <div key={title} style={{ textAlign: "center" }}>
               <div style={{ color: "#F2B8A8", marginBottom: 16, display: "flex", justifyContent: "center" }}>{icon}</div>
@@ -1222,9 +1222,9 @@ function WhyUsSection() {
 
 function TestimonialsSection() {
   const reviews = [
-    { name: "Chioma Adeola", loc: "Owerri", text: "The foundation I ordered was a perfect shade match for my skin! Delivery was same day. This is now my go-to beauty shop in Owerri.", stars: 5 },
-    { name: "Blessing Okafor", loc: "Port Harcourt", text: "The 24K glow serum completely transformed my skin. Authentic products at the right price. I've already referred 5 friends!", stars: 5 },
-    { name: "Adaeze Nwosu", loc: "Owerri", text: "Super professional experience. The WhatsApp payment confirmation was so smooth — felt like shopping from a real luxury online store!", stars: 5 },
+    { name: "Chioma Adeola", loc: "Owerri", text: "Perfect shade match, delivered the same day. I honestly expected to wait — Splendid Empire proved me wrong.", stars: 5 },
+    { name: "Blessing Okafor", loc: "Port Harcourt", text: "My skin has never looked better. The serum is genuinely transformative — and I know it's authentic because I can see the difference.", stars: 5 },
+    { name: "Adaeze Nwosu", loc: "Owerri", text: "The whole experience — browsing, ordering, paying — felt effortless. This is what online shopping in Nigeria should feel like.", stars: 5 },
   ];
 
   return (
@@ -1232,7 +1232,7 @@ function TestimonialsSection() {
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
         <div style={{ textAlign: "center", marginBottom: 48 }}>
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: "#1A0F0A", marginBottom: 8 }}>What Our Clients Say</h2>
-          <p style={{ color: "#5C3D2E", fontSize: 13 }}>Real words from real queens 👑</p>
+          <p style={{ color: "#5C3D2E", fontSize: 13 }}>Real reviews from real clients</p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 24 }}>
           {reviews.map(({ name, loc, text, stars }) => (
@@ -1279,8 +1279,8 @@ function LocationSection() {
       <div style={{ maxWidth: 1200, margin: "0 auto" }} className="px-4 sm:px-6">
         <div style={{ borderRadius: 24, overflow: "hidden", display: "grid", boxShadow: "0 24px 70px rgba(26,15,10,0.16)", border: "1px solid rgba(242,184,168,0.28)" }} className="grid-cols-1 md:grid-cols-2">
           <div style={{ background: "radial-gradient(circle at 18% 15%, rgba(181,120,74,0.34) 0, transparent 28%), linear-gradient(145deg, #1A0F0A 0%, #2A160E 100%)", display: "flex", flexDirection: "column", justifyContent: "center" }} className="p-6 sm:p-8 lg:p-10">
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: "#fff", marginBottom: 6 }}>Visit Our Store</h2>
-            <p style={{ color: "#F2B8A8", fontSize: 13, marginBottom: 28, letterSpacing: "0.05em" }}>Luxury beauty, close to you</p>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: "#fff", marginBottom: 6 }}>Find Us</h2>
+            <p style={{ color: "#F2B8A8", fontSize: 13, marginBottom: 28, letterSpacing: "0.05em" }}>Come see us in Owerri</p>
             
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
@@ -1305,7 +1305,7 @@ function LocationSection() {
                 <div>
                   <div style={{ color: "#fff", fontWeight: 600, fontSize: 12, marginBottom: 2 }}>WhatsApp Us</div>
                   <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" style={{ color: "#9A7A6E", fontSize: 11, textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "#9A7A6E"}>
-                    Click to chat now
+                    Message us on WhatsApp
                   </a>
                 </div>
               </div>
@@ -1388,7 +1388,7 @@ function SiteFooter({ onSelectCategory }: { onSelectCategory?: (c: Category) => 
           <div>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#fff", lineHeight: 1, letterSpacing: "-0.01em" }}>SPLENDID</div>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#B5784A", marginBottom: 16, fontWeight: 600 }}>EMPIRE COSMETICS</div>
-            <p style={{ color: "#9A7A6E", fontSize: 13, lineHeight: 1.7, marginBottom: 20 }}>Owerri's premier luxury beauty destination. Discover curated skincare, foundation, and fragrance lines designed to elevate your unique glow.</p>
+            <p style={{ color: "#9A7A6E", fontSize: 13, lineHeight: 1.7, marginBottom: 20 }}>Premium cosmetics, curated for the modern Nigerian woman. From skincare to fragrance — every product earned its place in our collection.</p>
             <div style={{ display: "flex", gap: 10 }}>
               {[
                 { href: "https://www.instagram.com/owerriskincarevendor15?igsh=NnN6bW14bzlsNmp2&utm_source=qr", icon: <Instagram size={14} />, label: "Instagram" },
@@ -1500,9 +1500,9 @@ function CartDrawer({ open, cart, total, onClose, onRemove, onQty, onCheckout }:
       {cart.length === 0 ? (
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, color: "#5C3D2E" }} className="p-6 sm:p-8">
           <ShoppingBag size={52} style={{ opacity: 0.15 }} />
-          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 500 }}>Your cart is empty</p>
-          <p style={{ fontSize: 13, color: "#9A7A6E", textAlign: "center" }}>Add some luxury to your life!</p>
-          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#B5784A", fontSize: 13, textDecoration: "underline", marginTop: 8 }}>Continue Shopping</button>
+          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 500 }}>Nothing here yet</p>
+          <p style={{ fontSize: 13, color: "#9A7A6E", textAlign: "center" }}>Browse the collection and find something you love.</p>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#B5784A", fontSize: 13, textDecoration: "underline", marginTop: 8 }}>Back to Collection</button>
         </div>
       ) : (
         <>
@@ -1553,14 +1553,14 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, onName, onPhon
 
         <div style={{ background: "#B5784A", padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", color: "#fff", fontSize: 20, fontWeight: 700 }}>{step === "info" ? "Your Details" : "Complete Payment"}</h2>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", color: "#fff", fontSize: 20, fontWeight: 700 }}>{step === "info" ? "Your Details" : "Complete Your Order"}</h2>
             <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, fontFamily: "monospace", fontWeight: 700, marginTop: 2 }}>{orderId}</p>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.8)", display: "flex" }}><X size={20} /></button>
         </div>
 
         <div style={{ display: "flex", borderBottom: "1px solid rgba(242,184,168,0.3)", flexShrink: 0 }}>
-          {[["info", "1. Your Details"], ["payment", "2. Pay & Confirm"]].map(([s, label]) => (
+          {[["info", "1. Details"], ["payment", "2. Payment"]].map(([s, label]) => (
             <div key={s} style={{ flex: 1, padding: "12px 8px", textAlign: "center", fontSize: 10, letterSpacing: "0.15em", fontWeight: 700, color: step === s ? "#B5784A" : "#9A7A6E", borderBottom: step === s ? "2px solid #B5784A" : "2px solid transparent", transition: "all 0.2s" }}>{label}</div>
           ))}
         </div>
@@ -1570,7 +1570,7 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, onName, onPhon
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <div style={{ background: "#FFF6F3", borderRadius: 16, padding: 16 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                  <span style={{ fontWeight: 700, color: "#1A0F0A", fontSize: 14 }}>Order Summary</span>
+                  <span style={{ fontWeight: 700, color: "#1A0F0A", fontSize: 14 }}>Your Order</span>
                   <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#B5784A", fontSize: 11, background: "rgba(181,120,74,0.1)", padding: "2px 10px", borderRadius: 999 }}>{orderId}</span>
                 </div>
                 {cart.map(({ product: p, quantity: q }) => (
@@ -1585,7 +1585,7 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, onName, onPhon
                 </div>
               </div>
 
-              {[{ label: "Full Name *", val: name, set: onName, ph: "Enter your full name" }, { label: "WhatsApp / Phone *", val: phone, set: onPhone, ph: "e.g. 08012345678" }].map(({ label, val, set, ph }) => (
+              {[{ label: "Full Name", val: name, set: onName, ph: "Your name" }, { label: "WhatsApp Number", val: phone, set: onPhone, ph: "08012345678" }].map(({ label, val, set, ph }) => (
                 <div key={label}>
                   <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#1A0F0A", marginBottom: 8, letterSpacing: "0.1em", textTransform: "uppercase" }}>{label}</label>
                   <input value={val} onChange={e => set(e.target.value)} placeholder={ph} style={{ width: "100%", border: "1px solid rgba(242,184,168,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 14, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }} />
@@ -1593,7 +1593,7 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, onName, onPhon
               ))}
 
               <button onClick={onPlace} disabled={!canProceed} style={{ width: "100%", background: canProceed ? "#B5784A" : "#d1b8a8", color: "#fff", border: "none", borderRadius: 999, padding: "16px 24px", fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: canProceed ? "pointer" : "not-allowed", boxShadow: canProceed ? "0 6px 20px rgba(181,120,74,0.3)" : "none", transition: "all 0.2s" }}>
-                PROCEED TO PAYMENT →
+                CONTINUE TO PAYMENT →
               </button>
             </div>
           )}
@@ -1601,16 +1601,16 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, onName, onPhon
           {step === "payment" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <div style={{ background: "#FFF6F3", borderRadius: 16, padding: 20, textAlign: "center" }}>
-                <p style={{ color: "#5C3D2E", fontSize: 12, letterSpacing: "0.1em", marginBottom: 6 }}>AMOUNT TO TRANSFER</p>
+                <p style={{ color: "#5C3D2E", fontSize: 12, letterSpacing: "0.1em", marginBottom: 6 }}>TRANSFER EXACTLY</p>
                 <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, fontWeight: 700, color: "#B5784A", margin: 0 }}>{fmt(total)}</p>
                 <div style={{ marginTop: 10, display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(181,120,74,0.12)", borderRadius: 999, padding: "4px 14px" }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, color: "#B5784A", letterSpacing: "0.1em" }}>NARRATION / REFERENCE:</span>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: "#B5784A", letterSpacing: "0.1em" }}>USE AS REFERENCE:</span>
                   <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#1A0F0A", fontSize: 11 }}>{orderId}</span>
                 </div>
               </div>
 
               <div style={{ background: "#1A0F0A", borderRadius: 16, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
-                <h3 style={{ color: "#F2B8A8", fontWeight: 700, fontSize: 11, letterSpacing: "0.2em", marginBottom: 4 }}>BANK TRANSFER DETAILS</h3>
+                <h3 style={{ color: "#F2B8A8", fontWeight: 700, fontSize: 11, letterSpacing: "0.2em", marginBottom: 4 }}>TRANSFER TO</h3>
                 {[["Bank", BANK_NAME], ["Account Name", BANK_ACCOUNT_NAME]].map(([l, v]) => (
                   <div key={l} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span style={{ color: "#9A7A6E", fontSize: 13 }}>{l}</span>
@@ -1634,15 +1634,15 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, onName, onPhon
 
               <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 14, padding: 14, display: "flex", gap: 12 }}>
                 <AlertTriangle size={17} color="#d97706" style={{ flexShrink: 0, marginTop: 2 }} />
-                <p style={{ color: "#92400e", fontSize: 12, lineHeight: 1.7, margin: 0 }}>After making the transfer, tap the button below to send us a WhatsApp notification. We'll confirm and pack your order immediately.</p>
+                <p style={{ color: "#92400e", fontSize: 12, lineHeight: 1.7, margin: 0 }}>Once your transfer is complete, tap below. We'll verify and begin packing your order right away.</p>
               </div>
 
               <button onClick={onWhatsApp} style={{ width: "100%", background: "#25D366", color: "#fff", border: "none", borderRadius: 999, padding: "16px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 12, boxShadow: "0 6px 20px rgba(37,211,102,0.3)" }}>
-                <MessageCircle size={20} /> I HAVE PAID — CONFIRM ON WHATSAPP
+                <MessageCircle size={20} /> NOTIFY US ON WHATSAPP
               </button>
 
               <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#5C3D2E", fontSize: 13, textAlign: "center", padding: 8 }}>
-                Close & Continue Shopping
+                Close & Back to Collection
               </button>
             </div>
           )}
@@ -1776,8 +1776,8 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
 
   function waCustomer(o: Order) {
     const msg = o.status === "confirmed"
-      ? `Hi ${o.customerName}! 🎉 Your payment for order *${o.id}* (${fmt(o.total)}) has been *confirmed*! Your beauty products are being packed. We'll deliver soon. Thank you for choosing Splendid Empire Cosmetics! 💄👑`
-      : `Hi ${o.customerName}! Your order *${o.id}* has been *dispatched*! 🚚 It will reach you very soon. Thank you — Splendid Empire Cosmetics 💕`;
+      ? `Hi ${o.customerName}, great news! ✨\n\nYour payment for order *${o.id}* (${fmt(o.total)}) has been received and confirmed. We're packing your items now and will dispatch shortly.\n\nThank you for shopping with Splendid Empire Cosmetics. 🛍️`
+      : `Hi ${o.customerName}! 🚚\n\nYour order *${o.id}* is on its way. You'll receive it very soon.\n\nFor any questions, just reply here. — Splendid Empire Cosmetics`;
     window.open(`https://wa.me/${o.phone.replace(/^0/, "234").replace(/\D/g, "")}?text=${encodeURIComponent(msg)}`, "_blank");
   }
 
@@ -1785,8 +1785,8 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
     return (
       <div style={{ textAlign: "center", padding: "80px 0", color: "#5C3D2E" }}>
         <Package size={52} style={{ margin: "0 auto 16px", opacity: 0.15 }} />
-        <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 500, marginBottom: 8 }}>No orders yet</p>
-        <p style={{ fontSize: 13, color: "#9A7A6E" }}>Orders will appear here as soon as customers checkout.</p>
+        <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 500, marginBottom: 8 }}>All clear</p>
+        <p style={{ fontSize: 13, color: "#9A7A6E" }}>New orders will show up here the moment a customer checks out.</p>
       </div>
     );
   }
