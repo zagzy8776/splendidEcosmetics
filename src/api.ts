@@ -40,6 +40,7 @@ export interface OrderData {
   id: string;
   customerName: string;
   phone: string;
+  email: string;
   total: number;
   status: string;
   items: Array<{

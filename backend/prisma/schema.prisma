@@ -29,6 +29,7 @@ model Order {
   id           String      @id @default(cuid())
   customerName String      @map("customer_name")
   phone        String
+  email        String      @default("")
   total        Int
   status       String      @default("pending")
   createdAt    DateTime    @default(now()) @map("created_at")

@@ -10,7 +10,7 @@ import {
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
 type Category = "All" | "Foundation" | "Lipstick" | "Serum" | "Eyeliner" | "Moisturizer" | "Perfume";
-type OrderStatus = "pending" | "verifying" | "confirmed" | "dispatched";
+type OrderStatus = "pending" | "verifying" | "confirmed" | "dispatched" | "delivered";
 type AdminTab = "orders" | "products";
 type AppView = "store" | "admin";
 type CheckoutStep = "info" | "payment";
@@ -37,6 +37,7 @@ interface Order {
   id: string;
   customerName: string;
   phone: string;
+  email: string;
   items: CartItem[];
   total: number;
   status: OrderStatus;
@@ -104,6 +105,7 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState<Category>("All");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
   const [orderId, setOrderId] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -145,6 +147,7 @@ export default function App() {
       id: orderId,
       customerName,
       phone: customerPhone,
+      email: customerEmail,
       total: cartTotal,
       status: "pending" as const,
       items: cart.map(i => ({
@@ -155,7 +158,6 @@ export default function App() {
 
     createOrder(payload)
       .then(savedOrder => {
-        // Map any required format if needed (api client already does parse dates and items)
         const typedOrder = {
           ...savedOrder,
           status: savedOrder.status as OrderStatus
@@ -164,7 +166,7 @@ export default function App() {
       })
       .catch(err => {
         console.error("Failed to save order to database:", err);
-        setOrders(prev => [{ id: orderId, customerName, phone: customerPhone, items: [...cart], total: cartTotal, status: "pending", createdAt: new Date() }, ...prev]);
+        setOrders(prev => [{ id: orderId, customerName, phone: customerPhone, email: customerEmail, items: [...cart], total: cartTotal, status: "pending", createdAt: new Date() }, ...prev]);
       });
 
     setCheckoutStep("payment");
@@ -188,6 +190,7 @@ export default function App() {
     setCart([]);
     setCustomerName("");
     setCustomerPhone("");
+    setCustomerEmail("");
   }
 
   const filtered = products.filter(p => p.inStock && (activeCategory === "All" || p.category === activeCategory));
@@ -214,7 +217,7 @@ export default function App() {
       <CartDrawer open={cartOpen} cart={cart} total={cartTotal} onClose={() => setCartOpen(false)} onRemove={removeFromCart} onQty={updateQty} onCheckout={beginCheckout} />
 
       {checkoutStep && (
-        <CheckoutModal step={checkoutStep} cart={cart} total={cartTotal} orderId={orderId} name={customerName} phone={customerPhone} onName={setCustomerName} onPhone={setCustomerPhone} onPlace={placeOrder} onWhatsApp={sendWhatsApp} onCopy={copyAccount} copied={copied} onClose={closeCheckout} />
+        <CheckoutModal step={checkoutStep} cart={cart} total={cartTotal} orderId={orderId} name={customerName} phone={customerPhone} email={customerEmail} onName={setCustomerName} onPhone={setCustomerPhone} onEmail={setCustomerEmail} onPlace={placeOrder} onWhatsApp={sendWhatsApp} onCopy={copyAccount} copied={copied} onClose={closeCheckout} />
       )}
 
 
@@ -1636,8 +1639,11 @@ function CartDrawer({ open, cart, total, onClose, onRemove, onQty, onCheckout }:
 
 // ─── CHECKOUT MODAL ───────────────────────────────────────────────────────────
 
-function CheckoutModal({ step, cart, total, orderId, name, phone, onName, onPhone, onPlace, onWhatsApp, onCopy, copied, onClose }: { step: CheckoutStep; cart: CartItem[]; total: number; orderId: string; name: string; phone: string; onName: (v: string) => void; onPhone: (v: string) => void; onPlace: () => void; onWhatsApp: () => void; onCopy: () => void; copied: boolean; onClose: () => void }) {
-  const canProceed = name.trim().length >= 2 && phone.trim().replace(/\D/g, "").length >= 10;
+function CheckoutModal({ step, cart, total, orderId, name, phone, email, onName, onPhone, onEmail, onPlace, onWhatsApp, onCopy, copied, onClose }: { step: CheckoutStep; cart: CartItem[]; total: number; orderId: string; name: string; phone: string; email: string; onName: (v: string) => void; onPhone: (v: string) => void; onEmail: (v: string) => void; onPlace: () => void; onWhatsApp: () => void; onCopy: () => void; copied: boolean; onClose: () => void }) {
+  const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) && v.length <= 254;
+  const canProceed = name.trim().length >= 2 && phone.trim().replace(/\D/g, "").length >= 10 && isValidEmail(email.trim());
+  const emailTouched = email.length > 0;
+  const emailError = emailTouched && !isValidEmail(email.trim()) ? "Please enter a valid email address" : "";
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 60, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: 0 }} className="sm:items-center sm:p-4">
@@ -1678,12 +1684,24 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, onName, onPhon
                 </div>
               </div>
 
-              {[{ label: "Full Name", val: name, set: onName, ph: "Your name" }, { label: "WhatsApp Number", val: phone, set: onPhone, ph: "08012345678" }].map(({ label, val, set, ph }) => (
+              {[{ label: "Full Name", val: name, set: onName, ph: "Your name", type: "text" }, { label: "WhatsApp Number", val: phone, set: onPhone, ph: "08012345678", type: "tel" }].map(({ label, val, set, ph, type }) => (
                 <div key={label}>
                   <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#1A0F0A", marginBottom: 8, letterSpacing: "0.1em", textTransform: "uppercase" }}>{label}</label>
-                  <input value={val} onChange={e => set(e.target.value)} placeholder={ph} style={{ width: "100%", border: "1px solid rgba(242,184,168,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 14, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }} />
+                  <input type={type} value={val} onChange={e => set(e.target.value)} placeholder={ph} style={{ width: "100%", border: "1px solid rgba(242,184,168,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 14, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }} />
                 </div>
               ))}
+              <div>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#1A0F0A", marginBottom: 8, letterSpacing: "0.1em", textTransform: "uppercase" }}>Email Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => onEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  style={{ width: "100%", border: emailError ? "1.5px solid #ef4444" : "1px solid rgba(242,184,168,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 14, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }}
+                />
+                {emailError && <p style={{ color: "#ef4444", fontSize: 11, marginTop: 6, fontWeight: 600 }}>{emailError}</p>}
+                <p style={{ color: "#9A7A6E", fontSize: 11, marginTop: 6 }}>Your order confirmation will be sent here</p>
+              </div>
 
               <button onClick={onPlace} disabled={!canProceed} style={{ width: "100%", background: canProceed ? "#B5784A" : "#d1b8a8", color: "#fff", border: "none", borderRadius: 999, padding: "16px 24px", fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: canProceed ? "pointer" : "not-allowed", boxShadow: canProceed ? "0 6px 20px rgba(181,120,74,0.3)" : "none", transition: "all 0.2s" }}>
                 CONTINUE TO PAYMENT →
@@ -1842,9 +1860,10 @@ const STATUS_CFG: Record<OrderStatus, { label: string; bg: string; color: string
   verifying: { label: "Verifying", bg: "#dbeafe", color: "#1d4ed8", icon: <Eye size={11} /> },
   confirmed: { label: "Confirmed", bg: "#dcfce7", color: "#15803d", icon: <Check size={11} /> },
   dispatched: { label: "Dispatched", bg: "#f3e8ff", color: "#7e22ce", icon: <Truck size={11} /> },
+  delivered: { label: "Delivered", bg: "#fce7f3", color: "#be185d", icon: <Heart size={11} /> },
 };
-const NEXT: Record<OrderStatus, OrderStatus | null> = { pending: "verifying", verifying: "confirmed", confirmed: "dispatched", dispatched: null };
-const NEXT_LABEL: Record<OrderStatus, string | null> = { pending: "Mark Verifying", verifying: "Approve Payment ✓", confirmed: "Mark Dispatched", dispatched: null };
+const NEXT: Record<OrderStatus, OrderStatus | null> = { pending: "verifying", verifying: "confirmed", confirmed: "dispatched", dispatched: "delivered", delivered: null };
+const NEXT_LABEL: Record<OrderStatus, string | null> = { pending: "Mark Verifying", verifying: "Approve Payment ✓", confirmed: "Mark Dispatched", dispatched: "Mark Delivered 📦", delivered: null };
 
 function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.Dispatch<React.SetStateAction<Order[]>> }) {
   function advance(id: string) {
