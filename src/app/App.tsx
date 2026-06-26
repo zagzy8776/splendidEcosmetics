@@ -205,6 +205,7 @@ export default function App() {
       <WhyUsSection />
       <TestimonialsSection />
       <LocationSection />
+      <SEOSection />
       <SiteFooter onSelectCategory={setActiveCategory} />
 
       {cartOpen && <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 40 }} onClick={() => setCartOpen(false)} />}
@@ -1358,6 +1359,99 @@ function LocationSection() {
           </div>
         </div>
       </div>
+    </section>
+  );
+}
+
+// ─── SEO SECTION ──────────────────────────────────────────────────────────────
+// Visually hidden but fully rendered in the DOM for Googlebot (which executes JS).
+// Uses sr-only technique: visible to crawlers and screen readers, invisible on screen.
+
+function SEOSection() {
+  return (
+    <section
+      aria-label="About Splendid Empire Cosmetics Owerri"
+      style={{
+        position: "absolute",
+        width: 1,
+        height: 1,
+        padding: 0,
+        margin: -1,
+        overflow: "hidden",
+        clip: "rect(0,0,0,0)",
+        whiteSpace: "nowrap",
+        border: 0,
+      }}
+    >
+      <h2>Best Cosmetics Store in Owerri — Splendid Empire Cosmetics</h2>
+      <p>
+        Splendid Empire Cosmetics is the number one beauty store in Owerri, Imo State, Nigeria.
+        We are located at Shop D, World Centre, by IMSU Junction, 470 Works Layout, Owerri 460212.
+        We stock 100% authentic cosmetics, skincare, makeup, and luxury fragrances sourced directly
+        from certified distributors. No fakes. No compromises.
+      </p>
+
+      <h3>Cosmetics We Sell in Owerri</h3>
+      <ul>
+        <li>Foundation Owerri — full-coverage, velvet matte, long-lasting liquid foundation</li>
+        <li>Concealer Owerri — medium to full coverage concealer for all Nigerian skin tones</li>
+        <li>Lip Gloss Owerri — hydrating rose petal lip gloss, kiss-proof formula</li>
+        <li>Lipstick Owerri — matte, satin, and glossy nude lip collection sets</li>
+        <li>Serum Owerri — 24K gold-infused brightening serum, niacinamide, vitamin C</li>
+        <li>Eyeliner Owerri — precision waterproof eyeliner pen, 36-hour wear</li>
+        <li>Moisturizer Owerri — shea butter moisturizer with vitamin E and argan oil</li>
+        <li>Perfume Owerri — luxury floral-musk fragrances, rose, jasmine, amber</li>
+        <li>Skincare products Owerri — serums, toners, brightening creams</li>
+        <li>Makeup products Owerri — full face makeup kits, foundations, blush, highlighter</li>
+      </ul>
+
+      <h3>Why We Are the Best Beauty Store in Owerri</h3>
+      <ul>
+        <li>Same-day cosmetics delivery in Owerri on orders placed before 5pm</li>
+        <li>Next-day delivery to Port Harcourt and other cities in Imo State</li>
+        <li>Order cosmetics via WhatsApp — fast, easy, and convenient</li>
+        <li>100% authentic products — certified by authorised distributors</li>
+        <li>Over 1,200 satisfied clients across Owerri, Port Harcourt, and beyond</li>
+        <li>Rated 5 stars by customers — the top-rated cosmetics shop in Owerri</li>
+        <li>Products specifically curated for Nigerian skin tones and the Nigerian climate</li>
+        <li>Affordable luxury cosmetics — premium quality without premium price</li>
+        <li>Physical store in Works Layout, near IMSU Junction, Owerri</li>
+        <li>WhatsApp customer support — we respond within minutes</li>
+      </ul>
+
+      <h3>How to Order Cosmetics in Owerri</h3>
+      <p>
+        You can shop online at our website, add your favourite products to cart, fill in your name
+        and WhatsApp number, and make a bank transfer to our Access Bank account. Once you send us
+        a WhatsApp confirmation, we verify and pack your order immediately. Same-day delivery in
+        Owerri. It is that simple.
+      </p>
+      <p>
+        You can also walk into our store at Shop D, World Centre, by IMSU Junction, Works Layout,
+        Owerri, Monday to Saturday from 9am to 7pm.
+      </p>
+
+      <h3>Popular Searches We Cover</h3>
+      <p>
+        cosmetic store owerri, best cosmetics shop in owerri, authentic skincare vendor owerri,
+        makeup shop owerri, lipstick vendor owerri, foundation owerri, serum owerri, perfume shop
+        owerri, moisturizer owerri, eyeliner owerri, beauty store owerri, skincare products owerri,
+        imo state cosmetics, works layout beauty shop, imsu junction cosmetics, owerri skincare
+        vendor instagram, buy cosmetics owerri, cosmetics delivery owerri, whatsapp cosmetics order
+        owerri, online beauty store nigeria, port harcourt cosmetics delivery, affordable luxury
+        cosmetics nigeria, nigerian skincare vendor, face products owerri, glow serum nigeria,
+        body care products owerri, lip gloss owerri, authentic makeup nigeria, skin care near imsu,
+        beauty shop near works layout owerri, splendid empire cosmetics owerri
+      </p>
+
+      <address>
+        <strong>Splendid Empire Cosmetics</strong><br />
+        Shop D, World Centre, By IMSU Junction<br />
+        470 Works Layout, Owerri 460212, Imo State, Nigeria<br />
+        WhatsApp / Phone: +2348104748683<br />
+        Email: obilodoris15@gmail.com<br />
+        Open: Monday – Saturday, 9:00am – 7:00pm
+      </address>
     </section>
   );
 }
