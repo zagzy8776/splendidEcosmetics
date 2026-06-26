@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { fetchProducts, createOrder, fetchOrders, updateOrderStatus, createProduct, updateProduct, deleteProduct, adminLogin } from "../api";
+import { fetchProducts, createOrder, fetchOrders, updateOrderStatus, createProduct, updateProduct, deleteProduct, adminLogin, adminLogout, getAdminToken, clearAdminToken } from "../api";
 import {
   ShoppingBag, X, Menu, Instagram, Facebook, Phone, MapPin,
   Star, Plus, Minus, Trash2, Package, Settings, LogOut, Check,
@@ -49,7 +49,6 @@ const WHATSAPP_NUMBER = "2348104748683";
 const BANK_NAME = "Access Bank";
 const BANK_ACCOUNT_NAME = "Splendid Empire Cosmetics";
 const BANK_ACCOUNT_NUMBER = "0123456789";
-const ADMIN_PASSWORD = "SEC@Admin2024";
 
 const INITIAL_PRODUCTS: Product[] = [
   { id: "p1", name: "Velvet Matte Foundation", category: "Foundation", price: 8500, image: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=500&h=500&fit=crop", description: "Full-coverage foundation with a luxurious velvet matte finish. 24-hour wear.", inStock: true, badge: "NEW", rating: 4.8, reviews: 124 },
@@ -96,16 +95,7 @@ export default function App() {
       .then(data => setProducts(data))
       .catch(() => setProducts(INITIAL_PRODUCTS))
       .finally(() => setLoading(false));
-
-    fetchOrders()
-      .then(data => {
-        const typedOrders = data.map((o: any) => ({
-          ...o,
-          status: o.status as OrderStatus
-        }));
-        setOrders(typedOrders);
-      })
-      .catch(err => console.error("Failed to load orders from database:", err));
+    // Orders are fetched inside AdminPanel after authentication
   }, []);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -278,15 +268,9 @@ function PasscodeModal({ onClose, onSuccess }: PasscodeModalProps) {
           setTimeout(() => setError(false), 2000);
         }
       })
-      .catch(err => {
-        console.error("Login request failed:", err);
-        if (password === ADMIN_PASSWORD) {
-          onSuccess();
-          onClose();
-        } else {
-          setError(true);
-          setTimeout(() => setError(false), 2000);
-        }
+      .catch(() => {
+        setError(true);
+        setTimeout(() => setError(false), 2000);
       });
   }
 
@@ -1682,18 +1666,16 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
         if (res.authenticated) {
           setAuthed(true);
           setErr("");
+          // Load orders now that we have a valid token
+          fetchOrders()
+            .then(data => setOrders(data.map((o: any) => ({ ...o, status: o.status as OrderStatus }))))
+            .catch(() => {});
         } else {
           setErr("Incorrect password. Try again.");
         }
       })
-      .catch(err => {
-        console.error("Login request failed:", err);
-        if (pw === ADMIN_PASSWORD) {
-          setAuthed(true);
-          setErr("");
-        } else {
-          setErr("Incorrect password. Try again.");
-        }
+      .catch(() => {
+        setErr("Login failed. Please check your connection and try again.");
       });
   }
 
@@ -1732,7 +1714,7 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
         </div>
         <div style={{ display: "flex", gap: 20 }}>
           <button onClick={onExit} style={{ background: "none", border: "none", cursor: "pointer", color: "#9A7A6E", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, letterSpacing: "0.1em" }}><Eye size={14} /> VIEW STORE</button>
-          <button onClick={() => { setAuthed(false); setPw(""); onExit(); }} style={{ background: "none", border: "none", cursor: "pointer", color: "#9A7A6E", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, letterSpacing: "0.1em" }}><LogOut size={14} /> LOGOUT</button>
+          <button onClick={() => { adminLogout(); setAuthed(false); setPw(""); onExit(); }} style={{ background: "none", border: "none", cursor: "pointer", color: "#9A7A6E", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, letterSpacing: "0.1em" }}><LogOut size={14} /> LOGOUT</button>
         </div>
       </div>
 
