@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 
 # Primary sitemap
-Sitemap: https://splendid-empire-cosmetics.vercel.app/sitemap.xml
+Sitemap: https://splendid-ecosmetics.vercel.app/sitemap.xml
