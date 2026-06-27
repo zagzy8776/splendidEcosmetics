@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { fetchProducts, createOrder, fetchOrders, updateOrderStatus, createProduct, updateProduct, deleteProduct, adminLogin, adminLogout, getAdminToken, clearAdminToken } from "../api";
+import { fetchProducts, createOrder, fetchOrders, updateOrderStatus, createProduct, updateProduct, deleteProduct, adminLogin, adminLogout, getAdminToken, clearAdminToken, changeAdminPassword } from "../api";
 import {
   ShoppingBag, X, Menu, Instagram, Facebook, Phone, MapPin,
   Star, Plus, Minus, Trash2, Package, Settings, LogOut, Check,
@@ -11,7 +11,7 @@ import {
 
 type Category = "All" | "Foundation" | "Lipstick" | "Serum" | "Eyeliner" | "Moisturizer" | "Perfume";
 type OrderStatus = "pending" | "verifying" | "confirmed" | "dispatched" | "delivered";
-type AdminTab = "orders" | "products";
+type AdminTab = "orders" | "products" | "security";
 type AppView = "store" | "admin";
 type CheckoutStep = "info" | "payment";
 
@@ -1842,13 +1842,99 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
 
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "32px 20px" }}>
         <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
-          {[["orders", "📋 Orders"], ["products", "🛍️ Products"]].map(([t, label]) => (
+          {[["orders", "📋 Orders"], ["products", "🛍️ Products"], ["security", "🔒 Security"]].map(([t, label]) => (
             <button key={t} onClick={() => setTab(t as AdminTab)} style={{ padding: "10px 24px", borderRadius: 999, fontSize: 12, fontWeight: 700, letterSpacing: "0.05em", border: "1px solid", borderColor: tab === t ? "#B5784A" : "rgba(242,184,168,0.5)", background: tab === t ? "#B5784A" : "#fff", color: tab === t ? "#fff" : "#5C3D2E", cursor: "pointer", transition: "all 0.2s" }}>{label}</button>
           ))}
         </div>
         {tab === "orders" && <AdminOrders orders={orders} setOrders={setOrders} />}
         {tab === "products" && <AdminProducts products={products} setProducts={setProducts} />}
+        {tab === "security" && <AdminSecurity />}
       </div>
+    </div>
+  );
+}
+
+// ─── ADMIN SECURITY ───────────────────────────────────────────────────────────
+
+function AdminSecurity() {
+  const [current, setCurrent] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+
+  function handleChange(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    if (newPw.length < 6) {
+      setError("New password must be at least 6 characters.");
+      return;
+    }
+    if (newPw !== confirm) {
+      setError("New passwords don't match.");
+      return;
+    }
+
+    setLoading(true);
+    changeAdminPassword(current, newPw)
+      .then(() => {
+        setSuccess("Password changed! You'll need to log in again next time.");
+        setCurrent("");
+        setNewPw("");
+        setConfirm("");
+      })
+      .catch(err => setError(err.message || "Something went wrong."))
+      .finally(() => setLoading(false));
+  }
+
+  return (
+    <div style={{ maxWidth: 440 }}>
+      <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#1A0F0A", marginBottom: 8 }}>Change Admin Password</h2>
+      <p style={{ color: "#9A7A6E", fontSize: 13, marginBottom: 28, lineHeight: 1.6 }}>
+        Enter your current password, then choose a new one. You can do this anytime from your phone — no need to go to the server dashboard.
+      </p>
+
+      <form onSubmit={handleChange} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+        {[
+          { label: "Current Password", val: current, set: setCurrent, ph: "Enter current password" },
+          { label: "New Password", val: newPw, set: setNewPw, ph: "At least 6 characters" },
+          { label: "Confirm New Password", val: confirm, set: setConfirm, ph: "Repeat new password" },
+        ].map(({ label, val, set, ph }) => (
+          <div key={label}>
+            <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#1A0F0A", marginBottom: 8, letterSpacing: "0.1em", textTransform: "uppercase" }}>{label}</label>
+            <input
+              type="password"
+              value={val}
+              onChange={e => set(e.target.value)}
+              placeholder={ph}
+              required
+              style={{ width: "100%", border: "1px solid rgba(242,184,168,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 14, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }}
+            />
+          </div>
+        ))}
+
+        {error && (
+          <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: 10, padding: "12px 16px", color: "#dc2626", fontSize: 13, fontWeight: 600 }}>
+            {error}
+          </div>
+        )}
+        {success && (
+          <div style={{ background: "#f0fdf4", border: "1px solid #86efac", borderRadius: 10, padding: "12px 16px", color: "#16a34a", fontSize: 13, fontWeight: 600 }}>
+            ✓ {success}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          style={{ background: loading ? "#d1b8a8" : "#B5784A", color: "#fff", border: "none", borderRadius: 999, padding: "14px 24px", fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", boxShadow: loading ? "none" : "0 6px 20px rgba(181,120,74,0.3)", transition: "all 0.2s" }}
+        >
+          {loading ? "SAVING..." : "UPDATE PASSWORD"}
+        </button>
+      </form>
     </div>
   );
 }

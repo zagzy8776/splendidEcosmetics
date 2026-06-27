@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import crypto from "crypto";
+import bcrypt from "bcrypt";
 import { PrismaClient } from "@prisma/client";
 import { Resend } from "resend";
 
@@ -10,8 +11,8 @@ const PORT = process.env.PORT || 4000;
 
 // ─── ENV GUARDS ───────────────────────────────────────────────────────────────
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-if (!ADMIN_PASSWORD) {
+const ADMIN_PASSWORD_ENV = process.env.ADMIN_PASSWORD;
+if (!ADMIN_PASSWORD_ENV) {
   console.error("FATAL: ADMIN_PASSWORD environment variable is not set.");
   process.exit(1);
 }
@@ -391,23 +392,74 @@ app.patch("/api/orders/:id/status", requireAdminAuth, async (req, res) => {
 
 // ─── ADMIN AUTH ───────────────────────────────────────────────────────────────
 
-app.post("/api/admin/login", (req, res) => {
+// Seed the password from env on first startup if DB has no entry yet
+async function ensureAdminPassword() {
+  const existing = await prisma.adminSetting.findUnique({ where: { key: "admin_password" } });
+  if (!existing) {
+    const hash = await bcrypt.hash(ADMIN_PASSWORD_ENV, 12);
+    await prisma.adminSetting.create({ data: { key: "admin_password", value: hash } });
+    console.log("[Auth] Admin password seeded from ADMIN_PASSWORD env var.");
+  }
+}
+
+async function getAdminPasswordHash() {
+  const row = await prisma.adminSetting.findUnique({ where: { key: "admin_password" } });
+  return row?.value ?? null;
+}
+
+app.post("/api/admin/login", async (req, res) => {
   const { password } = req.body;
   if (!password) return res.status(400).json({ error: "Password is required" });
 
-  const provided = Buffer.from(password);
-  const expected = Buffer.from(ADMIN_PASSWORD);
-  const match =
-    provided.length === expected.length &&
-    crypto.timingSafeEqual(provided, expected);
+  try {
+    const hash = await getAdminPasswordHash();
+    if (!hash) return res.status(500).json({ error: "Admin account not configured" });
 
-  if (match) {
-    const token = generateToken();
-    const expiresAt = Date.now() + 8 * 60 * 60 * 1000;
-    activeTokens.set(token, expiresAt);
-    res.json({ authenticated: true, token });
-  } else {
-    res.status(401).json({ authenticated: false, error: "Invalid password" });
+    const match = await bcrypt.compare(password, hash);
+    if (match) {
+      const token = generateToken();
+      const expiresAt = Date.now() + 8 * 60 * 60 * 1000;
+      activeTokens.set(token, expiresAt);
+      res.json({ authenticated: true, token });
+    } else {
+      res.status(401).json({ authenticated: false, error: "Invalid password" });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Login failed" });
+  }
+});
+
+app.post("/api/admin/change-password", requireAdminAuth, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: "Both currentPassword and newPassword are required" });
+  }
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: "New password must be at least 6 characters" });
+  }
+
+  try {
+    const hash = await getAdminPasswordHash();
+    if (!hash) return res.status(500).json({ error: "Admin account not configured" });
+
+    const match = await bcrypt.compare(currentPassword, hash);
+    if (!match) return res.status(401).json({ error: "Current password is incorrect" });
+
+    const newHash = await bcrypt.hash(newPassword, 12);
+    await prisma.adminSetting.upsert({
+      where: { key: "admin_password" },
+      update: { value: newHash },
+      create: { key: "admin_password", value: newHash },
+    });
+
+    // Invalidate all existing sessions so any old token stops working
+    activeTokens.clear();
+
+    res.json({ success: true, message: "Password updated successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to change password" });
   }
 });
 
@@ -423,6 +475,7 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
+  await ensureAdminPassword();
   console.log(`Splendid Empire API running on port ${PORT}`);
 });

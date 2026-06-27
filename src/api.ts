@@ -162,4 +162,15 @@ export async function adminLogout() {
   clearAdminToken();
 }
 
+export async function changeAdminPassword(currentPassword: string, newPassword: string) {
+  const res = await fetch(`${API_BASE}/api/admin/change-password`, {
+    method: "POST",
+    headers: adminHeaders(),
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Failed to change password");
+  return data;
+}
+
 export default API_BASE;

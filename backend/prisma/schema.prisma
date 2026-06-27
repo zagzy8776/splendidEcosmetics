@@ -51,3 +51,11 @@ model OrderItem {
 
   @@map("order_items")
 }
+
+model AdminSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("admin_settings")
+}
