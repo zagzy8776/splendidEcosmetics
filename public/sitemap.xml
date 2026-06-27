@@ -4,7 +4,7 @@
 
   <!-- Homepage -->
   <url>
-    <loc>https://splendid-ecosmetics.vercel.app/</loc>
+    <loc>https://splendidcosmetics.com.ng/</loc>
     <lastmod>2026-06-27</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -12,7 +12,7 @@
 
   <!-- Shop / Products -->
   <url>
-    <loc>https://splendid-ecosmetics.vercel.app/#products</loc>
+    <loc>https://splendidcosmetics.com.ng/#products</loc>
     <lastmod>2026-06-27</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -20,7 +20,7 @@
 
   <!-- Categories -->
   <url>
-    <loc>https://splendid-ecosmetics.vercel.app/#categories</loc>
+    <loc>https://splendidcosmetics.com.ng/#categories</loc>
     <lastmod>2026-06-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -28,7 +28,7 @@
 
   <!-- Store Location / Contact -->
   <url>
-    <loc>https://splendid-ecosmetics.vercel.app/#location</loc>
+    <loc>https://splendidcosmetics.com.ng/#location</loc>
     <lastmod>2026-06-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
