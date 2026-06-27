@@ -55,7 +55,7 @@
       "@id": "https://splendidcosmetics.com.ng/#store",
       "name": "Splendid Empire Cosmetics",
       "alternateName": ["Splendid Empire", "SEC Owerri", "Owerri Skincare Vendor", "Splendid Cosmetics Owerri"],
-      "description": "Splendid Empire Cosmetics is the best skincare store in Owerri, Imo State. We stock authentic imported foundations, serums, lipsticks, moisturizers, eyeliners, and perfumes. Same-day delivery in Owerri and next-day delivery to Port Harcourt. Order easily via WhatsApp.",
+      "description": "Splendid Empire Cosmetics is the best skincare store in Owerri, Imo State. We stock authentic imported foundations, serums, lipsticks, moisturizers, eyeliners, and perfumes. Same-day delivery in Owerri and next-day delivery to Port Harcourt.",
       "image": [
         "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=800&h=800&fit=crop",
         "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&h=800&fit=crop",
@@ -67,11 +67,6 @@
       "priceRange": "₦₦",
       "currenciesAccepted": "NGN",
       "paymentAccepted": "Cash, Bank Transfer, Mobile Payment",
-      "areaServed": [
-        { "@type": "City", "name": "Owerri" },
-        { "@type": "City", "name": "Port Harcourt" },
-        { "@type": "AdministrativeArea", "name": "Imo State" }
-      ],
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "Shop D, World Centre, 470 Works Layout, By IMSU Junction",
@@ -85,12 +80,14 @@
         "latitude": "5.5085449",
         "longitude": "6.9961665"
       },
-      "openingHoursSpecification": {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
-        "opens": "09:00",
-        "closes": "19:00"
-      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+          "opens": "09:00",
+          "closes": "19:00"
+        }
+      ],
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": "5",
@@ -101,20 +98,41 @@
       "review": [
         {
           "@type": "Review",
-          "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
-          "author": { "@type": "Person", "name": "Chioma Adeola" },
+          "reviewRating": {
+            "@type": "Rating",
+            "ratingValue": "5",
+            "bestRating": "5"
+          },
+          "author": {
+            "@type": "Person",
+            "name": "Chioma Adeola"
+          },
           "reviewBody": "Perfect shade match, delivered the same day. Splendid Empire is my go-to skincare store in Owerri."
         },
         {
           "@type": "Review",
-          "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
-          "author": { "@type": "Person", "name": "Blessing Okafor" },
+          "reviewRating": {
+            "@type": "Rating",
+            "ratingValue": "5",
+            "bestRating": "5"
+          },
+          "author": {
+            "@type": "Person",
+            "name": "Blessing Okafor"
+          },
           "reviewBody": "The 24K glow serum is genuinely transformative. Real imported product — I can see the difference in my skin."
         },
         {
           "@type": "Review",
-          "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
-          "author": { "@type": "Person", "name": "Adaeze Nwosu" },
+          "reviewRating": {
+            "@type": "Rating",
+            "ratingValue": "5",
+            "bestRating": "5"
+          },
+          "author": {
+            "@type": "Person",
+            "name": "Adaeze Nwosu"
+          },
           "reviewBody": "The whole experience — browsing, ordering, paying — felt effortless. Best online skincare shop in Nigeria."
         }
       ],
