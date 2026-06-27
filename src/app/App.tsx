@@ -58,7 +58,7 @@ const INITIAL_PRODUCTS: Product[] = [
   { id: "p4", name: "Precision Eyeliner Pen", category: "Eyeliner", price: 2800, image: "https://images.unsplash.com/photo-1531646317777-0619c7c5d1d3?w=500&h=500&fit=crop", description: "Ultra-fine tip for perfect wings every time. Waterproof 36hr wear.", inStock: true, rating: 4.6, reviews: 67 },
   { id: "p5", name: "Ivory Shea Moisturizer", category: "Moisturizer", price: 6800, image: "https://images.unsplash.com/photo-1643168186368-c42359c82573?w=500&h=500&fit=crop", description: "Rich hydrating cream with shea butter & vitamin E. For all skin types.", inStock: true, rating: 4.8, reviews: 156 },
   { id: "p6", name: "Nude Lip Collection Set", category: "Lipstick", price: 4500, image: "https://images.unsplash.com/photo-1676570092589-a6c09ecbb373?w=500&h=500&fit=crop", description: "3 bestselling nude shades in matte, satin & glossy finishes.", inStock: true, badge: "SET", rating: 4.9, reviews: 312 },
-  { id: "p7", name: "Empress Parfum 50ml", category: "Perfume", price: 18000, image: "https://images.unsplash.com/photo-1631730359585-38a4935cbec4?w=500&h=500&fit=crop", description: "Signature floral-musk fragrance. Notes of rose, jasmine & amber.", inStock: false, badge: "LUXURY", rating: 4.9, reviews: 44 },
+  { id: "p7", name: "Empress Parfum 50ml", category: "Perfume", price: 18000, image: "https://images.unsplash.com/photo-1631730359585-38a4935cbec4?w=500&h=500&fit=crop", description: "Signature floral-musk fragrance. Notes of rose, jasmine & amber.", inStock: false, badge: "IMPORT", rating: 4.9, reviews: 44 },
   { id: "p8", name: "Flawless Concealer", category: "Foundation", price: 5200, image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=500&h=500&fit=crop", description: "Medium-to-full coverage. Blends seamlessly into all Nigerian skin tones.", inStock: true, rating: 4.7, reviews: 98 },
 ];
 
@@ -314,13 +314,13 @@ interface ProductQuickViewProps {
 function ProductQuickViewModal({ product: p, onClose, onAdd }: ProductQuickViewProps) {
   const [quantity, setQuantity] = useState(1);
 
-  // Mocking luxury ingredients based on product category
+  // Ingredient descriptions based on product category
   const ingredientsMap: Record<string, string> = {
     Foundation: "Aqua, Cyclopentasiloxane, Hyaluronic Acid, Tocopherol (Vitamin E), Shea Butter, Titanium Dioxide, Iron Oxides, Centella Asiatica Extract.",
     Lipstick: "Jojoba Esters, Rosa Canina (Rosehip) Fruit Oil, Cera Alba (Beeswax), Copernicia Cerifera Wax, Butyrospermum Parkii, Mica, Sweet Almond Oil.",
     Serum: "Pure 24K Gold Particles, Niacinamide (Vitamin B3), Sodium Hyaluronate, Ascorbic Acid (Vitamin C), Collagen Amino Acids, Glycerin, Chamomile Extract.",
     Eyeliner: "Water, Acrylates Copolymer, Carbon Black, Butylene Glycol, Aloe Barbadensis Leaf Juice, Tocopheryl Acetate, Xanthan Gum, Phenoxyethanol.",
-    Moisturizer: "Organic Butyrospermum Parkii (Shea Butter), Aloe Barbadensis Leaf Juice, Squalane, Argania Spinosa Kernel Oil, Panthenol, Lavender Essential Oil.",
+    Moisturizer: "Butyrospermum Parkii (Shea Butter), Aloe Barbadensis Leaf Juice, Squalane, Argania Spinosa Kernel Oil, Panthenol, Lavender Essential Oil.",
     Perfume: "Alcohol Denat., Fragrance (Parfum), Benzyl Salicylate, Limonene, Linalool, Citronellol, Jasmine Flower Water, Amber Extract."
   };
 
@@ -908,28 +908,28 @@ function HeroSection() {
       </div>
 
       <div style={{ position: "absolute", right: 0, top: 0, width: "55%", height: "100%", overflow: "hidden" }} className="hidden md:block">
-        <img src="https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=1000&h=1000&fit=crop" alt="Luxury cosmetics" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <img src="https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=1000&h=1000&fit=crop" alt="Premium skincare products" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, #FDE8E0 0%, rgba(253,232,224,0.62) 38%, rgba(26,15,10,0.08) 100%)" }} />
       </div>
 
       <div style={{ position: "relative", zIndex: 10, maxWidth: 1200, margin: "0 auto", width: "100%" }} className="px-4 py-8 sm:px-6 md:py-10 lg:px-8">
         <div className="flex flex-col items-center gap-8 text-center md:max-w-[48%] md:items-start md:text-left">
           <div className="md:hidden" style={{ width: "min(82vw, 320px)", aspectRatio: "1", borderRadius: 32, overflow: "hidden", boxShadow: "0 24px 70px rgba(181,120,74,0.26)", border: "1px solid rgba(255,255,255,0.65)" }}>
-            <img src="https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=700&h=700&fit=crop" alt="Luxury cosmetics" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <img src="https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=700&h=700&fit=crop" alt="Premium skincare products" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
 
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.58)", border: "1px solid rgba(181,120,74,0.25)", borderRadius: 999, padding: "6px 14px", marginBottom: 0, flexWrap: "wrap", justifyContent: "center", boxShadow: "0 10px 30px rgba(181,120,74,0.12)", backdropFilter: "blur(10px)" }}>
             <Sparkles size={12} color="#B5784A" />
-            <span style={{ color: "#B5784A", fontSize: 9, letterSpacing: "0.2em", fontWeight: 700 }}>OWERRI'S LUXURY BEAUTY DESTINATION</span>
+            <span style={{ color: "#B5784A", fontSize: 9, letterSpacing: "0.2em", fontWeight: 700 }}>OWERRI'S PREMIUM SKINCARE DESTINATION</span>
           </div>
 
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", lineHeight: 1.05, marginBottom: 0, fontSize: "clamp(34px, 9vw, 62px)" }}>
-            Luxury Beauty,<br />
+            Premium Skincare,<br />
             <span style={{ color: "#B5784A", fontStyle: "italic" }}>Delivered.</span>
           </h1>
 
           <p style={{ color: "#5C3D2E", fontSize: 14, lineHeight: 1.65, marginBottom: 0, maxWidth: 500 }} className="mx-auto md:mx-0 sm:text-base">
-            Authentic cosmetics. Same-day delivery in Owerri. Order in minutes via WhatsApp.
+            Foreign skincare & beauty products. Same-day delivery in Owerri. Order in minutes via WhatsApp.
           </p>
 
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }} className="w-full flex-col justify-center md:justify-start sm:w-auto sm:flex-row">
@@ -1206,7 +1206,7 @@ function WhyUsSection() {
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 32 }}>
           {[
-            { icon: <Shield size={30} />, title: "Certified Authentic", desc: "Every item sourced directly from authorised distributors. Zero compromises on quality." },
+            { icon: <Shield size={30} />, title: "Genuine Products", desc: "Every item sourced directly from trusted foreign distributors. What you order is exactly what you receive." },
             { icon: <Truck size={30} />, title: "Swift Delivery", desc: "Same-day within Owerri. Next-day to Port Harcourt." },
             { icon: <MessageCircle size={30} />, title: "WhatsApp Support", desc: "Direct line to our team. We respond within minutes, every time." },
             { icon: <Star size={30} />, title: "Premium Quality", desc: "Global brands curated specifically for Nigerian skin tones and climate." },
@@ -1228,7 +1228,7 @@ function WhyUsSection() {
 function TestimonialsSection() {
   const reviews = [
     { name: "Chioma Adeola", loc: "Owerri", text: "Perfect shade match, delivered the same day. I honestly expected to wait — Splendid Empire proved me wrong.", stars: 5 },
-    { name: "Blessing Okafor", loc: "Port Harcourt", text: "My skin has never looked better. The serum is genuinely transformative — and I know it's authentic because I can see the difference.", stars: 5 },
+    { name: "Blessing Okafor", loc: "Port Harcourt", text: "My skin has never looked better. The serum is genuinely transformative — and I can see real results from a quality imported product.", stars: 5 },
     { name: "Adaeze Nwosu", loc: "Owerri", text: "The whole experience — browsing, ordering, paying — felt effortless. This is what online shopping in Nigeria should feel like.", stars: 5 },
   ];
 
@@ -1373,12 +1373,12 @@ function LocationSection() {
 function FAQSection() {
   const [open, setOpen] = React.useState<number | null>(null);
   const faqs = [
-    { q: "Where is the best cosmetics store in Owerri?", a: "Splendid Empire Cosmetics is Owerri's most trusted beauty store, located at Shop D, World Centre, by IMSU Junction, 470 Works Layout, Owerri, Imo State. We stock authentic foundations, serums, lipsticks, moisturizers, eyeliners, and luxury perfumes — all curated for Nigerian skin tones." },
+    { q: "Where is the best cosmetics store in Owerri?", a: "Splendid Empire Cosmetics is Owerri's most trusted beauty store, located at Shop D, World Centre, by IMSU Junction, 470 Works Layout, Owerri, Imo State. We stock premium imported foundations, serums, lipsticks, moisturizers, eyeliners, and perfumes — all carefully selected for Nigerian skin tones." },
     { q: "Do you offer same-day delivery in Owerri?", a: "Yes. We offer same-day delivery within Owerri on orders placed before 5pm, and next-day delivery to Port Harcourt and other parts of Imo State. Message us on WhatsApp at +2348104748683 to arrange delivery." },
-    { q: "Are your cosmetics 100% authentic?", a: "Absolutely. Every product at Splendid Empire Cosmetics is sourced directly from certified, authorised distributors. We do not stock counterfeit or unverified products. What you see is what you get — genuine, quality beauty." },
+    { q: "Are your products genuine foreign brands?", a: "Yes. Every product at Splendid Empire Cosmetics is sourced directly from trusted foreign distributors. We do not stock counterfeits or unverified products. What you see is what you get — real, imported skincare and beauty." },
     { q: "How do I place an order?", a: "Shop directly on our website — add items to your cart, enter your name and WhatsApp number, then make a bank transfer to our Access Bank account. Once you notify us on WhatsApp, we verify and start packing immediately. You can also walk into our store in Works Layout, Owerri." },
     { q: "Do you deliver to Port Harcourt?", a: "Yes. We offer next-day delivery to Port Harcourt, and we can arrange shipping to other cities across Nigeria. Contact us on WhatsApp to confirm delivery to your specific location." },
-    { q: "What cosmetic products do you sell?", a: "We sell a full range: foundations, concealers, lip glosses, lipsticks, brightening serums, moisturizers, precision eyeliners, and luxury perfumes — all handpicked for Nigerian skin tones and climate. New stock arrives regularly." },
+    { q: "What skincare products do you sell?", a: "We sell a full range of imported skincare and beauty products: foundations, concealers, lip glosses, lipsticks, brightening serums, moisturizers, precision eyeliners, and perfumes — all handpicked for Nigerian skin tones and climate. New stock arrives regularly." },
   ];
   return (
     <section style={{ padding: "60px 0", backgroundColor: "#FFF6F3" }}>
@@ -1426,7 +1426,7 @@ function SEOSection() {
       <ul>
         <li>Best cosmetics store in Owerri — 5-star rated by over 1,200 clients</li>
         <li>Number one skincare vendor in Owerri, Imo State</li>
-        <li>100% authentic products sourced from certified authorised distributors</li>
+        <li>Genuine imported skincare products sourced from trusted foreign distributors</li>
         <li>Same-day cosmetics delivery in Owerri on orders before 5pm</li>
         <li>Next-day delivery to Port Harcourt and across Imo State</li>
         <li>Easy WhatsApp ordering — +2348104748683</li>
@@ -1438,21 +1438,21 @@ function SEOSection() {
       <h3>Buy Foundation in Owerri</h3>
       <p>Looking for the best foundation in Owerri? Splendid Empire Cosmetics stocks full-coverage velvet matte liquid foundations for all Nigerian skin tones. 24-hour wear. Keywords: foundation vendor Owerri, buy foundation Owerri, liquid foundation Owerri, matte foundation Nigeria, full coverage foundation Owerri, foundation for dark skin Owerri, concealer Owerri.</p>
       <h3>Buy Serum in Owerri — Brightening and Anti-Ageing Serums</h3>
-      <p>Authentic brightening serums in Owerri. 24K gold-infused glow serum with niacinamide, sodium hyaluronate, vitamin C, and collagen. Radiant skin in 7 days. Keywords: serum vendor Owerri, brightening serum Owerri, Vitamin C serum Owerri, niacinamide serum Owerri, glow serum Nigeria, skincare serum delivery Owerri.</p>
+      <p>Premium imported brightening serums in Owerri. 24K gold-infused glow serum with niacinamide, sodium hyaluronate, vitamin C, and collagen. Radiant skin in 7 days. Keywords: serum vendor Owerri, brightening serum Owerri, Vitamin C serum Owerri, niacinamide serum Owerri, glow serum Nigeria, skincare serum delivery Owerri.</p>
       <h3>Buy Lipstick and Lip Gloss in Owerri</h3>
       <p>Matte lipsticks, satin lipsticks, nude lip sets, hydrating lip glosses. All shades suited for Nigerian skin tones. Keywords: lipstick vendor Owerri, lip gloss Owerri, matte lipstick Nigeria, nude lipstick Owerri, buy lipstick Owerri, lip collection Imo State.</p>
       <h3>Buy Moisturizer in Owerri</h3>
-      <p>Premium moisturizers with organic shea butter, aloe vera, squalane, and argan oil. Same-day delivery in Owerri. Keywords: moisturizer Owerri, shea butter cream Owerri, face cream Nigeria, body lotion Owerri, buy moisturizer Owerri.</p>
+      <p>Premium imported moisturizers with shea butter, aloe vera, squalane, and argan oil. Same-day delivery in Owerri. Keywords: moisturizer Owerri, shea butter cream Owerri, face cream Nigeria, body lotion Owerri, buy moisturizer Owerri.</p>
       <h3>Buy Eyeliner in Owerri</h3>
       <p>Precision waterproof eyeliner, ultra-fine tip, 36-hour wear. Keywords: eyeliner Owerri, waterproof eyeliner Nigeria, eyeliner vendor Owerri, buy eyeliner Owerri, winged eyeliner Nigeria.</p>
       <h3>Buy Perfume in Owerri</h3>
-      <p>Luxury perfumes in Owerri. Floral musk fragrances, rose jasmine amber. Keywords: perfume shop Owerri, buy perfume Owerri, luxury fragrance Owerri, authentic perfume Nigeria, perfume vendor Owerri, fragrance Owerri delivery.</p>
+      <p>Premium imported perfumes in Owerri. Floral musk fragrances, rose jasmine amber. Keywords: perfume shop Owerri, buy perfume Owerri, imported fragrance Owerri, foreign perfume Nigeria, perfume vendor Owerri, fragrance Owerri delivery.</p>
       <h3>Same-Day Cosmetics Delivery in Owerri and Port Harcourt</h3>
       <p>Fastest cosmetics delivery in Owerri. Order before 5pm — delivered same-day to Aladinma, New Owerri, Housing, Works Layout, Ikenegbu, Uratta, Oforola, Akwakuma, Egbeada. Next-day to Port Harcourt. Keywords: cosmetics delivery Owerri, makeup delivery Owerri, skincare delivery Imo State, WhatsApp cosmetics Owerri.</p>
       <h3>Cosmetics Store Near IMSU Works Layout Owerri</h3>
       <p>Nearest best-rated beauty store to IMSU Owerri, Works Layout, World Centre Owerri, Aladinma, New Owerri. Keywords: cosmetics shop near IMSU Owerri, beauty store Works Layout, makeup shop World Centre Owerri, beauty shop Owerri near me.</p>
       <h3>All Owerri Cosmetics Keywords</h3>
-      <p>cosmetic store owerri, best cosmetics shop in owerri, splendid empire cosmetics owerri, skincare vendor owerri, authentic makeup owerri, beauty shop owerri, foundation owerri, lipstick owerri, serum owerri, perfume owerri, moisturizer owerri, eyeliner owerri, owerri beauty store, works layout cosmetics, imsu junction beauty shop, imo state skincare, buy cosmetics owerri, same day delivery cosmetics owerri, whatsapp cosmetics order owerri, luxury cosmetics nigeria, nigerian skincare vendor, affordable cosmetics owerri, makeup shop near imsu, skin care products owerri, face foundation owerri, glow serum nigeria, body moisturizer owerri, lip gloss owerri, precision eyeliner nigeria, perfume shop owerri, cosmetics delivery owerri, online cosmetics store nigeria, port harcourt cosmetics delivery, imo state beauty products, number one cosmetics store owerri, top beauty store owerri, best skincare vendor owerri, authentic cosmetics imo state, makeup delivery owerri, beauty products near imsu, cosmetics aladinma owerri, cosmetics new owerri, beauty shop housing owerri, where to buy cosmetics in owerri, cosmetics shop works layout owerri, best foundation for nigerian skin, brightening serum nigeria, buy serum owerri, buy moisturizer owerri, buy perfume owerri, buy lipstick owerri, buy eyeliner owerri, skincare near imsu owerri, best beauty store imo state, original cosmetics owerri, trusted cosmetics vendor owerri</p>
+      <p>cosmetic store owerri, best cosmetics shop in owerri, splendid empire cosmetics owerri, skincare vendor owerri, imported makeup owerri, beauty shop owerri, foundation owerri, lipstick owerri, serum owerri, perfume owerri, moisturizer owerri, eyeliner owerri, owerri beauty store, works layout cosmetics, imsu junction beauty shop, imo state skincare, buy cosmetics owerri, same day delivery cosmetics owerri, whatsapp cosmetics order owerri, premium skincare nigeria, nigerian skincare vendor, foreign cosmetics owerri, makeup shop near imsu, skin care products owerri, face foundation owerri, glow serum nigeria, body moisturizer owerri, lip gloss owerri, precision eyeliner nigeria, perfume shop owerri, cosmetics delivery owerri, online cosmetics store nigeria, port harcourt cosmetics delivery, imo state beauty products, number one cosmetics store owerri, top beauty store owerri, best skincare vendor owerri, imported cosmetics imo state, makeup delivery owerri, beauty products near imsu, cosmetics aladinma owerri, cosmetics new owerri, beauty shop housing owerri, where to buy cosmetics in owerri, cosmetics shop works layout owerri, best foundation for nigerian skin, brightening serum nigeria, buy serum owerri, buy moisturizer owerri, buy perfume owerri, buy lipstick owerri, buy eyeliner owerri, skincare near imsu owerri, best beauty store imo state, genuine cosmetics owerri, trusted cosmetics vendor owerri, foreign skincare products owerri, imported beauty products nigeria</p>
       <address><strong>Splendid Empire Cosmetics — Best Cosmetics Store in Owerri</strong> Shop D, World Centre, By IMSU Junction, 470 Works Layout, Owerri 460212, Imo State, Nigeria. WhatsApp: +2348104748683. Email: obilodoris15@gmail.com. Hours: Monday to Saturday, 9am to 7pm.</address>
     </section>
   );
