@@ -216,6 +216,48 @@ export default function App() {
 
       <CartDrawer open={cartOpen} cart={cart} total={cartTotal} onClose={() => setCartOpen(false)} onRemove={removeFromCart} onQty={updateQty} onCheckout={beginCheckout} />
 
+      {/* Sticky Cart Bar — shows when cart has items */}
+      {cartCount > 0 && !cartOpen && !checkoutStep && (
+        <div
+          onClick={() => setCartOpen(true)}
+          style={{
+            position: "fixed",
+            bottom: 24,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 50,
+            background: "#1A0F0A",
+            borderRadius: 999,
+            padding: "14px 28px",
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            boxShadow: "0 8px 32px rgba(26,15,10,0.35)",
+            cursor: "pointer",
+            border: "1px solid rgba(181,120,74,0.3)",
+            minWidth: 260,
+            justifyContent: "space-between",
+            transition: "transform 0.2s",
+            animation: "slideUpBar 0.3s ease",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ background: "#B5784A", borderRadius: 999, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <ShoppingBag size={14} color="#fff" />
+            </div>
+            <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, fontWeight: 600 }}>
+              {cartCount} {cartCount === 1 ? "item" : "items"}
+            </span>
+          </div>
+          <span style={{ fontFamily: "'Playfair Display', serif", color: "#F2B8A8", fontSize: 18, fontWeight: 700 }}>
+            {fmt(cartTotal)}
+          </span>
+          <span style={{ color: "#fff", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", background: "#B5784A", padding: "6px 16px", borderRadius: 999 }}>
+            VIEW CART →
+          </span>
+        </div>
+      )}
+
       {checkoutStep && (
         <CheckoutModal step={checkoutStep} cart={cart} total={cartTotal} orderId={orderId} name={customerName} phone={customerPhone} email={customerEmail} onName={setCustomerName} onPhone={setCustomerPhone} onEmail={setCustomerEmail} onPlace={placeOrder} onWhatsApp={sendWhatsApp} onCopy={copyAccount} copied={copied} onClose={closeCheckout} />
       )}
