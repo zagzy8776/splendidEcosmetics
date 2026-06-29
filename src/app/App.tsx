@@ -1810,16 +1810,19 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, email, onName,
 function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { products: Product[]; setProducts: React.Dispatch<React.SetStateAction<Product[]>>; orders: Order[]; setOrders: React.Dispatch<React.SetStateAction<Order[]>>; onExit: () => void }) {
   const [authed, setAuthed] = useState(false);
   const [pw, setPw] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [err, setErr] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
   const [tab, setTab] = useState<AdminTab>("orders");
 
   function login() {
+    setLoginLoading(true);
+    setErr("");
     adminLogin(pw)
       .then(res => {
         if (res.authenticated) {
           setAuthed(true);
           setErr("");
-          // Load orders now that we have a valid token
           fetchOrders()
             .then(data => setOrders(data.map((o: any) => ({ ...o, status: o.status as OrderStatus }))))
             .catch(() => {});
@@ -1829,65 +1832,164 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
       })
       .catch(() => {
         setErr("Login failed. Please check your connection and try again.");
-      });
+      })
+      .finally(() => setLoginLoading(false));
   }
 
   if (!authed) {
     return (
-      <div style={{ minHeight: "100vh", backgroundColor: "#1A0F0A", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'Raleway', sans-serif" }}>
-        <div className="glass" style={{ borderRadius: 24, padding: 40, width: "100%", maxWidth: 360, boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
-          <div style={{ textAlign: "center", marginBottom: 32 }}>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: "#1A0F0A" }}>SPLENDID</div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 9, letterSpacing: "0.45em", color: "#B5784A", marginBottom: 12 }}>EMPIRE COSMETICS</div>
-            <div style={{ height: 1, background: "rgba(181,120,74,0.2)", margin: "0 auto 12px", width: 60 }} />
-            <p style={{ color: "#5C3D2E", fontSize: 13, fontWeight: 600 }}>Admin Command Centre</p>
+      <div style={{ minHeight: "100vh", backgroundColor: "#1A0F0A", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'Raleway', sans-serif", position: "relative", overflow: "hidden" }}>
+        {/* Decorative blobs */}
+        <div style={{ position: "absolute", top: -120, right: -80, width: 400, height: 400, background: "radial-gradient(circle, rgba(181,120,74,0.12) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", bottom: -100, left: -60, width: 350, height: 350, background: "radial-gradient(circle, rgba(242,184,168,0.07) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
+
+        <div style={{ borderRadius: 24, padding: "44px 40px", width: "100%", maxWidth: 400, boxShadow: "0 0 0 1px rgba(181,120,74,0.35), 0 24px 64px rgba(0,0,0,0.55)", background: "rgba(30,18,12,0.85)", backdropFilter: "blur(20px)", position: "relative" }}>
+          {/* Glow ring */}
+          <div style={{ position: "absolute", inset: -1, borderRadius: 25, background: "linear-gradient(135deg, rgba(181,120,74,0.5) 0%, transparent 50%, rgba(181,120,74,0.2) 100%)", zIndex: -1, pointerEvents: "none" }} />
+
+          <div style={{ textAlign: "center", marginBottom: 36 }}>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: "#ffffff", letterSpacing: "0.08em", lineHeight: 1 }}>SPLENDID EMPIRE</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 9, letterSpacing: "0.45em", color: "#B5784A", marginTop: 8, marginBottom: 20, fontWeight: 600 }}>ADMIN COMMAND CENTRE</div>
+            <div style={{ height: 1, background: "linear-gradient(to right, transparent, rgba(181,120,74,0.5), transparent)", margin: "0 auto" }} />
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             <div>
-              <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#1A0F0A", marginBottom: 8, letterSpacing: "0.15em" }}>PASSWORD</label>
-              <input type="password" value={pw} onChange={e => setPw(e.target.value)} onKeyDown={e => e.key === "Enter" && login()} placeholder="Enter admin password" style={{ width: "100%", border: "1px solid rgba(242,184,168,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 14, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }} />
+              <label style={{ display: "block", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.5)", marginBottom: 8, letterSpacing: "0.2em" }}>PASSWORD</label>
+              <div style={{ position: "relative" }}>
+                <input
+                  type={showPw ? "text" : "password"}
+                  value={pw}
+                  onChange={e => setPw(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && !loginLoading && login()}
+                  placeholder="Enter admin password"
+                  style={{ width: "100%", border: "1px solid rgba(181,120,74,0.3)", borderRadius: 12, padding: "13px 48px 13px 16px", fontSize: 14, outline: "none", backgroundColor: "rgba(255,255,255,0.06)", color: "#fff", boxSizing: "border-box", transition: "border-color 0.2s" }}
+                  onFocus={e => (e.currentTarget.style.borderColor = "#B5784A")}
+                  onBlur={e => (e.currentTarget.style.borderColor = "rgba(181,120,74,0.3)")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPw(s => !s)}
+                  style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.4)", display: "flex", alignItems: "center", padding: 0 }}
+                >
+                  {showPw ? <Eye size={16} /> : <Eye size={16} style={{ opacity: 0.5 }} />}
+                </button>
+              </div>
             </div>
-            {err && <p style={{ color: "#ef4444", fontSize: 12, fontWeight: 500 }}>{err}</p>}
-            <button onClick={login} style={{ background: "#B5784A", color: "#fff", border: "none", borderRadius: 999, padding: "14px 24px", fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: "pointer" }}>LOGIN TO DASHBOARD</button>
-            <button onClick={onExit} style={{ background: "none", border: "none", cursor: "pointer", color: "#5C3D2E", fontSize: 13 }}>← Back to Store</button>
+
+            {err && (
+              <div style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 10, padding: "10px 14px", color: "#fca5a5", fontSize: 12, fontWeight: 600 }}>
+                {err}
+              </div>
+            )}
+
+            <button
+              onClick={login}
+              disabled={loginLoading}
+              style={{ background: loginLoading ? "rgba(181,120,74,0.5)" : "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", border: "none", borderRadius: 12, padding: "14px 24px", fontSize: 12, letterSpacing: "0.2em", fontWeight: 700, cursor: loginLoading ? "not-allowed" : "pointer", boxShadow: loginLoading ? "none" : "0 8px 24px rgba(181,120,74,0.3)", transition: "all 0.2s" }}
+            >
+              {loginLoading ? "VERIFYING..." : "LOGIN →"}
+            </button>
+
+            <button
+              onClick={onExit}
+              style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.35)", fontSize: 12, letterSpacing: "0.1em", fontWeight: 600, paddingTop: 4 }}
+            >
+              ← Back to Store
+            </button>
           </div>
         </div>
       </div>
     );
   }
 
-  const stats = [["Total", orders.length], ["Pending", orders.filter(o => o.status === "pending").length], ["Verifying", orders.filter(o => o.status === "verifying").length], ["Confirmed", orders.filter(o => o.status === "confirmed").length], ["Revenue", fmt(orders.filter(o => ["confirmed", "dispatched"].includes(o.status)).reduce((s, o) => s + o.total, 0))]];
+  const pendingCount = orders.filter(o => o.status === "pending").length;
+  const statsData: Array<[string, string | number]> = [
+    ["Total Orders", orders.length],
+    ["Pending", orders.filter(o => o.status === "pending").length],
+    ["Confirmed", orders.filter(o => o.status === "confirmed").length],
+    ["Dispatched", orders.filter(o => o.status === "dispatched").length],
+    ["Revenue", fmt(orders.filter(o => ["confirmed", "dispatched", "delivered"].includes(o.status)).reduce((s, o) => s + o.total, 0))],
+  ];
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#FFF6F3", fontFamily: "'Raleway', sans-serif" }}>
-      <div style={{ backgroundColor: "#1A0F0A", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 10, boxShadow: "0 2px 12px rgba(0,0,0,0.2)" }}>
-        <div>
-          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: "#fff", lineHeight: 1.1 }}>SPLENDID EMPIRE</div>
-          <div style={{ color: "#B5784A", fontSize: 9, letterSpacing: "0.3em", fontWeight: 600 }}>ADMIN PANEL</div>
+
+      {/* ── Sticky Header ── */}
+      <div style={{ backgroundColor: "#1A0F0A", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 30, boxShadow: "0 2px 16px rgba(0,0,0,0.35)", height: 60 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 700, color: "#fff", letterSpacing: "0.04em", lineHeight: 1 }}>SPLENDID EMPIRE</div>
+            <div style={{ color: "#B5784A", fontSize: 8, letterSpacing: "0.4em", fontWeight: 700, marginTop: 2 }}>ADMIN</div>
+          </div>
         </div>
-        <div style={{ display: "flex", gap: 20 }}>
-          <button onClick={onExit} style={{ background: "none", border: "none", cursor: "pointer", color: "#9A7A6E", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, letterSpacing: "0.1em" }}><Eye size={14} /> VIEW STORE</button>
-          <button onClick={() => { adminLogout(); setAuthed(false); setPw(""); onExit(); }} style={{ background: "none", border: "none", cursor: "pointer", color: "#9A7A6E", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, letterSpacing: "0.1em" }}><LogOut size={14} /> LOGOUT</button>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <button
+            onClick={onExit}
+            style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", cursor: "pointer", color: "rgba(255,255,255,0.7)", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, letterSpacing: "0.1em", padding: "8px 14px", borderRadius: 8, transition: "all 0.2s" }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.12)"; (e.currentTarget as HTMLElement).style.color = "#fff"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.07)"; (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.7)"; }}
+          >
+            <Eye size={13} /> VIEW STORE
+          </button>
+          <button
+            onClick={() => { adminLogout(); setAuthed(false); setPw(""); onExit(); }}
+            style={{ background: "rgba(181,120,74,0.15)", border: "1px solid rgba(181,120,74,0.3)", cursor: "pointer", color: "#B5784A", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, letterSpacing: "0.1em", padding: "8px 14px", borderRadius: 8, transition: "all 0.2s" }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(181,120,74,0.25)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(181,120,74,0.15)"; }}
+          >
+            <LogOut size={13} /> LOGOUT
+          </button>
         </div>
       </div>
 
-      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(242,184,168,0.3)", padding: "16px 24px", overflowX: "auto" }}>
-        <div style={{ display: "flex", gap: 48, justifyContent: "center", minWidth: "max-content" }}>
-          {stats.map(([l, v]) => (
-            <div key={l as string} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 10, color: "#9A7A6E", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 4 }}>{l as string}</div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", fontSize: 26 }}>{v as string | number}</div>
+      {/* ── Stats Bar ── */}
+      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(242,184,168,0.25)", padding: "20px 24px" }}>
+        <div style={{ maxWidth: 1060, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }} className="sm:grid-cols-5">
+          {statsData.map(([label, value]) => (
+            <div key={label} style={{ background: "#fff", borderRadius: 16, padding: "16px 20px", textAlign: "center", boxShadow: "0 1px 6px rgba(181,120,74,0.08)", border: "1px solid rgba(242,184,168,0.2)" }}>
+              <div style={{ fontSize: 9, color: "#9A7A6E", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 6, fontWeight: 700 }}>{label}</div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: label === "Revenue" ? "#B5784A" : "#1A0F0A", fontSize: label === "Revenue" ? 18 : 26, lineHeight: 1 }}>{value}</div>
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ maxWidth: 960, margin: "0 auto", padding: "32px 20px" }}>
-        <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
-          {[["orders", "📋 Orders"], ["products", "🛍️ Products"], ["security", "🔒 Security"]].map(([t, label]) => (
-            <button key={t} onClick={() => setTab(t as AdminTab)} style={{ padding: "10px 24px", borderRadius: 999, fontSize: 12, fontWeight: 700, letterSpacing: "0.05em", border: "1px solid", borderColor: tab === t ? "#B5784A" : "rgba(242,184,168,0.5)", background: tab === t ? "#B5784A" : "#fff", color: tab === t ? "#fff" : "#5C3D2E", cursor: "pointer", transition: "all 0.2s" }}>{label}</button>
+      {/* ── Tab Navigation ── */}
+      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(242,184,168,0.25)" }}>
+        <div style={{ maxWidth: 1060, margin: "0 auto", padding: "0 24px", display: "flex" }}>
+          {([["orders", "Orders"], ["products", "Products"], ["security", "Security"]] as const).map(([t, label]) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              style={{
+                padding: "16px 24px",
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: "0.1em",
+                border: "none",
+                borderBottom: tab === t ? "2px solid #B5784A" : "2px solid transparent",
+                background: "transparent",
+                color: tab === t ? "#B5784A" : "#9A7A6E",
+                cursor: "pointer",
+                transition: "all 0.2s",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                marginBottom: -1,
+              }}
+            >
+              {label.toUpperCase()}
+              {t === "orders" && pendingCount > 0 && (
+                <span style={{ background: "#B5784A", color: "#fff", fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 999, lineHeight: 1.4 }}>{pendingCount}</span>
+              )}
+            </button>
           ))}
         </div>
+      </div>
+
+      {/* ── Tab Content ── */}
+      <div style={{ maxWidth: 1060, margin: "0 auto", padding: "28px 20px 60px" }}>
         {tab === "orders" && <AdminOrders orders={orders} setOrders={setOrders} />}
         {tab === "products" && <AdminProducts products={products} setProducts={setProducts} />}
         {tab === "security" && <AdminSecurity />}
@@ -1994,6 +2096,8 @@ const NEXT: Record<OrderStatus, OrderStatus | null> = { pending: "verifying", ve
 const NEXT_LABEL: Record<OrderStatus, string | null> = { pending: "Mark Verifying", verifying: "Approve Payment ✓", confirmed: "Mark Dispatched", dispatched: "Mark Delivered 📦", delivered: null };
 
 function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.Dispatch<React.SetStateAction<Order[]>> }) {
+  const [filterStatus, setFilterStatus] = useState<"All" | OrderStatus>("All");
+
   function advance(id: string) {
     const o = orders.find(ord => ord.id === id);
     if (!o) return;
@@ -2021,63 +2125,132 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
     window.open(`https://wa.me/${o.phone.replace(/^0/, "234").replace(/\D/g, "")}?text=${encodeURIComponent(msg)}`, "_blank");
   }
 
+  const filterOptions: Array<"All" | OrderStatus> = ["All", "pending", "verifying", "confirmed", "dispatched", "delivered"];
+  const filterLabels: Record<string, string> = { All: "All", pending: "Pending", verifying: "Verifying", confirmed: "Confirmed", dispatched: "Dispatched", delivered: "Delivered" };
+
+  const displayOrders = filterStatus === "All" ? orders : orders.filter(o => o.status === filterStatus);
+
   if (orders.length === 0) {
     return (
       <div style={{ textAlign: "center", padding: "80px 0", color: "#5C3D2E" }}>
         <Package size={52} style={{ margin: "0 auto 16px", opacity: 0.15 }} />
-        <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 500, marginBottom: 8 }}>All clear</p>
-        <p style={{ fontSize: 13, color: "#9A7A6E" }}>New orders will show up here the moment a customer checks out.</p>
+        <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 600, marginBottom: 8, color: "#1A0F0A" }}>No orders yet</p>
+        <p style={{ fontSize: 13, color: "#9A7A6E" }}>New orders will appear here the moment a customer checks out.</p>
       </div>
     );
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16, paddingBottom: 48 }}>
-      {orders.map(o => {
-        const cfg = STATUS_CFG[o.status];
-        const btn = NEXT_LABEL[o.status];
-        return (
-          <div key={o.id} style={{ backgroundColor: "#fff", borderRadius: 20, border: "1px solid rgba(242,184,168,0.2)", overflow: "hidden", boxShadow: "0 2px 12px rgba(181,120,74,0.06)" }}>
-            <div style={{ padding: 20 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
-                <div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6, flexWrap: "wrap" }}>
-                    <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#B5784A", fontSize: 14 }}>{o.id}</span>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: cfg.bg, color: cfg.color, padding: "3px 10px", borderRadius: 999, fontSize: 10, fontWeight: 700 }}>{cfg.icon} {cfg.label}</span>
-                  </div>
-                  <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, color: "#1A0F0A", fontSize: 16 }}>{o.customerName}</div>
-                  <div style={{ color: "#5C3D2E", fontSize: 13 }}>{o.phone}</div>
-                  <div style={{ color: "#9A7A6E", fontSize: 11, marginTop: 2 }}>{o.createdAt.toLocaleString("en-NG")}</div>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 24, color: "#B5784A" }}>{fmt(o.total)}</div>
-                  <div style={{ color: "#9A7A6E", fontSize: 11 }}>{o.items.reduce((s, i) => s + i.quantity, 0)} item(s)</div>
-                </div>
-              </div>
+    <div style={{ paddingBottom: 48 }}>
+      {/* Filter pills */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
+        {filterOptions.map(status => {
+          const count = status === "All" ? orders.length : orders.filter(o => o.status === status).length;
+          const isActive = filterStatus === status;
+          return (
+            <button
+              key={status}
+              onClick={() => setFilterStatus(status)}
+              style={{
+                padding: "7px 16px",
+                borderRadius: 999,
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                border: `1px solid ${isActive ? "#B5784A" : "rgba(181,120,74,0.25)"}`,
+                background: isActive ? "#B5784A" : "#fff",
+                color: isActive ? "#fff" : "#9A7A6E",
+                cursor: "pointer",
+                transition: "all 0.18s",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              {filterLabels[status]}
+              <span style={{ background: isActive ? "rgba(255,255,255,0.25)" : "rgba(181,120,74,0.12)", color: isActive ? "#fff" : "#B5784A", borderRadius: 999, padding: "1px 6px", fontSize: 10, fontWeight: 800 }}>{count}</span>
+            </button>
+          );
+        })}
+      </div>
 
-              <div style={{ backgroundColor: "#FFF6F3", borderRadius: 12, padding: 14, marginBottom: 16 }}>
-                {o.items.map(({ product: p, quantity: q }) => (
-                  <div key={p.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "4px 0" }}>
-                    <span style={{ color: "#5C3D2E", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: 16 }}>{p.name} × {q}</span>
-                    <span style={{ color: "#1A0F0A", fontWeight: 600, flexShrink: 0 }}>{fmt(p.price * q)}</span>
-                  </div>
-                ))}
-              </div>
+      {displayOrders.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "60px 0", color: "#9A7A6E" }}>
+          <Package size={36} style={{ margin: "0 auto 12px", opacity: 0.2 }} />
+          <p style={{ fontSize: 14, fontWeight: 600 }}>No {filterStatus} orders</p>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {displayOrders.map(o => {
+            const cfg = STATUS_CFG[o.status];
+            const btn = NEXT_LABEL[o.status];
+            return (
+              <div key={o.id} style={{ backgroundColor: "#fff", borderRadius: 20, border: "1px solid rgba(242,184,168,0.2)", overflow: "hidden", boxShadow: "0 2px 16px rgba(181,120,74,0.07)" }}>
+                <div style={{ padding: "20px 22px" }}>
 
-              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                {btn && (
-                  <button onClick={() => advance(o.id)} style={{ flex: 1, background: "#B5784A", color: "#fff", border: "none", borderRadius: 999, padding: "10px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", minWidth: 140 }}>{btn}</button>
-                )}
-                {(o.status === "confirmed" || o.status === "dispatched") && (
-                  <button onClick={() => waCustomer(o)} style={{ display: "flex", alignItems: "center", gap: 8, background: "#25D366", color: "#fff", border: "none", borderRadius: 999, padding: "10px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-                    <MessageCircle size={14} /> WhatsApp Customer
-                  </button>
-                )}
+                  {/* Top row: ID + status badge + date */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                      <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#B5784A", fontSize: 14, letterSpacing: "0.05em" }}>{o.id}</span>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: cfg.bg, color: cfg.color, padding: "4px 12px", borderRadius: 999, fontSize: 10, fontWeight: 700, letterSpacing: "0.05em" }}>
+                        {cfg.icon} {cfg.label}
+                      </span>
+                    </div>
+                    <span style={{ color: "#9A7A6E", fontSize: 11, fontWeight: 600 }}>{o.createdAt.toLocaleString("en-NG")}</span>
+                  </div>
+
+                  {/* Middle row: customer info */}
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", fontSize: 18, lineHeight: 1.2, marginBottom: 4 }}>{o.customerName}</div>
+                    <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                      <span style={{ color: "#5C3D2E", fontSize: 13, fontWeight: 600 }}>{o.phone}</span>
+                      {o.email && <span style={{ color: "#9A7A6E", fontSize: 12 }}>{o.email}</span>}
+                    </div>
+                  </div>
+
+                  {/* Items row */}
+                  <div style={{ backgroundColor: "#FFF6F3", borderRadius: 12, padding: "12px 16px", marginBottom: 14 }}>
+                    {o.items.map(({ product: p, quantity: q }) => (
+                      <div key={p.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "4px 0", borderBottom: "1px solid rgba(181,120,74,0.07)" }}>
+                        <span style={{ color: "#5C3D2E", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: 16 }}>{p.name} <span style={{ color: "#9A7A6E" }}>×{q}</span></span>
+                        <span style={{ color: "#1A0F0A", fontWeight: 600, flexShrink: 0 }}>{fmt(p.price * q)}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Total + action buttons */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+                    <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 22, color: "#B5784A" }}>{fmt(o.total)}</div>
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                      {btn && (
+                        <button
+                          onClick={() => advance(o.id)}
+                          style={{ background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", border: "none", borderRadius: 999, padding: "11px 22px", fontSize: 12, fontWeight: 700, cursor: "pointer", minHeight: 44, letterSpacing: "0.04em", boxShadow: "0 4px 14px rgba(181,120,74,0.25)", transition: "opacity 0.2s" }}
+                          onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+                          onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+                        >
+                          {btn}
+                        </button>
+                      )}
+                      {(o.status === "confirmed" || o.status === "dispatched") && (
+                        <button
+                          onClick={() => waCustomer(o)}
+                          style={{ display: "flex", alignItems: "center", gap: 8, background: "#25D366", color: "#fff", border: "none", borderRadius: 999, padding: "11px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", minHeight: 44, boxShadow: "0 4px 14px rgba(37,211,102,0.2)", transition: "opacity 0.2s" }}
+                          onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+                          onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+                        >
+                          <MessageCircle size={14} /> WhatsApp Customer
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
               </div>
-            </div>
-          </div>
-        );
-      })}
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -2208,94 +2381,151 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
   return (
     <div style={{ paddingBottom: 48 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#1A0F0A" }}>{products.length} Products</h2>
-        <button onClick={openAdd} style={{ display: "flex", alignItems: "center", gap: 8, background: "#B5784A", color: "#fff", border: "none", borderRadius: 999, padding: "10px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-          <Plus size={14} /> Add Product
+        <div>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#1A0F0A", margin: 0 }}>{products.length} Products</h2>
+          <p style={{ color: "#9A7A6E", fontSize: 12, margin: "4px 0 0" }}>Manage your store inventory</p>
+        </div>
+        <button onClick={openAdd} style={{ display: "flex", alignItems: "center", gap: 8, background: "linear-gradient(135deg, #B5784A, #8F5731)", color: "#fff", border: "none", borderRadius: 12, padding: "12px 22px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 14px rgba(181,120,74,0.3)", letterSpacing: "0.05em" }}>
+          <Plus size={15} /> ADD PRODUCT
         </button>
       </div>
 
+      {/* Full-screen modal overlay for Add/Edit */}
       {showForm && (
-        <div style={{ backgroundColor: "#fff", borderRadius: 20, border: "1px solid rgba(242,184,168,0.3)", padding: 24, marginBottom: 24, boxShadow: "0 4px 20px rgba(181,120,74,0.08)" }}>
-          <h3 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", fontSize: 18, marginBottom: 20 }}>{editId ? "Edit Product" : "Add New Product"}</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <div>
-              <label style={labelStyle}>Product Name *</label>
-              <input value={form.name} onChange={e => sf("name")(e.target.value)} placeholder="e.g. Velvet Matte Foundation" style={inputStyle} />
-            </div>
-            <div>
-              <label style={labelStyle}>Price (₦) *</label>
-              <input type="number" value={form.price} onChange={e => sf("price")(e.target.value)} placeholder="e.g. 8500" style={inputStyle} />
-            </div>
-            <div>
-              <label style={labelStyle}>Category *</label>
-              <select value={form.category} onChange={e => sf("category")(e.target.value)} style={inputStyle}>
-                {(["Foundation", "Lipstick", "Serum", "Eyeliner", "Moisturizer", "Perfume"] as const).map(c => <option key={c}>{c}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={labelStyle}>Badge (optional)</label>
-              <input value={form.badge} onChange={e => sf("badge")(e.target.value)} placeholder="e.g. NEW, HOT, BESTSELLER" style={inputStyle} />
-            </div>
-            <div style={{ gridColumn: "1 / -1" }}>
-              <label style={labelStyle}>Product Image</label>
-              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                <div style={{ flex: 1, position: "relative" }}>
-                  <input type="file" accept="image/*" onChange={uploadImage} disabled={isUploading} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%" }} />
-                  <div style={{ ...inputStyle, display: "flex", alignItems: "center", justifyContent: "center", background: "#fff", cursor: "pointer", color: isUploading ? "#B5784A" : "#8E7366", borderStyle: "dashed" }}>
-                    {isUploading ? "Uploading to Cloudinary..." : "Click to select a picture from your device"}
-                  </div>
-                </div>
-                <div style={{ fontSize: 12, color: "#8E7366", fontWeight: 600 }}>OR</div>
-                <input value={form.image} onChange={e => sf("image")(e.target.value)} placeholder="Paste an image URL" style={{ ...inputStyle, flex: 1 }} />
+        <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "flex-end", justifyContent: "center" }} className="sm:items-center sm:p-4">
+          <div style={{ position: "absolute", inset: 0, background: "rgba(26,15,10,0.7)", backdropFilter: "blur(6px)" }} onClick={() => setShowForm(false)} />
+          <div style={{ position: "relative", background: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 640, maxHeight: "92vh", display: "flex", flexDirection: "column", boxShadow: "0 -20px 60px rgba(0,0,0,0.3)", overflowY: "auto" }} className="sm:rounded-3xl">
+            {/* Modal Header */}
+            <div style={{ background: "#1A0F0A", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, borderRadius: "24px 24px 0 0" }}>
+              <div>
+                <h3 style={{ fontFamily: "'Playfair Display', serif", color: "#fff", fontSize: 18, fontWeight: 700, margin: 0 }}>{editId ? "Edit Product" : "Add New Product"}</h3>
+                <p style={{ color: "#B5784A", fontSize: 11, margin: "4px 0 0", letterSpacing: "0.1em" }}>SPLENDID EMPIRE COSMETICS</p>
               </div>
-              {form.image && (
-                <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 12 }}>
-                  <img src={form.image} alt="Preview" style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 8, border: "1px solid rgba(242,184,168,0.6)" }} />
-                  <span style={{ fontSize: 11, color: "#10b981", fontWeight: 600 }}>Image ready!</span>
-                </div>
-              )}
-            </div>
-            <div style={{ gridColumn: "1 / -1" }}>
-              <label style={labelStyle}>Description</label>
-              <textarea value={form.description} onChange={e => sf("description")(e.target.value)} placeholder="Short product description..." rows={2} style={{ ...inputStyle, resize: "none" }} />
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <label style={{ fontSize: 13, fontWeight: 700, color: "#1A0F0A" }}>In Stock</label>
-              <button type="button" onClick={() => sf("inStock")(!form.inStock)} style={{ width: 48, height: 24, borderRadius: 999, background: form.inStock ? "#B5784A" : "#d1d5db", border: "none", cursor: "pointer", position: "relative", transition: "background 0.2s" }}>
-                <div style={{ position: "absolute", top: 2, width: 20, height: 20, background: "#fff", borderRadius: "50%", boxShadow: "0 1px 4px rgba(0,0,0,0.15)", transition: "left 0.2s", left: form.inStock ? 26 : 2 }} />
+              <button onClick={() => setShowForm(false)} style={{ background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%", width: 36, height: 36, cursor: "pointer", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <X size={18} />
               </button>
             </div>
-          </div>
-          {fErr && <p style={{ color: "#ef4444", fontSize: 12, fontWeight: 500, marginTop: 12 }}>{fErr}</p>}
-          <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
-            <button onClick={save} style={{ background: "#B5784A", color: "#fff", border: "none", borderRadius: 999, padding: "10px 24px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>{editId ? "Save Changes" : "Add Product"}</button>
-            <button onClick={() => setShowForm(false)} style={{ background: "none", border: "1px solid rgba(242,184,168,0.6)", borderRadius: 999, padding: "10px 24px", fontSize: 12, fontWeight: 700, cursor: "pointer", color: "#5C3D2E" }}>Cancel</button>
+
+            {/* Modal Body */}
+            <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 18 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <label style={labelStyle}>Product Name *</label>
+                  <input value={form.name} onChange={e => sf("name")(e.target.value)} placeholder="e.g. Velvet Matte Foundation" style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Price (₦) *</label>
+                  <input type="number" value={form.price} onChange={e => sf("price")(e.target.value)} placeholder="e.g. 8500" style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Category *</label>
+                  <select value={form.category} onChange={e => sf("category")(e.target.value)} style={inputStyle}>
+                    {(["Foundation", "Lipstick", "Serum", "Eyeliner", "Moisturizer", "Perfume"] as const).map(c => <option key={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={labelStyle}>Badge (optional)</label>
+                  <input value={form.badge} onChange={e => sf("badge")(e.target.value)} placeholder="e.g. NEW, HOT, BESTSELLER" style={inputStyle} />
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <label style={{ fontSize: 13, fontWeight: 700, color: "#1A0F0A" }}>In Stock</label>
+                  <button type="button" onClick={() => sf("inStock")(!form.inStock)} style={{ width: 52, height: 28, borderRadius: 999, background: form.inStock ? "#B5784A" : "#d1d5db", border: "none", cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
+                    <div style={{ position: "absolute", top: 3, width: 22, height: 22, background: "#fff", borderRadius: "50%", boxShadow: "0 1px 4px rgba(0,0,0,0.2)", transition: "left 0.2s", left: form.inStock ? 27 : 3 }} />
+                  </button>
+                  <span style={{ fontSize: 12, color: form.inStock ? "#15803d" : "#dc2626", fontWeight: 700 }}>{form.inStock ? "In Stock" : "Out of Stock"}</span>
+                </div>
+              </div>
+
+              <div>
+                <label style={labelStyle}>Product Image</label>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ position: "relative" }}>
+                    <input type="file" accept="image/*" onChange={uploadImage} disabled={isUploading} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%", height: "100%" }} />
+                    <div style={{ border: "2px dashed rgba(181,120,74,0.4)", borderRadius: 12, padding: "20px", textAlign: "center", background: "#FFF6F3", cursor: "pointer" }}>
+                      <Plus size={20} color="#B5784A" style={{ margin: "0 auto 8px" }} />
+                      <p style={{ color: isUploading ? "#B5784A" : "#9A7A6E", fontSize: 13, fontWeight: 600, margin: 0 }}>
+                        {isUploading ? "Uploading..." : "Tap to upload from your phone"}
+                      </p>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ height: 1, flex: 1, background: "rgba(181,120,74,0.2)" }} />
+                    <span style={{ fontSize: 11, color: "#9A7A6E", fontWeight: 700 }}>OR PASTE URL</span>
+                    <div style={{ height: 1, flex: 1, background: "rgba(181,120,74,0.2)" }} />
+                  </div>
+                  <input value={form.image} onChange={e => sf("image")(e.target.value)} placeholder="https://..." style={inputStyle} />
+                  {form.image && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, background: "#f0fdf4", borderRadius: 10, padding: "10px 14px", border: "1px solid #86efac" }}>
+                      <img src={form.image} alt="Preview" style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 8 }} />
+                      <span style={{ fontSize: 12, color: "#15803d", fontWeight: 700 }}>✓ Image ready</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label style={labelStyle}>Description</label>
+                <textarea value={form.description} onChange={e => sf("description")(e.target.value)} placeholder="Short product description..." rows={3} style={{ ...inputStyle, resize: "none" }} />
+              </div>
+
+              {fErr && <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: 10, padding: "12px 16px", color: "#dc2626", fontSize: 13, fontWeight: 600 }}>{fErr}</div>}
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(242,184,168,0.2)", display: "flex", gap: 12, flexShrink: 0 }}>
+              <button onClick={save} style={{ flex: 1, background: "linear-gradient(135deg, #B5784A, #8F5731)", color: "#fff", border: "none", borderRadius: 12, padding: "14px", fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 14px rgba(181,120,74,0.3)" }}>
+                {editId ? "SAVE CHANGES" : "ADD PRODUCT"}
+              </button>
+              <button onClick={() => setShowForm(false)} style={{ padding: "14px 20px", background: "#FFF6F3", border: "1px solid rgba(181,120,74,0.3)", borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: "pointer", color: "#5C3D2E" }}>
+                CANCEL
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
+      {/* Products Grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16 }}>
         {products.map(p => (
-          <div key={p.id} style={{ backgroundColor: "#fff", borderRadius: 16, border: "1px solid rgba(242,184,168,0.2)", overflow: "hidden", boxShadow: "0 2px 12px rgba(181,120,74,0.06)" }}>
-            <div style={{ position: "relative", aspectRatio: "16/9", overflow: "hidden", backgroundColor: "#FFF0EB" }}>
+          <div key={p.id} style={{ backgroundColor: "#fff", borderRadius: 20, border: "1px solid rgba(242,184,168,0.2)", overflow: "hidden", boxShadow: "0 2px 16px rgba(181,120,74,0.07)", display: "flex", flexDirection: "column" }}>
+            {/* Image */}
+            <div style={{ position: "relative", aspectRatio: "1", overflow: "hidden", backgroundColor: "#FFF0EB" }}>
               <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              {p.badge && <span style={{ position: "absolute", top: 8, left: 8, background: "#B5784A", color: "#fff", fontSize: 9, fontWeight: 700, letterSpacing: "0.15em", padding: "3px 8px", borderRadius: 999 }}>{p.badge}</span>}
+              {p.badge && (
+                <span style={{ position: "absolute", top: 10, left: 10, background: "#B5784A", color: "#fff", fontSize: 9, fontWeight: 700, letterSpacing: "0.15em", padding: "4px 10px", borderRadius: 999 }}>{p.badge}</span>
+              )}
+              <span style={{ position: "absolute", top: 10, right: 10, background: p.inStock ? "rgba(21,128,61,0.9)" : "rgba(220,38,38,0.9)", color: "#fff", fontSize: 9, fontWeight: 700, padding: "4px 8px", borderRadius: 999 }}>
+                {p.inStock ? "IN STOCK" : "OUT"}
+              </span>
             </div>
-            <div style={{ padding: 14 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 6 }}>
-                <h4 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, color: "#1A0F0A", fontSize: 14, lineHeight: 1.4, flex: 1 }}>{p.name}</h4>
-                <span style={{ fontFamily: "'Playfair Display', serif", color: "#B5784A", fontWeight: 700, fontSize: 14, flexShrink: 0 }}>{fmt(p.price)}</span>
-              </div>
-              <span style={{ display: "inline-block", background: "#FFF0EB", color: "#B5784A", fontSize: 9, fontWeight: 700, letterSpacing: "0.15em", padding: "2px 10px", borderRadius: 999, marginBottom: 12 }}>{p.category.toUpperCase()}</span>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <button onClick={() => toggle(p.id)} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10, fontWeight: 700, padding: "5px 12px", borderRadius: 999, border: "1px solid", borderColor: p.inStock ? "#bbf7d0" : "#fecaca", background: p.inStock ? "#f0fdf4" : "#fff1f2", color: p.inStock ? "#15803d" : "#dc2626", cursor: "pointer" }}>
-                  {p.inStock ? <><Check size={10} /> In Stock</> : <><X size={10} /> Out of Stock</>}
-                </button>
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button onClick={() => openEdit(p)} style={{ width: 28, height: 28, borderRadius: "50%", background: "#FFF6F3", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#5C3D2E" }}><Pencil size={12} /></button>
-                  <button onClick={() => del(p.id)} style={{ width: 28, height: 28, borderRadius: "50%", background: "#FFF6F3", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#5C3D2E" }}><Trash2 size={12} /></button>
-                </div>
-              </div>
+
+            {/* Info */}
+            <div style={{ padding: "14px 16px", flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+              <span style={{ background: "#FFF0EB", color: "#B5784A", fontSize: 9, fontWeight: 700, letterSpacing: "0.15em", padding: "3px 10px", borderRadius: 999, alignSelf: "flex-start" }}>{p.category.toUpperCase()}</span>
+              <h4 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", fontSize: 14, lineHeight: 1.3, margin: 0 }}>{p.name}</h4>
+              <div style={{ fontFamily: "'Playfair Display', serif", color: "#B5784A", fontWeight: 700, fontSize: 16 }}>{fmt(p.price)}</div>
+            </div>
+
+            {/* Actions */}
+            <div style={{ padding: "12px 16px", borderTop: "1px solid rgba(242,184,168,0.15)", display: "flex", gap: 8 }}>
+              <button
+                onClick={() => toggle(p.id)}
+                style={{ flex: 1, padding: "8px 6px", borderRadius: 8, border: `1px solid ${p.inStock ? "#bbf7d0" : "#fecaca"}`, background: p.inStock ? "#f0fdf4" : "#fff1f2", color: p.inStock ? "#15803d" : "#dc2626", fontSize: 10, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}
+              >
+                {p.inStock ? <><Check size={10} /> Stock</> : <><X size={10} /> Restock</>}
+              </button>
+              <button
+                onClick={() => openEdit(p)}
+                style={{ padding: "8px 12px", borderRadius: 8, background: "#FFF6F3", border: "1px solid rgba(181,120,74,0.2)", cursor: "pointer", color: "#5C3D2E", display: "flex", alignItems: "center", justifyContent: "center" }}
+              >
+                <Pencil size={13} />
+              </button>
+              <button
+                onClick={() => del(p.id)}
+                style={{ padding: "8px 12px", borderRadius: 8, background: "#fff1f2", border: "1px solid #fecaca", cursor: "pointer", color: "#dc2626", display: "flex", alignItems: "center", justifyContent: "center" }}
+              >
+                <Trash2 size={13} />
+              </button>
             </div>
           </div>
         ))}
