@@ -275,7 +275,7 @@ export default function App() {
   }
 
   return (
-    <div style={{ fontFamily: "'Raleway', sans-serif", backgroundColor: "#FFF6F3", minHeight: "100vh", overflowX: "hidden" }}>
+    <div style={{ fontFamily: "'Raleway', sans-serif", backgroundColor: "#FFF6F3", minHeight: "100dvh", overflowX: "hidden" }}>
       <Navbar
         cartCount={cartCount}
         onCartOpen={() => setCartOpen(true)}
@@ -2057,7 +2057,7 @@ function BackToTop() {
       aria-label="Back to top"
       style={{
         position: "fixed",
-        bottom: 96,
+        bottom: "calc(96px + env(safe-area-inset-bottom, 0px))",
         right: 16,
         zIndex: 45,
         width: 44,
