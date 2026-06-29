@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
+import rateLimit from "express-rate-limit";
 import { PrismaClient } from "@prisma/client";
 import { Resend } from "resend";
 
@@ -237,7 +238,54 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 }));
-app.use(express.json());
+app.use(express.json({ limit: "50kb" })); // Reject oversized payloads
+
+// ─── SECURITY HEADERS ─────────────────────────────────────────────────────────
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+  next();
+});
+
+// ─── RATE LIMITERS ────────────────────────────────────────────────────────────
+
+// Strict: admin login — max 10 attempts per 15 min per IP
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: "Too many login attempts. Please wait 15 minutes and try again." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Moderate: order creation — max 20 orders per 10 min per IP (stops spam)
+const orderLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 20,
+  message: { error: "Too many requests. Please try again shortly." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// General: all API routes — max 200 requests per min per IP
+const generalLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 200,
+  message: { error: "Too many requests." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use("/api/", generalLimiter);
+
+// ─── INPUT SANITISATION ────────────────────────────────────────────────────────
+function sanitiseString(val, maxLen = 500) {
+  if (typeof val !== "string") return val;
+  return val.trim().slice(0, maxLen);
+}
 
 // ─── IN-MEMORY TOKEN STORE ────────────────────────────────────────────────────
 const activeTokens = new Map();
@@ -275,7 +323,22 @@ app.get("/api/products", async (req, res) => {
 app.post("/api/products", requireAdminAuth, async (req, res) => {
   try {
     const { id, createdAt, updatedAt, ...data } = req.body;
-    const product = await prisma.product.create({ data: { ...data, price: Number(data.price) } });
+    if (!data.name || typeof data.name !== "string" || data.name.trim().length === 0) {
+      return res.status(400).json({ error: "Product name is required" });
+    }
+    const price = Number(data.price);
+    if (isNaN(price) || price <= 0 || price > 10_000_000) {
+      return res.status(400).json({ error: "Invalid price" });
+    }
+    const safeData = {
+      ...data,
+      name: sanitiseString(data.name, 200),
+      category: sanitiseString(data.category, 100),
+      description: sanitiseString(data.description, 1000),
+      badge: data.badge ? sanitiseString(data.badge, 50) : undefined,
+      price,
+    };
+    const product = await prisma.product.create({ data: safeData });
     res.status(201).json(product);
   } catch (err) {
     console.error(err);
@@ -286,7 +349,15 @@ app.post("/api/products", requireAdminAuth, async (req, res) => {
 app.patch("/api/products/:id", requireAdminAuth, async (req, res) => {
   try {
     const { id, createdAt, updatedAt, ...safeData } = req.body;
-    if (safeData.price !== undefined) safeData.price = Number(safeData.price);
+    if (safeData.price !== undefined) {
+      const price = Number(safeData.price);
+      if (isNaN(price) || price <= 0) return res.status(400).json({ error: "Invalid price" });
+      safeData.price = price;
+    }
+    if (safeData.name) safeData.name = sanitiseString(safeData.name, 200);
+    if (safeData.description) safeData.description = sanitiseString(safeData.description, 1000);
+    if (safeData.category) safeData.category = sanitiseString(safeData.category, 100);
+    if (safeData.badge) safeData.badge = sanitiseString(safeData.badge, 50);
     const product = await prisma.product.update({ where: { id: req.params.id }, data: safeData });
     res.json(product);
   } catch (err) {
@@ -320,7 +391,7 @@ app.get("/api/orders", requireAdminAuth, async (req, res) => {
   }
 });
 
-app.post("/api/orders", async (req, res) => {
+app.post("/api/orders", orderLimiter, async (req, res) => {
   try {
     const { customerName, phone, email, total, items } = req.body;
 
@@ -328,12 +399,30 @@ app.post("/api/orders", async (req, res) => {
       return res.status(400).json({ error: "Missing required order fields" });
     }
 
+    // Input length validation
+    if (typeof customerName !== "string" || customerName.trim().length < 2 || customerName.length > 100) {
+      return res.status(400).json({ error: "Invalid customer name" });
+    }
+    if (typeof phone !== "string" || phone.trim().length < 7 || phone.length > 20) {
+      return res.status(400).json({ error: "Invalid phone number" });
+    }
+    if (typeof email !== "string" || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return res.status(400).json({ error: "Invalid email address" });
+    }
+    const parsedTotal = Number(total);
+    if (isNaN(parsedTotal) || parsedTotal <= 0 || parsedTotal > 100_000_000) {
+      return res.status(400).json({ error: "Invalid order total" });
+    }
+    if (!Array.isArray(items) || items.length === 0 || items.length > 50) {
+      return res.status(400).json({ error: "Invalid items" });
+    }
+
     const order = await prisma.order.create({
       data: {
-        customerName,
-        phone,
-        email,
-        total: Number(total),
+        customerName: sanitiseString(customerName, 100),
+        phone: sanitiseString(phone, 20),
+        email: email.trim().toLowerCase().slice(0, 254),
+        total: parsedTotal,
         status: "pending",
         items: {
           create: items.map((item) => ({
@@ -429,9 +518,11 @@ async function getAdminPasswordHash() {
   return row?.value ?? null;
 }
 
-app.post("/api/admin/login", async (req, res) => {
+app.post("/api/admin/login", loginLimiter, async (req, res) => {
   const { password } = req.body;
-  if (!password) return res.status(400).json({ error: "Password is required" });
+  if (!password || typeof password !== "string" || password.length > 200) {
+    return res.status(400).json({ error: "Password is required" });
+  }
 
   try {
     const hash = await getAdminPasswordHash();
@@ -444,6 +535,7 @@ app.post("/api/admin/login", async (req, res) => {
       activeTokens.set(token, expiresAt);
       res.json({ authenticated: true, token });
     } else {
+      // Uniform response time regardless of whether password matched
       res.status(401).json({ authenticated: false, error: "Invalid password" });
     }
   } catch (err) {
