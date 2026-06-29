@@ -144,6 +144,19 @@ export default function App() {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
 
+  // Prevent background scroll when any overlay modal or sidebar is active
+  useEffect(() => {
+    const isModalOpen = cartOpen || !!checkoutStep || !!quickViewProduct || quizOpen || adminPromptOpen;
+    if (isModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [cartOpen, checkoutStep, quickViewProduct, quizOpen, adminPromptOpen]);
+
   const cartTotal = cart.reduce((s, i) => s + i.product.price * i.quantity, 0);
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
 
@@ -2792,7 +2805,7 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
                   {/* Total + action buttons */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
                     <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 22, color: "#C9A227" }}>{fmt(o.total)}</div>
-                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }} className="flex-col sm:flex-row">
                       {btn && (
                         <button
                           onClick={() => advance(o.id)}
@@ -2890,13 +2903,35 @@ function AdminCategories({ products, setProducts }: { products: Product[]; setPr
         <p style={{ color: "#9A7A6E", fontSize: 12, margin: "4px 0 0" }}>Add, rename, or remove product categories</p>
       </div>
 
+      {/* Quick Add Category */}
+      <div style={{ background: "#fff", borderRadius: 16, padding: 20, border: "1px solid rgba(249,222,218,0.2)", marginBottom: 24, boxShadow: "0 2px 12px rgba(201,162,39,0.06)" }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: "block", fontSize: 10, fontWeight: 700, color: "#5C3D2E", marginBottom: 8, letterSpacing: "0.15em", textTransform: "uppercase" }}>Quick Add Category</label>
+            <input
+              value={newCat}
+              onChange={e => setNewCat(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleAdd()}
+              placeholder="Type new category name..."
+              style={{ width: "100%", border: "1px solid rgba(249,222,218,0.6)", borderRadius: 10, padding: "10px 14px", fontSize: 13, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }}
+            />
+          </div>
+          <button
+            onClick={handleAdd}
+            style={{ padding: "10px 20px", background: "#C9A227", color: "#fff", border: "none", borderRadius: 10, fontSize: 11, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap", height: 42 }}
+          >
+            ADD
+          </button>
+        </div>
+      </div>
+
       {/* Informative helper on how categories work */}
       <div style={{ background: "#fff", borderRadius: 16, padding: 20, border: "1px solid rgba(249,222,218,0.2)", marginBottom: 24, boxShadow: "0 2px 12px rgba(201,162,39,0.06)", display: "flex", gap: 12, alignItems: "flex-start" }}>
         <div style={{ fontSize: 20, marginTop: 2 }}>💡</div>
         <div>
-          <h4 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#1A0F0A", marginBottom: 4 }}>How to add a new category:</h4>
+          <h4 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#1A0F0A", marginBottom: 4 }}>Tip:</h4>
           <p style={{ color: "#9A7A6E", fontSize: 12, lineHeight: 1.6, margin: 0 }}>
-            Categories are dynamic and derived directly from your products. To create a new one, go to the <strong>Products</strong> tab, click <strong>ADD PRODUCT</strong>, and type your new category name in the Category field.
+            You can also create categories directly when adding products in the <strong>Products</strong> tab.
           </p>
         </div>
       </div>
@@ -3131,7 +3166,7 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
             </div>
 
             {/* Modal Body */}
-            <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 18 }}>
+            <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 18 }} className="sm:padding-24">
               <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }} className="sm:grid-cols-2">
                 <div style={{ gridColumn: "1 / -1" }}>
                   <label style={labelStyle}>Product Name *</label>
@@ -3288,7 +3323,7 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
           style={{ width: "100%", border: "1px solid rgba(201,162,39,0.25)", borderRadius: 10, padding: "10px 12px 10px 34px", fontSize: 13, outline: "none", backgroundColor: "#fff", boxSizing: "border-box", color: "#1A0F0A" }}
         />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 16 }}>
         {products.filter(p => !productSearch || p.name.toLowerCase().includes(productSearch.toLowerCase()) || p.category.toLowerCase().includes(productSearch.toLowerCase())).map(p => (
           <div key={p.id} style={{ backgroundColor: "#fff", borderRadius: 20, border: "1px solid rgba(249,222,218,0.2)", overflow: "hidden", boxShadow: "0 2px 16px rgba(201,162,39,0.07)", display: "flex", flexDirection: "column" }}>
             {/* Image */}
