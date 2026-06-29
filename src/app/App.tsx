@@ -2101,7 +2101,7 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
   ];
 
   return (
-    <div style={{ height: "100vh", backgroundColor: "#FFF6F3", fontFamily: "'Raleway', sans-serif", display: "flex", flexDirection: "column", overflow: "hidden", width: "100%", boxSizing: "border-box" }}>
+    <div style={{ height: "100dvh", backgroundColor: "#FFF6F3", fontFamily: "'Raleway', sans-serif", display: "flex", flexDirection: "column", overflow: "hidden", width: "100%", boxSizing: "border-box" }}>
 
       {/* ── Sticky Header ── */}
       <div style={{ backgroundColor: "#1A0F0A", padding: "0 16px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, boxShadow: "0 2px 16px rgba(0,0,0,0.35)", height: 60, width: "100%", boxSizing: "border-box", zIndex: 30 }}>
