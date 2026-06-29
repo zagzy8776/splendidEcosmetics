@@ -3302,7 +3302,7 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
             </div>
 
             {/* Modal Footer */}
-            <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(249,222,218,0.2)", display: "flex", gap: 12, flexShrink: 0 }}>
+            <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(249,222,218,0.2)", display: "flex", gap: 12, flexShrink: 0, paddingBottom: "calc(16px + env(safe-area-inset-bottom, 0px))" }}>
               <button onClick={save} disabled={uploadingSlot !== null} style={{ flex: 1, background: uploadingSlot !== null ? "rgba(201,162,39,0.5)" : "linear-gradient(135deg, #C9A227, #A8841A)", color: "#fff", border: "none", borderRadius: 12, padding: "14px", fontSize: 13, fontWeight: 700, cursor: uploadingSlot !== null ? "not-allowed" : "pointer", boxShadow: "0 4px 14px rgba(201,162,39,0.3)" }}>
                 {editId ? "SAVE CHANGES" : "ADD PRODUCT"}
               </button>
@@ -3347,19 +3347,19 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
 
             {/* Actions */}
             <div style={{ padding: "12px 16px", borderTop: "1px solid rgba(249,222,218,0.15)", display: "flex", gap: 8 }}>
-              <button onClick={() => toggle(p.id)} style={{ flex: 1, padding: "8px 6px", borderRadius: 8, border: `1px solid ${p.inStock ? "#bbf7d0" : "#fecaca"}`, background: p.inStock ? "#f0fdf4" : "#fff1f2", color: p.inStock ? "#15803d" : "#dc2626", fontSize: 10, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+              <button onClick={() => toggle(p.id)} style={{ flex: 1, padding: "10px 8px", minHeight: 44, borderRadius: 8, border: `1px solid ${p.inStock ? "#bbf7d0" : "#fecaca"}`, background: p.inStock ? "#f0fdf4" : "#fff1f2", color: p.inStock ? "#15803d" : "#dc2626", fontSize: 10, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
                 {p.inStock ? <><Check size={10} /> Stock</> : <><X size={10} /> Restock</>}
               </button>
-              <button onClick={() => openEdit(p)} style={{ padding: "8px 12px", borderRadius: 8, background: "#FFF6F3", border: "1px solid rgba(201,162,39,0.2)", cursor: "pointer", color: "#5C3D2E", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <button onClick={() => openEdit(p)} style={{ padding: "10px 12px", minHeight: 44, borderRadius: 8, background: "#FFF6F3", border: "1px solid rgba(201,162,39,0.2)", cursor: "pointer", color: "#5C3D2E", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Pencil size={13} />
               </button>
               {confirmDeleteId === p.id ? (
                 <div style={{ display: "flex", gap: 4 }}>
-                  <button onClick={() => del(p.id)} style={{ padding: "6px 10px", borderRadius: 8, background: "#dc2626", border: "none", cursor: "pointer", color: "#fff", fontSize: 10, fontWeight: 700, whiteSpace: "nowrap" }}>YES</button>
-                  <button onClick={() => setConfirmDeleteId(null)} style={{ padding: "6px 10px", borderRadius: 8, background: "#FFF6F3", border: "1px solid #fecaca", cursor: "pointer", color: "#5C3D2E", fontSize: 10, fontWeight: 700 }}>NO</button>
+                  <button onClick={() => del(p.id)} style={{ padding: "10px 12px", minHeight: 44, borderRadius: 8, background: "#dc2626", border: "none", cursor: "pointer", color: "#fff", fontSize: 10, fontWeight: 700, whiteSpace: "nowrap" }}>YES</button>
+                  <button onClick={() => setConfirmDeleteId(null)} style={{ padding: "10px 12px", minHeight: 44, borderRadius: 8, background: "#FFF6F3", border: "1px solid #fecaca", cursor: "pointer", color: "#5C3D2E", fontSize: 10, fontWeight: 700 }}>NO</button>
                 </div>
               ) : (
-                <button onClick={() => setConfirmDeleteId(p.id)} style={{ padding: "8px 12px", borderRadius: 8, background: "#fff1f2", border: "1px solid #fecaca", cursor: "pointer", color: "#dc2626", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <button onClick={() => setConfirmDeleteId(p.id)} style={{ padding: "10px 12px", minHeight: 44, borderRadius: 8, background: "#fff1f2", border: "1px solid #fecaca", cursor: "pointer", color: "#dc2626", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <Trash2 size={13} />
                 </button>
               )}
