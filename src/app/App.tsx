@@ -1871,7 +1871,7 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
           <div style={{ position: "absolute", inset: -1, borderRadius: 25, background: "linear-gradient(135deg, rgba(201,162,39,0.5) 0%, transparent 50%, rgba(201,162,39,0.2) 100%)", zIndex: -1, pointerEvents: "none" }} />
 
           <div style={{ textAlign: "center", marginBottom: 36 }}>
-            <img src="/logo.jpg" alt="Splendid Empire Cosmetics" style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover", margin: "0 auto 16px", border: "3px solid rgba(201,162,39,0.5)", boxShadow: "0 8px 24px rgba(201,162,39,0.2)" }} />
+            <img src="/logo.jpg" alt="Splendid Empire Cosmetics" style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover", margin: "0 auto 16px", border: "3px solid rgba(201,162,39,0.5)", boxShadow: "0 8px 24px rgba(201,162,39,0.2)", background: "#F9DEDA" }} />
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 9, letterSpacing: "0.45em", color: "#C9A227", marginTop: 4, marginBottom: 20, fontWeight: 600 }}>ADMIN COMMAND CENTRE</div>
             <div style={{ height: 1, background: "linear-gradient(to right, transparent, rgba(201,162,39,0.5), transparent)", margin: "0 auto" }} />
           </div>
@@ -1941,7 +1941,7 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
       {/* ── Sticky Header ── */}
       <div style={{ backgroundColor: "#1A0F0A", padding: "0 16px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 30, boxShadow: "0 2px 16px rgba(0,0,0,0.35)", height: 60, width: "100%", boxSizing: "border-box" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <img src="/logo.jpg" alt="Splendid Empire Cosmetics" style={{ height: 36, width: 36, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(201,162,39,0.5)" }} />
+          <img src="/logo.jpg" alt="Splendid Empire Cosmetics" style={{ height: 36, width: 36, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(201,162,39,0.5)", background: "#F9DEDA" }} />
           <div>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 700, color: "#fff", letterSpacing: "0.04em", lineHeight: 1 }}>SPLENDID EMPIRE</div>
             <div style={{ color: "#C9A227", fontSize: 8, letterSpacing: "0.4em", fontWeight: 700, marginTop: 2 }}>ADMIN</div>
