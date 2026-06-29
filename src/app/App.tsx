@@ -3184,7 +3184,7 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
                   </select>
                   <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
                     <input value={customCatInput} onChange={e => setCustomCatInput(e.target.value)} placeholder="Or type new category..." style={{ ...inputStyle, flex: 1 }} />
-                    <button type="button" onClick={() => { const t = customCatInput.trim(); if (t) { sf("category")(t); setCustomCatInput(""); } }} style={{ padding: "10px 14px", background: "#C9A227", color: "#fff", border: "none", borderRadius: 10, fontSize: 11, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>USE</button>
+                    <button type="button" onClick={() => { const t = customCatInput.trim(); if (t) { sf("category")(t); setCustomCatInput(""); } }} style={{ padding: "10px 14px", minHeight: 44, background: "#C9A227", color: "#fff", border: "none", borderRadius: 10, fontSize: 11, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>USE</button>
                   </div>
                   {form.category && !existingCategories.includes(form.category) && (
                     <p style={{ fontSize: 11, color: "#C9A227", marginTop: 6, fontWeight: 600 }}>✦ New category: "{form.category}"</p>
@@ -3196,8 +3196,8 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                   <label style={{ fontSize: 13, fontWeight: 700, color: "#1A0F0A" }}>In Stock</label>
-                  <button type="button" onClick={() => sf("inStock")(!form.inStock)} style={{ width: 52, height: 28, borderRadius: 999, background: form.inStock ? "#C9A227" : "#d1d5db", border: "none", cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
-                    <div style={{ position: "absolute", top: 3, width: 22, height: 22, background: "#fff", borderRadius: "50%", boxShadow: "0 1px 4px rgba(0,0,0,0.2)", transition: "left 0.2s", left: form.inStock ? 27 : 3 }} />
+                  <button type="button" onClick={() => sf("inStock")(!form.inStock)} style={{ width: 52, minHeight: 44, height: 44, borderRadius: 999, background: form.inStock ? "#C9A227" : "#d1d5db", border: "none", cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
+                    <div style={{ position: "absolute", top: 11, width: 22, height: 22, background: "#fff", borderRadius: "50%", boxShadow: "0 1px 4px rgba(0,0,0,0.2)", transition: "left 0.2s", left: form.inStock ? 27 : 3 }} />
                   </button>
                   <span style={{ fontSize: 12, color: form.inStock ? "#15803d" : "#dc2626", fontWeight: 700 }}>{form.inStock ? "In Stock" : "Out of Stock"}</span>
                 </div>
@@ -3262,9 +3262,9 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
                             type="button"
                             onClick={e => { e.preventDefault(); removeSlot(slotIdx); }}
                             aria-label={`Remove ${slot.label}`}
-                            style={{ position: "absolute", top: 6, right: 6, width: 22, height: 22, borderRadius: "50%", background: "rgba(26,15,10,0.75)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 5 }}
+                            style={{ position: "absolute", top: 6, right: 6, width: 36, height: 36, minHeight: 44, borderRadius: "50%", background: "rgba(26,15,10,0.75)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 5 }}
                           >
-                            <X size={11} color="#fff" />
+                            <X size={16} color="#fff" />
                           </button>
                         )}
 
