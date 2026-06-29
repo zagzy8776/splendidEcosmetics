@@ -147,3 +147,8 @@ button, .smooth-tap {
 button:active, .smooth-tap:active {
   transform: scale(0.96) !important;
 }
+
+/* Spinner used in upload and loading states */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

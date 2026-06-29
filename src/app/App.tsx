@@ -2445,27 +2445,60 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
   async function uploadImage(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Client-side validation before upload
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/heic", "image/heif"];
+    if (!allowedTypes.includes(file.type)) {
+      setFErr("Please upload a JPEG, PNG, or WebP image.");
+      return;
+    }
+    const MAX_SIZE_MB = 15;
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      setFErr(`Image is too large. Max size is ${MAX_SIZE_MB}MB.`);
+      return;
+    }
+
     setIsUploading(true);
     setFErr("");
     try {
-      const data = new FormData();
-      data.append("file", file);
-      data.append("upload_preset", "splendid_ecosmetics");
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "splendid_ecosmetics");
+      // Cloudinary eager transformation:
+      // - c_fill: fill the square (no letterboxing)
+      // - g_auto: AI detects subject and centres it
+      // - w_800,h_800: consistent 800×800 output
+      // - q_auto: optimal quality/size ratio
+      // - f_auto: WebP for modern browsers, JPEG fallback
+      formData.append("eager", "c_fill,g_auto,w_800,h_800,q_auto,f_auto");
+      formData.append("eager_async", "false");
+
       const res = await fetch("https://api.cloudinary.com/v1_1/djup7klv2/image/upload", {
         method: "POST",
-        body: data,
+        body: formData,
       });
       const json = await res.json();
-      if (json.secure_url) {
-        sf("image")(json.secure_url);
+
+      if (json.error) {
+        setFErr(json.error.message || "Upload failed. Please try again.");
+        return;
+      }
+
+      // Prefer the eager-transformed URL (clean square crop), fall back to raw
+      const transformedUrl = json.eager?.[0]?.secure_url ?? json.secure_url;
+
+      if (transformedUrl) {
+        sf("image")(transformedUrl);
       } else {
         setFErr("Failed to upload image. Please try again.");
       }
     } catch (err) {
       console.error(err);
-      setFErr("An error occurred during upload.");
+      setFErr("An error occurred during upload. Check your connection and try again.");
     } finally {
       setIsUploading(false);
+      // Reset file input so same file can be re-selected after an error
+      e.target.value = "";
     }
   }
 
@@ -2632,13 +2665,44 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
               <div>
                 <label style={labelStyle}>Product Image</label>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {/* Upload tips */}
+                  <div style={{ background: "rgba(201,162,39,0.08)", border: "1px solid rgba(201,162,39,0.2)", borderRadius: 10, padding: "10px 14px", display: "flex", gap: 10, alignItems: "flex-start" }}>
+                    <Sparkles size={14} color="#C9A227" style={{ flexShrink: 0, marginTop: 1 }} />
+                    <p style={{ color: "#5C3D2E", fontSize: 11, margin: 0, lineHeight: 1.6 }}>
+                      <strong>Tips for clean product photos:</strong> Plain or white background, good lighting, product centred. Cloudinary will auto-crop to a clean square.
+                    </p>
+                  </div>
+                  {/* Drop zone */}
                   <div style={{ position: "relative" }}>
-                    <input type="file" accept="image/*" onChange={uploadImage} disabled={isUploading} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%", height: "100%" }} />
-                    <div style={{ border: "2px dashed rgba(201,162,39,0.4)", borderRadius: 12, padding: "20px", textAlign: "center", background: "#FFF6F3", cursor: "pointer" }}>
-                      <Plus size={20} color="#C9A227" style={{ margin: "0 auto 8px" }} />
-                      <p style={{ color: isUploading ? "#C9A227" : "#9A7A6E", fontSize: 13, fontWeight: 600, margin: 0 }}>
-                        {isUploading ? "Uploading..." : "Tap to upload from your phone"}
-                      </p>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp,image/heic"
+                      onChange={uploadImage}
+                      disabled={isUploading}
+                      style={{ position: "absolute", inset: 0, opacity: 0, cursor: isUploading ? "not-allowed" : "pointer", width: "100%", height: "100%" }}
+                    />
+                    <div style={{
+                      border: `2px dashed ${isUploading ? "#C9A227" : "rgba(201,162,39,0.4)"}`,
+                      borderRadius: 12,
+                      padding: "24px 20px",
+                      textAlign: "center",
+                      background: isUploading ? "rgba(201,162,39,0.04)" : "#FFF6F3",
+                      cursor: isUploading ? "not-allowed" : "pointer",
+                      transition: "all 0.2s"
+                    }}>
+                      {isUploading ? (
+                        <>
+                          <div style={{ width: 28, height: 28, border: "3px solid rgba(201,162,39,0.2)", borderTopColor: "#C9A227", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 10px" }} />
+                          <p style={{ color: "#C9A227", fontSize: 13, fontWeight: 700, margin: 0 }}>Uploading & enhancing image...</p>
+                          <p style={{ color: "#9A7A6E", fontSize: 11, margin: "4px 0 0" }}>Auto-cropping to clean square</p>
+                        </>
+                      ) : (
+                        <>
+                          <Plus size={22} color="#C9A227" style={{ margin: "0 auto 8px" }} />
+                          <p style={{ color: "#5C3D2E", fontSize: 13, fontWeight: 700, margin: 0 }}>Tap to upload photo</p>
+                          <p style={{ color: "#9A7A6E", fontSize: 11, margin: "4px 0 0" }}>JPEG · PNG · WebP · Max 15MB</p>
+                        </>
+                      )}
                     </div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -2649,8 +2713,11 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
                   <input value={form.image} onChange={e => sf("image")(e.target.value)} placeholder="https://..." style={inputStyle} />
                   {form.image && (
                     <div style={{ display: "flex", alignItems: "center", gap: 12, background: "#f0fdf4", borderRadius: 10, padding: "10px 14px", border: "1px solid #86efac" }}>
-                      <img src={form.image} alt="Preview" style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 8 }} />
-                      <span style={{ fontSize: 12, color: "#15803d", fontWeight: 700 }}>✓ Image ready</span>
+                      <img src={form.image} alt="Preview" style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8, border: "1px solid #86efac" }} />
+                      <div>
+                        <p style={{ fontSize: 12, color: "#15803d", fontWeight: 700, margin: 0 }}>✓ Image ready</p>
+                        <p style={{ fontSize: 10, color: "#9A7A6E", margin: "2px 0 0" }}>Auto-cropped to square · Optimised</p>
+                      </div>
                     </div>
                   )}
                 </div>
