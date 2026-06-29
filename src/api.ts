@@ -29,6 +29,8 @@ export interface ProductData {
   category: string;
   price: number;
   image: string;
+  images?: string[];
+  videoUrl?: string;
   description: string;
   inStock: boolean;
   badge?: string;
@@ -52,7 +54,11 @@ export interface OrderData {
 export async function fetchProducts(): Promise<ProductData[]> {
   const res = await fetch(`${API_BASE}/api/products`);
   if (!res.ok) throw new Error("Failed to fetch products");
-  return res.json();
+  const data = await res.json();
+  return data.map((p: any) => ({
+    ...p,
+    images: typeof p.images === "string" ? (() => { try { return JSON.parse(p.images); } catch { return []; } })() : (Array.isArray(p.images) ? p.images : []),
+  }));
 }
 
 export async function createOrder(order: OrderData) {

@@ -4,7 +4,7 @@ import {
   ShoppingBag, X, Menu, Instagram, Facebook, Phone, MapPin,
   Star, Plus, Minus, Trash2, Package, Settings, LogOut, Check,
   Clock, Truck, Eye, Shield, Sparkles, Heart, MessageCircle,
-  Copy, CheckCircle, AlertTriangle, Pencil, ChevronRight,
+  Copy, CheckCircle, AlertTriangle, Pencil, ChevronRight, ChevronLeft,
 } from "lucide-react";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
@@ -21,6 +21,8 @@ interface Product {
   category: Exclude<Category, "All">;
   price: number;
   image: string;
+  images?: string[];   // up to 4 gallery images
+  videoUrl?: string;   // Instagram Reel or TikTok URL
   description: string;
   inStock: boolean;
   badge?: string;
@@ -369,6 +371,25 @@ interface ProductQuickViewProps {
 
 function ProductQuickViewModal({ product: p, onClose, onAdd }: ProductQuickViewProps) {
   const [quantity, setQuantity] = useState(1);
+  const gallery = [p.image, ...(p.images ?? [])];
+  const [activeIdx, setActiveIdx] = useState(0);
+  const hasMultiple = gallery.length > 1;
+
+  // Reset gallery index when product changes
+  useEffect(() => { setActiveIdx(0); }, [p.id]);
+
+  // Touch swipe support
+  const touchStartX = useRef<number | null>(null);
+  function handleTouchStart(e: React.TouchEvent) { touchStartX.current = e.touches[0].clientX; }
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(dx) > 40) {
+      if (dx < 0) setActiveIdx(i => (i + 1) % gallery.length); // swipe left → next
+      else setActiveIdx(i => (i - 1 + gallery.length) % gallery.length); // swipe right → prev
+    }
+    touchStartX.current = null;
+  }
 
   // Ingredient descriptions based on product category
   const ingredientsMap: Record<string, string> = {
@@ -397,6 +418,10 @@ function ProductQuickViewModal({ product: p, onClose, onAdd }: ProductQuickViewP
     onClose();
   }
 
+  // Determine if video URL looks like TikTok or Instagram
+  const isTikTok = p.videoUrl?.includes("tiktok.com");
+  const videoLabel = isTikTok ? "Watch on TikTok" : "Watch on Instagram / TikTok";
+
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(15, 7, 5, 0.6)", backdropFilter: "blur(4px)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
       <div style={{ background: "#fff", borderRadius: 24, width: "100%", maxWidth: 800, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 24px 70px rgba(0,0,0,0.2)", border: "1px solid rgba(249,222,218,0.3)" }} className="animate-modal-zoom">
@@ -405,15 +430,69 @@ function ProductQuickViewModal({ product: p, onClose, onAdd }: ProductQuickViewP
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#9A7A6E" }}><X size={20} /></button>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 24, padding: 24 }} className="md:grid-cols-2">
-          {/* Left: Image Container */}
-          <div style={{ position: "relative", aspectRatio: "1", borderRadius: 16, overflow: "hidden", backgroundColor: "#FFF0EB", height: "fit-content" }}>
-            <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            {p.badge && (
-              <span style={{ position: "absolute", top: 16, left: 16, background: "#C9A227", color: "#fff", fontSize: 9, letterSpacing: "0.18em", fontWeight: 700, padding: "4px 10px", borderRadius: 999 }}>{p.badge}</span>
+          {/* Left: Gallery Viewer */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, height: "fit-content" }}>
+            {/* Main image area with arrows */}
+            <div
+              style={{ position: "relative", aspectRatio: "1", borderRadius: 16, overflow: "hidden", backgroundColor: "#FFF0EB", userSelect: "none" }}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
+              <img
+                src={gallery[activeIdx]}
+                alt={`${p.name} — image ${activeIdx + 1}`}
+                style={{ width: "100%", height: "100%", objectFit: "cover", transition: "opacity 0.2s" }}
+              />
+              {p.badge && (
+                <span style={{ position: "absolute", top: 16, left: 16, background: "#C9A227", color: "#fff", fontSize: 9, letterSpacing: "0.18em", fontWeight: 700, padding: "4px 10px", borderRadius: 999 }}>{p.badge}</span>
+              )}
+              <span style={{ position: "absolute", bottom: 16, right: 16, background: p.inStock ? "rgba(34,197,94,0.9)" : "rgba(239,68,68,0.9)", color: "#fff", fontSize: 9, letterSpacing: "0.1em", fontWeight: 700, padding: "4px 10px", borderRadius: 999 }}>
+                {p.inStock ? "IN STOCK" : "OUT OF STOCK"}
+              </span>
+
+              {/* Left / Right arrows — only shown when multiple images */}
+              {hasMultiple && (
+                <>
+                  <button
+                    onClick={() => setActiveIdx(i => (i - 1 + gallery.length) % gallery.length)}
+                    aria-label="Previous image"
+                    style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", width: 32, height: 32, borderRadius: "50%", background: "rgba(255,255,255,0.9)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.2)", zIndex: 5 }}
+                  >
+                    <ChevronLeft size={16} color="#1A0F0A" />
+                  </button>
+                  <button
+                    onClick={() => setActiveIdx(i => (i + 1) % gallery.length)}
+                    aria-label="Next image"
+                    style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", width: 32, height: 32, borderRadius: "50%", background: "rgba(255,255,255,0.9)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.2)", zIndex: 5 }}
+                  >
+                    <ChevronRight size={16} color="#1A0F0A" />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Dot indicators — only shown when multiple images */}
+            {hasMultiple && (
+              <div style={{ display: "flex", justifyContent: "center", gap: 6 }}>
+                {gallery.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveIdx(i)}
+                    aria-label={`View image ${i + 1}`}
+                    style={{
+                      width: i === activeIdx ? 20 : 8,
+                      height: 8,
+                      borderRadius: 999,
+                      border: "none",
+                      cursor: "pointer",
+                      background: i === activeIdx ? "#C9A227" : "rgba(201,162,39,0.3)",
+                      padding: 0,
+                      transition: "all 0.25s",
+                    }}
+                  />
+                ))}
+              </div>
             )}
-            <span style={{ position: "absolute", bottom: 16, right: 16, background: p.inStock ? "rgba(34,197,94,0.9)" : "rgba(239,68,68,0.9)", color: "#fff", fontSize: 9, letterSpacing: "0.1em", fontWeight: 700, padding: "4px 10px", borderRadius: 999 }}>
-              {p.inStock ? "IN STOCK" : "OUT OF STOCK"}
-            </span>
           </div>
 
           {/* Right: Details Container */}
@@ -448,22 +527,46 @@ function ProductQuickViewModal({ product: p, onClose, onAdd }: ProductQuickViewP
             </div>
 
             {/* Actions */}
-            {p.inStock ? (
-              <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 12 }}>
-                <div style={{ display: "flex", alignItems: "center", border: "1px solid rgba(201,162,39,0.3)", borderRadius: 12, overflow: "hidden" }}>
-                  <button onClick={() => setQuantity(q => Math.max(1, q - 1))} style={{ padding: "10px 14px", background: "none", border: "none", cursor: "pointer", color: "#5C3D2E" }}><Minus size={13} /></button>
-                  <span style={{ padding: "0 10px", fontSize: 13, fontWeight: 700, color: "#1A0F0A", minWidth: 24, textAlign: "center" }}>{quantity}</span>
-                  <button onClick={() => setQuantity(q => q + 1)} style={{ padding: "10px 14px", background: "none", border: "none", cursor: "pointer", color: "#5C3D2E" }}><Plus size={13} /></button>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
+              {/* Watch on Instagram / TikTok button */}
+              {p.videoUrl && (
+                <a
+                  href={p.videoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    padding: "12px 16px", borderRadius: 12,
+                    border: "1.5px solid rgba(201,162,39,0.4)",
+                    background: "#FFF6F3",
+                    color: "#1A0F0A", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em",
+                    textDecoration: "none", transition: "all 0.2s",
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#C9A227"; (e.currentTarget as HTMLElement).style.background = "rgba(201,162,39,0.06)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(201,162,39,0.4)"; (e.currentTarget as HTMLElement).style.background = "#FFF6F3"; }}
+                >
+                  {isTikTok ? <TikTokIcon size={14} /> : <Instagram size={14} />}
+                  {videoLabel.toUpperCase()}
+                </a>
+              )}
+
+              {p.inStock ? (
+                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                  <div style={{ display: "flex", alignItems: "center", border: "1px solid rgba(201,162,39,0.3)", borderRadius: 12, overflow: "hidden" }}>
+                    <button onClick={() => setQuantity(q => Math.max(1, q - 1))} style={{ padding: "10px 14px", background: "none", border: "none", cursor: "pointer", color: "#5C3D2E" }}><Minus size={13} /></button>
+                    <span style={{ padding: "0 10px", fontSize: 13, fontWeight: 700, color: "#1A0F0A", minWidth: 24, textAlign: "center" }}>{quantity}</span>
+                    <button onClick={() => setQuantity(q => q + 1)} style={{ padding: "10px 14px", background: "none", border: "none", cursor: "pointer", color: "#5C3D2E" }}><Plus size={13} /></button>
+                  </div>
+                  <button onClick={handleAdd} style={{ flex: 1, background: "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)", color: "#fff", border: "none", padding: "14px", borderRadius: 12, fontWeight: 700, fontSize: 11, letterSpacing: "0.15em", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 10px 24px rgba(201,162,39,0.25)" }}>
+                    <ShoppingBag size={14} /> ADD TO CART — {fmt(p.price * quantity)}
+                  </button>
                 </div>
-                <button onClick={handleAdd} style={{ flex: 1, background: "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)", color: "#fff", border: "none", padding: "14px", borderRadius: 12, fontWeight: 700, fontSize: 11, letterSpacing: "0.15em", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 10px 24px rgba(201,162,39,0.25)" }}>
-                  <ShoppingBag size={14} /> ADD TO CART — {fmt(p.price * quantity)}
-                </button>
-              </div>
-            ) : (
-              <div style={{ padding: "14px", textAlign: "center", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, color: "#ef4444", fontSize: 12, fontWeight: 700, backgroundColor: "rgba(239,68,68,0.05)" }}>
-                OUT OF STOCK
-              </div>
-            )}
+              ) : (
+                <div style={{ padding: "14px", textAlign: "center", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, color: "#ef4444", fontSize: 12, fontWeight: 700, backgroundColor: "rgba(239,68,68,0.05)" }}>
+                  OUT OF STOCK
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -1216,6 +1319,11 @@ function ProductCard({ product: p, onAdd, onQuickView }: { product: Product; onA
   const [wished, setWished] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
 
+  const extraImages = p.images ?? [];
+  const galleryCount = 1 + extraImages.length; // main + extras
+  const hasMultiple = extraImages.length > 0;
+  const hasVideo = !!p.videoUrl;
+
   function handleAdd() {
     onAdd(p);
     setJustAdded(true);
@@ -1238,6 +1346,43 @@ function ProductCard({ product: p, onAdd, onQuickView }: { product: Product; onA
         <button onClick={e => { e.stopPropagation(); setWished(!wished); }} style={{ position: "absolute", top: 8, right: 8, width: 26, height: 26, background: "#fff", border: "none", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.1)", zIndex: 10 }}>
           <Heart size={11} fill={wished ? "#C9A227" : "none"} color={wished ? "#C9A227" : "#1A0F0A"} />
         </button>
+
+        {/* ▶ Watch badge — opens video in new tab */}
+        {hasVideo && (
+          <button
+            onClick={e => { e.stopPropagation(); window.open(p.videoUrl, "_blank", "noopener,noreferrer"); }}
+            style={{
+              position: "absolute", bottom: hasMultiple ? 24 : 8, left: 8,
+              background: "rgba(26,15,10,0.82)", backdropFilter: "blur(4px)",
+              color: "#fff", border: "none", borderRadius: 999,
+              padding: "4px 10px", fontSize: 10, fontWeight: 700,
+              cursor: "pointer", display: "flex", alignItems: "center", gap: 4,
+              letterSpacing: "0.04em", zIndex: 10,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
+            }}
+          >
+            ▶ Watch
+          </button>
+        )}
+
+        {/* Gallery dot indicator */}
+        {hasMultiple && (
+          <div style={{
+            position: "absolute", bottom: 8, left: 0, right: 0,
+            display: "flex", justifyContent: "center", gap: 4, zIndex: 10,
+          }}>
+            {Array.from({ length: Math.min(galleryCount, 4) }).map((_, i) => (
+              <div key={i} style={{
+                width: i === 0 ? 6 : 5,
+                height: i === 0 ? 6 : 5,
+                borderRadius: "50%",
+                background: i === 0 ? "#fff" : "rgba(255,255,255,0.55)",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.4)",
+                transition: "background 0.2s",
+              }} />
+            ))}
+          </div>
+        )}
       </div>
       <div className="p-2 sm:p-4">
         <div style={{ display: "flex", gap: 1, marginBottom: 4, alignItems: "center" }}>
@@ -2425,8 +2570,8 @@ function AdminCategories({ products, setProducts }: { products: Product[]; setPr
 
 // ─── ADMIN PRODUCTS ───────────────────────────────────────────────────────────
 
-type PForm = { name: string; category: Exclude<Category, "All">; price: string; image: string; description: string; badge: string; inStock: boolean };
-const EMPTY: PForm = { name: "", category: "Foundation", price: "", image: "", description: "", badge: "", inStock: true };
+type PForm = { name: string; category: Exclude<Category, "All">; price: string; image: string; images: string[]; videoUrl: string; description: string; badge: string; inStock: boolean };
+const EMPTY: PForm = { name: "", category: "Foundation", price: "", image: "", images: [], videoUrl: "", description: "", badge: "", inStock: true };
 
 function AdminProducts({ products, setProducts }: { products: Product[]; setProducts: React.Dispatch<React.SetStateAction<Product[]>> }) {
   const [showForm, setShowForm] = useState(false);
@@ -2434,13 +2579,14 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
   const [form, setForm] = useState<PForm>(EMPTY);
   const [fErr, setFErr] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
   const [customCatInput, setCustomCatInput] = useState("");
 
   // Derive unique categories from existing products
   const existingCategories = Array.from(new Set(products.map(p => p.category))).sort();
 
   function openAdd() { setForm(EMPTY); setEditId(null); setFErr(""); setShowForm(true); }
-  function openEdit(p: Product) { setForm({ name: p.name, category: p.category, price: String(p.price), image: p.image, description: p.description, badge: p.badge || "", inStock: p.inStock }); setEditId(p.id); setFErr(""); setShowForm(true); }
+  function openEdit(p: Product) { setForm({ name: p.name, category: p.category, price: String(p.price), image: p.image, images: p.images ?? [], videoUrl: p.videoUrl ?? "", description: p.description, badge: p.badge || "", inStock: p.inStock }); setEditId(p.id); setFErr(""); setShowForm(true); }
 
   async function uploadImage(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -2503,8 +2649,11 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
   }
 
   function save() {
-    if (!form.name.trim()) { setFErr("Product name is required."); return; }
     if (!form.price || isNaN(Number(form.price))) { setFErr("Enter a valid price."); return; }
+    if (form.videoUrl.trim() && !form.videoUrl.trim().startsWith("https://")) {
+      setFErr("Video URL must start with https://");
+      return;
+    }
     
     if (editId) {
       const updateData = {
@@ -2512,6 +2661,8 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
         category: form.category,
         price: Number(form.price),
         image: form.image.trim() || "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=500&h=500&fit=crop",
+        images: form.images.filter(u => u.trim()),
+        videoUrl: form.videoUrl.trim() || undefined,
         description: form.description.trim(),
         badge: form.badge.trim() || undefined,
         inStock: form.inStock
@@ -2533,6 +2684,8 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
         category: form.category,
         price: Number(form.price),
         image: form.image.trim() || "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=500&h=500&fit=crop",
+        images: form.images.filter(u => u.trim()),
+        videoUrl: form.videoUrl.trim() || undefined,
         description: form.description.trim(),
         badge: form.badge.trim() || undefined,
         inStock: form.inStock,
@@ -2721,6 +2874,56 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
                     </div>
                   )}
                 </div>
+              </div>
+
+              <div>
+                <label style={labelStyle}>Extra Images (up to 3 additional)</label>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {[0, 1, 2].map(idx => {
+                    const url = form.images[idx] ?? "";
+                    const allUrls = [form.image, ...form.images];
+                    const isDuplicate = url.trim() !== "" && allUrls.filter(u => u.trim() === url.trim()).length > 1;
+                    return (
+                      <div key={idx}>
+                        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                          <span style={{ fontSize: 10, fontWeight: 700, color: "#9A7A6E", minWidth: 52, letterSpacing: "0.08em" }}>IMAGE {idx + 2}</span>
+                          <input
+                            value={url}
+                            onChange={e => {
+                              const next = [...form.images];
+                              next[idx] = e.target.value;
+                              setForm(f => ({ ...f, images: next }));
+                            }}
+                            placeholder="https://..."
+                            style={{ ...inputStyle, flex: 1, marginBottom: 0 }}
+                          />
+                          {url && (
+                            <img src={url} alt="" style={{ width: 36, height: 36, borderRadius: 6, objectFit: "cover", border: "1px solid rgba(201,162,39,0.3)", flexShrink: 0 }} onError={e => ((e.target as HTMLImageElement).style.display = "none")} />
+                          )}
+                        </div>
+                        {isDuplicate && (
+                          <p style={{ fontSize: 11, color: "#d97706", marginTop: 4, fontWeight: 600 }}>⚠ Duplicate image URL detected</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label style={labelStyle}>Instagram Reel or TikTok URL (optional)</label>
+                <input
+                  value={form.videoUrl}
+                  onChange={e => sf("videoUrl")(e.target.value)}
+                  placeholder="https://www.instagram.com/reel/... or https://www.tiktok.com/..."
+                  style={{
+                    ...inputStyle,
+                    borderColor: form.videoUrl && !form.videoUrl.startsWith("https://") ? "#fca5a5" : undefined,
+                  }}
+                />
+                {form.videoUrl && !form.videoUrl.startsWith("https://") && (
+                  <p style={{ fontSize: 11, color: "#dc2626", marginTop: 6, fontWeight: 600 }}>Video URL must start with https://</p>
+                )}
               </div>
 
               <div>

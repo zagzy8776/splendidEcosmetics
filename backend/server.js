@@ -313,7 +313,14 @@ function requireAdminAuth(req, res, next) {
 app.get("/api/products", async (req, res) => {
   try {
     const products = await prisma.product.findMany({ orderBy: { createdAt: "desc" } });
-    res.json(products);
+    const parsed = products.map(p => ({
+      ...p,
+      images: (() => {
+        if (!p.images) return [];
+        try { return JSON.parse(p.images); } catch { return []; }
+      })(),
+    }));
+    res.json(parsed);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch products" });
@@ -330,6 +337,28 @@ app.post("/api/products", requireAdminAuth, async (req, res) => {
     if (isNaN(price) || price <= 0 || price > 10_000_000) {
       return res.status(400).json({ error: "Invalid price" });
     }
+    // Validate images array
+    if (data.images !== undefined) {
+      const imgs = Array.isArray(data.images) ? data.images : [];
+      if (imgs.length > 3) return res.status(400).json({ error: "Extra images must not exceed 3" });
+      for (const img of imgs) {
+        if (typeof img !== "string" || img.trim().length === 0 || img.length > 2000) {
+          return res.status(400).json({ error: "Each image URL must be a non-empty string under 2000 characters" });
+        }
+      }
+      data.images = JSON.stringify(imgs.filter(u => u.trim()));
+    }
+    // Validate videoUrl
+    if (data.videoUrl !== undefined && data.videoUrl !== null && data.videoUrl !== "") {
+      if (typeof data.videoUrl !== "string" || data.videoUrl.length > 500) {
+        return res.status(400).json({ error: "Invalid video URL" });
+      }
+      if (!data.videoUrl.startsWith("https://")) {
+        return res.status(400).json({ error: "Video URL must start with https://" });
+      }
+    } else if (data.videoUrl === "") {
+      data.videoUrl = null;
+    }
     const safeData = {
       ...data,
       name: sanitiseString(data.name, 200),
@@ -339,7 +368,10 @@ app.post("/api/products", requireAdminAuth, async (req, res) => {
       price,
     };
     const product = await prisma.product.create({ data: safeData });
-    res.status(201).json(product);
+    res.status(201).json({
+      ...product,
+      images: (() => { try { return JSON.parse(product.images ?? "[]"); } catch { return []; } })(),
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to create product" });
@@ -358,8 +390,33 @@ app.patch("/api/products/:id", requireAdminAuth, async (req, res) => {
     if (safeData.description) safeData.description = sanitiseString(safeData.description, 1000);
     if (safeData.category) safeData.category = sanitiseString(safeData.category, 100);
     if (safeData.badge) safeData.badge = sanitiseString(safeData.badge, 50);
+    // Validate and serialize images
+    if (safeData.images !== undefined) {
+      const imgs = Array.isArray(safeData.images) ? safeData.images : [];
+      if (imgs.length > 3) return res.status(400).json({ error: "Extra images must not exceed 3" });
+      for (const img of imgs) {
+        if (typeof img !== "string" || img.trim().length === 0 || img.length > 2000) {
+          return res.status(400).json({ error: "Each image URL must be a non-empty string under 2000 characters" });
+        }
+      }
+      safeData.images = JSON.stringify(imgs.filter(u => u.trim()));
+    }
+    // Validate videoUrl
+    if (safeData.videoUrl !== undefined && safeData.videoUrl !== null && safeData.videoUrl !== "") {
+      if (typeof safeData.videoUrl !== "string" || safeData.videoUrl.length > 500) {
+        return res.status(400).json({ error: "Invalid video URL" });
+      }
+      if (!safeData.videoUrl.startsWith("https://")) {
+        return res.status(400).json({ error: "Video URL must start with https://" });
+      }
+    } else if (safeData.videoUrl === "") {
+      safeData.videoUrl = null;
+    }
     const product = await prisma.product.update({ where: { id: req.params.id }, data: safeData });
-    res.json(product);
+    res.json({
+      ...product,
+      images: (() => { try { return JSON.parse(product.images ?? "[]"); } catch { return []; } })(),
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to update product" });
