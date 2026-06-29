@@ -392,8 +392,17 @@ app.patch("/api/orders/:id/status", requireAdminAuth, async (req, res) => {
 
 // ─── ADMIN AUTH ───────────────────────────────────────────────────────────────
 
-// Seed the password from env on first startup if DB has no entry yet
+// Create table if it doesn't exist, then seed password from env
 async function ensureAdminPassword() {
+  // Create the table directly via raw SQL — works even if prisma db push hasn't run
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS admin_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
   const existing = await prisma.adminSetting.findUnique({ where: { key: "admin_password" } });
   if (!existing) {
     const hash = await bcrypt.hash(ADMIN_PASSWORD_ENV, 12);

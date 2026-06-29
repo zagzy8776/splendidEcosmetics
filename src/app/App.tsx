@@ -123,7 +123,7 @@ export default function App() {
       if (ex) return prev.map(i => i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i);
       return [...prev, { product, quantity: 1 }];
     });
-    setCartOpen(true);
+    // Don't open cart drawer — let customer keep browsing
   }
 
   function removeFromCart(id: string) { setCart(prev => prev.filter(i => i.product.id !== id)); }
@@ -200,7 +200,7 @@ export default function App() {
   }
 
   return (
-    <div style={{ fontFamily: "'Raleway', sans-serif", backgroundColor: "#FFF6F3", minHeight: "100vh" }}>
+    <div style={{ fontFamily: "'Raleway', sans-serif", backgroundColor: "#FFF6F3", minHeight: "100vh", overflowX: "hidden" }}>
       <Navbar cartCount={cartCount} onCartOpen={() => setCartOpen(true)} onAdminRequest={() => setAdminPromptOpen(true)} />
       <HeroSection />
       <CategorySection active={activeCategory} onSelect={setActiveCategory} />
@@ -279,7 +279,7 @@ export default function App() {
               if (ex) return prev.map(i => i.product.id === prod.id ? { ...i, quantity: i.quantity + qty } : i);
               return [...prev, { product: prod, quantity: qty }];
             });
-            setCartOpen(true);
+            setQuickViewProduct(null); // just close the modal, stay on page
           }}
         />
       )}
