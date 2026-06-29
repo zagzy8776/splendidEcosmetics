@@ -1982,6 +1982,20 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
   const [err, setErr] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
   const [tab, setTab] = useState<AdminTab>("orders");
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  function switchTab(t: AdminTab) {
+    setTab(t);
+    // Always scroll content area back to top when switching tabs
+    if (contentRef.current) contentRef.current.scrollTop = 0;
+  }
+
+  // Lock body scroll while admin panel is mounted
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, []);
 
   function login() {
     setLoginLoading(true);
@@ -2081,10 +2095,10 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
   ];
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#FFF6F3", fontFamily: "'Raleway', sans-serif", overflowX: "hidden", width: "100%", boxSizing: "border-box" }}>
+    <div style={{ height: "100vh", backgroundColor: "#FFF6F3", fontFamily: "'Raleway', sans-serif", display: "flex", flexDirection: "column", overflow: "hidden", width: "100%", boxSizing: "border-box" }}>
 
       {/* ── Sticky Header ── */}
-      <div style={{ backgroundColor: "#1A0F0A", padding: "0 16px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 30, boxShadow: "0 2px 16px rgba(0,0,0,0.35)", height: 60, width: "100%", boxSizing: "border-box" }}>
+      <div style={{ backgroundColor: "#1A0F0A", padding: "0 16px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, boxShadow: "0 2px 16px rgba(0,0,0,0.35)", height: 60, width: "100%", boxSizing: "border-box", zIndex: 30 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <img src="/logo.jpg" alt="Splendid Empire Cosmetics" style={{ height: 36, width: 36, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(201,162,39,0.5)", background: "#F9DEDA" }} />
           <div>
@@ -2113,27 +2127,27 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
       </div>
 
       {/* ── Stats Bar ── */}
-      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(249,222,218,0.25)", padding: "20px 16px", width: "100%", boxSizing: "border-box" }}>
-        <div style={{ maxWidth: 1060, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }} className="sm:grid-cols-5">
+      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(249,222,218,0.25)", padding: "16px", width: "100%", boxSizing: "border-box", flexShrink: 0 }}>
+        <div style={{ maxWidth: 1060, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }} className="sm:grid-cols-5">
           {statsData.map(([label, value]) => (
-            <div key={label} style={{ background: "#fff", borderRadius: 16, padding: "16px 20px", textAlign: "center", boxShadow: "0 1px 6px rgba(201,162,39,0.08)", border: "1px solid rgba(249,222,218,0.2)" }}>
-              <div style={{ fontSize: 9, color: "#9A7A6E", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 6, fontWeight: 700 }}>{label}</div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: label === "Revenue" ? "#C9A227" : "#1A0F0A", fontSize: label === "Revenue" ? 18 : 26, lineHeight: 1 }}>{value}</div>
+            <div key={label} style={{ background: "#fff", borderRadius: 14, padding: "12px 16px", textAlign: "center", boxShadow: "0 1px 6px rgba(201,162,39,0.08)", border: "1px solid rgba(249,222,218,0.2)" }}>
+              <div style={{ fontSize: 9, color: "#9A7A6E", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 4, fontWeight: 700 }}>{label}</div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: label === "Revenue" ? "#C9A227" : "#1A0F0A", fontSize: label === "Revenue" ? 16 : 22, lineHeight: 1 }}>{value}</div>
             </div>
           ))}
         </div>
       </div>
 
       {/* ── Tab Navigation ── */}
-      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(249,222,218,0.25)", width: "100%", boxSizing: "border-box", overflowX: "auto" }}>
-        <div style={{ maxWidth: 1060, margin: "0 auto", padding: "0 24px", display: "flex" }}>
+      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(249,222,218,0.25)", width: "100%", boxSizing: "border-box", overflowX: "auto", flexShrink: 0 }}>
+        <div style={{ maxWidth: 1060, margin: "0 auto", padding: "0 16px", display: "flex" }}>
           {([["orders", "Orders"], ["products", "Products"], ["categories", "Categories"], ["security", "Security"]] as const).map(([t, label]) => (
             <button
               key={t}
-              onClick={() => setTab(t)}
+              onClick={() => switchTab(t)}
               style={{
-                padding: "16px 24px",
-                fontSize: 12,
+                padding: "14px 20px",
+                fontSize: 11,
                 fontWeight: 700,
                 letterSpacing: "0.1em",
                 border: "none",
@@ -2146,6 +2160,7 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
                 alignItems: "center",
                 gap: 8,
                 marginBottom: -1,
+                whiteSpace: "nowrap",
               }}
             >
               {label.toUpperCase()}
@@ -2157,12 +2172,14 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
         </div>
       </div>
 
-      {/* ── Tab Content ── */}
-      <div style={{ maxWidth: 1060, margin: "0 auto", padding: "28px 16px 60px", boxSizing: "border-box" }}>
-        {tab === "orders" && <AdminOrders orders={orders} setOrders={setOrders} />}
-        {tab === "products" && <AdminProducts products={products} setProducts={setProducts} />}
-        {tab === "categories" && <AdminCategories products={products} setProducts={setProducts} />}
-        {tab === "security" && <AdminSecurity />}
+      {/* ── Tab Content — scrolls independently ── */}
+      <div ref={contentRef} style={{ flex: 1, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
+        <div style={{ maxWidth: 1060, margin: "0 auto", padding: "28px 16px 60px", boxSizing: "border-box" }}>
+          {tab === "orders" && <AdminOrders orders={orders} setOrders={setOrders} />}
+          {tab === "products" && <AdminProducts products={products} setProducts={setProducts} />}
+          {tab === "categories" && <AdminCategories products={products} setProducts={setProducts} />}
+          {tab === "security" && <AdminSecurity />}
+        </div>
       </div>
     </div>
   );
@@ -2917,4 +2934,4 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
       </div>
     </div>
   );
-}
+}
