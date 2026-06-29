@@ -1059,7 +1059,7 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest, onSearch }: { cartCount
       <div
         style={{
           position: "fixed",
-          top: scrolled ? 60 : 72,
+          top: "calc((scrolled ? 60 : 72) + env(safe-area-inset-top, 0px))",
           left: 0,
           right: 0,
           zIndex: 9997,
@@ -1170,6 +1170,7 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest, onSearch }: { cartCount
           transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease",
           overflowY: "auto",
           WebkitOverflowScrolling: "touch",
+          paddingBottom: "calc(20px + env(safe-area-inset-bottom, 0px))",
         }}
       >
         {/* Mobile menu header */}
@@ -2112,7 +2113,7 @@ function CartDrawer({ open, cart, total, onClose, onRemove, onQty, onCheckout }:
         </div>
       ) : (
         <>
-          <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }} className="gap-3 p-3 sm:gap-4 sm:p-5">
+          <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", paddingBottom: "calc(20px + env(safe-area-inset-bottom, 0px))" }} className="gap-3 p-3 sm:gap-4 sm:p-5">
             {cart.map(({ product: p, quantity: q }) => (
               <div key={p.id} style={{ display: "flex", background: "linear-gradient(180deg, #FFF8F5 0%, #FFF1EB 100%)", borderRadius: 14, border: "1px solid rgba(249,222,218,0.28)" }} className="gap-3 p-3 sm:gap-4 sm:p-3.5">
                 <img src={p.image} alt={p.name} style={{ borderRadius: 10, objectFit: "cover", flexShrink: 0 }} className="h-14 w-14 sm:h-[68px] sm:w-[68px]" />
@@ -2164,7 +2165,7 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, email, onName,
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 60, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: 0 }} className="sm:items-center sm:p-4">
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }} />
-      <div className="glass" style={{ position: "relative", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 480, maxHeight: "95vh", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 -20px 60px rgba(0,0,0,0.2)" }}>
+      <div className="glass" style={{ position: "relative", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 480, maxHeight: "95vh", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 -20px 60px rgba(0,0,0,0.2)", paddingBottom: "calc(20px + env(safe-area-inset-bottom, 0px))" }}>
 
         <div style={{ background: "#C9A227", padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div>
@@ -2701,7 +2702,7 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
     <div style={{ paddingBottom: 48 }}>
       {/* Advance toast */}
       {advanceToast && (
-        <div style={{ position: "fixed", top: 70, right: 16, zIndex: 999, background: "#1A0F0A", color: "#fff", borderRadius: 10, padding: "10px 18px", fontSize: 13, fontWeight: 700, boxShadow: "0 6px 20px rgba(0,0,0,0.3)", border: "1px solid rgba(201,162,39,0.4)", animation: "slideUpIn 0.3s ease" }}>
+        <div style={{ position: "fixed", top: "calc(70px + env(safe-area-inset-top, 0px))", right: 16, zIndex: 999, background: "#1A0F0A", color: "#fff", borderRadius: 10, padding: "10px 18px", fontSize: 13, fontWeight: 700, boxShadow: "0 6px 20px rgba(0,0,0,0.3)", border: "1px solid rgba(201,162,39,0.4)", animation: "slideUpIn 0.3s ease" }}>
           {advanceToast}
         </div>
       )}
@@ -3150,7 +3151,7 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
             if (window.confirm("Discard unsaved changes?")) setShowForm(false);
           }} onTouchMove={e => e.preventDefault()} />
           <div
-            style={{ position: "relative", background: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 640, maxHeight: "92vh", display: "flex", flexDirection: "column", boxShadow: "0 -20px 60px rgba(0,0,0,0.3)", overflowY: "auto", WebkitOverflowScrolling: "touch" }}
+            style={{ position: "relative", background: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 640, maxHeight: "92vh", display: "flex", flexDirection: "column", boxShadow: "0 -20px 60px rgba(0,0,0,0.3)", overflowY: "auto", WebkitOverflowScrolling: "touch", paddingBottom: "calc(20px + env(safe-area-inset-bottom, 0px))" }}
             className="sm:rounded-3xl"
             onTouchMove={e => e.stopPropagation()} // allow scroll inside modal
           >
