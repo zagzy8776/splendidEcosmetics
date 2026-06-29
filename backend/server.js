@@ -392,9 +392,9 @@ app.patch("/api/orders/:id/status", requireAdminAuth, async (req, res) => {
 
 // ─── ADMIN AUTH ───────────────────────────────────────────────────────────────
 
-// Create table if it doesn't exist, then seed password from env
+// Create table if needed, then ALWAYS sync password from ADMIN_PASSWORD env var.
+// This means whatever is set in Render env is always what works — no stale hash issues.
 async function ensureAdminPassword() {
-  // Create the table directly via raw SQL — works even if prisma db push hasn't run
   await prisma.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS admin_settings (
       key TEXT PRIMARY KEY,
@@ -403,12 +403,13 @@ async function ensureAdminPassword() {
     )
   `);
 
-  const existing = await prisma.adminSetting.findUnique({ where: { key: "admin_password" } });
-  if (!existing) {
-    const hash = await bcrypt.hash(ADMIN_PASSWORD_ENV, 12);
-    await prisma.adminSetting.create({ data: { key: "admin_password", value: hash } });
-    console.log("[Auth] Admin password seeded from ADMIN_PASSWORD env var.");
-  }
+  const hash = await bcrypt.hash(ADMIN_PASSWORD_ENV, 12);
+  await prisma.adminSetting.upsert({
+    where: { key: "admin_password" },
+    update: { value: hash },
+    create: { key: "admin_password", value: hash },
+  });
+  console.log("[Auth] Admin password synced from ADMIN_PASSWORD env var.");
 }
 
 async function getAdminPasswordHash() {
