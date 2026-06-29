@@ -2618,12 +2618,96 @@ const STATUS_CFG: Record<OrderStatus, { label: string; bg: string; color: string
 const NEXT: Record<OrderStatus, OrderStatus | null> = { pending: "verifying", verifying: "confirmed", confirmed: "dispatched", dispatched: "delivered", delivered: null };
 const NEXT_LABEL: Record<OrderStatus, string | null> = { pending: "Mark Verifying", verifying: "Approve Payment ✓", confirmed: "Mark Dispatched", dispatched: "Mark Delivered 📦", delivered: null };
 
+// Memoized order card component for performance
+const OrderCard = React.memo(({ order, onAdvance, onWhatsApp }: { order: Order; onAdvance: (id: string) => void; onWhatsApp: (order: Order) => void }) => {
+  const cfg = STATUS_CFG[order.status];
+  const btn = NEXT_LABEL[order.status];
+  return (
+    <div style={{ backgroundColor: "#fff", borderRadius: 20, border: "1px solid rgba(249,222,218,0.2)", overflow: "hidden", boxShadow: "0 2px 16px rgba(201,162,39,0.07)" }}>
+      <div style={{ padding: "20px 22px" }}>
+
+        {/* Top row: ID + status badge + date */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#C9A227", fontSize: 14, letterSpacing: "0.05em" }}>{order.id}</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: cfg.bg, color: cfg.color, padding: "4px 12px", borderRadius: 999, fontSize: 10, fontWeight: 700, letterSpacing: "0.05em" }}>
+              {cfg.icon} {cfg.label}
+            </span>
+          </div>
+          <span style={{ color: "#9A7A6E", fontSize: 11, fontWeight: 600 }}>{order.createdAt.toLocaleString("en-NG")}</span>
+        </div>
+
+        {/* Middle row: customer info */}
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", fontSize: 18, lineHeight: 1.2, marginBottom: 4 }}>{order.customerName}</div>
+          <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+            <span style={{ color: "#5C3D2E", fontSize: 13, fontWeight: 600 }}>{order.phone}</span>
+            {order.email && <span style={{ color: "#9A7A6E", fontSize: 12 }}>{order.email}</span>}
+          </div>
+        </div>
+
+        {/* Items row */}
+        <div style={{ backgroundColor: "#FFF6F3", borderRadius: 12, padding: "12px 16px", marginBottom: 14 }}>
+          {order.items.map(({ product: p, quantity: q }) => (
+            <div key={p.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "4px 0", borderBottom: "1px solid rgba(201,162,39,0.07)" }}>
+              <span style={{ color: "#5C3D2E", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: 16 }}>{p.name} <span style={{ color: "#9A7A6E" }}>×{q}</span></span>
+              <span style={{ color: "#1A0F0A", fontWeight: 600, flexShrink: 0 }}>{fmt(p.price * q)}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Total + action buttons */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 22, color: "#C9A227" }}>{fmt(order.total)}</div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }} className="flex-col sm:flex-row">
+            {btn && (
+              <button
+                onClick={() => onAdvance(order.id)}
+                style={{ background: "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)", color: "#fff", border: "none", borderRadius: 999, padding: "11px 22px", fontSize: 12, fontWeight: 700, cursor: "pointer", minHeight: 44, letterSpacing: "0.04em", boxShadow: "0 4px 14px rgba(201,162,39,0.25)", transition: "opacity 0.2s" }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+                onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+              >
+                {btn}
+              </button>
+            )}
+            {order.status !== "delivered" && (
+              <button
+                onClick={() => onWhatsApp(order)}
+                style={{ display: "flex", alignItems: "center", gap: 8, background: "#25D366", color: "#fff", border: "none", borderRadius: 999, padding: "11px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", minHeight: 44, boxShadow: "0 4px 14px rgba(37,211,102,0.2)", transition: "opacity 0.2s" }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+                onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+              >
+                <MessageCircle size={14} /> WhatsApp Customer
+              </button>
+            )}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}, (prevProps, nextProps) => {
+  return prevProps.order.id === nextProps.order.id && 
+         prevProps.order.status === nextProps.order.status &&
+         prevProps.order.total === nextProps.order.total &&
+         prevProps.order.customerName === nextProps.order.customerName;
+});
+
 function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.Dispatch<React.SetStateAction<Order[]>> }) {
   const [filterStatus, setFilterStatus] = useState<"All" | OrderStatus>("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [advanceToast, setAdvanceToast] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [refreshing, setRefreshing] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  // Initial load
+  useEffect(() => {
+    fetchOrders()
+      .then(data => { setOrders(data.map((o: any) => ({ ...o, status: o.status as OrderStatus }))); setLastRefresh(new Date()); })
+      .catch(() => {})
+      .finally(() => setInitialLoading(false));
+  }, []);
 
   // Auto-refresh every 60 seconds
   useEffect(() => {
@@ -2688,6 +2772,15 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
       o.id.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+  if (initialLoading) {
+    return (
+      <div style={{ textAlign: "center", padding: "80px 0", color: "#5C3D2E" }}>
+        <div style={{ width: 40, height: 40, border: "3px solid rgba(201,162,39,0.2)", borderTopColor: "#C9A227", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 16px" }} />
+        <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 600, color: "#1A0F0A" }}>Loading orders...</p>
+      </div>
+    );
+  }
+
   if (orders.length === 0) {
     return (
       <div style={{ textAlign: "center", padding: "80px 0", color: "#5C3D2E" }}>
@@ -2720,11 +2813,16 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
         </div>
         <button
           onClick={manualRefresh}
-          title={`Last refreshed: ${lastRefresh.toLocaleTimeString()}`}
-          style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 14px", background: "#fff", border: "1px solid rgba(201,162,39,0.25)", borderRadius: 10, cursor: "pointer", color: "#C9A227", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", flexShrink: 0 }}
+          disabled={refreshing}
+          style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 14px", background: refreshing ? "rgba(201,162,39,0.1)" : "#fff", border: "1px solid rgba(201,162,39,0.25)", borderRadius: 10, cursor: refreshing ? "not-allowed" : "pointer", color: "#C9A227", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", flexShrink: 0 }}
         >
-          <RefreshCw size={13} style={{ animation: refreshing ? "spin 0.8s linear infinite" : "none" }} /> REFRESH
+          <RefreshCw size={13} style={{ animation: refreshing ? "spin 0.8s linear infinite" : "none" }} /> {refreshing ? "REFRESHING..." : "REFRESH"}
         </button>
+      </div>
+
+      {/* Last updated timestamp */}
+      <div style={{ fontSize: 11, color: "#9A7A6E", marginBottom: 16, fontWeight: 500 }}>
+        Last updated: {lastRefresh.toLocaleTimeString()} • {displayOrders.length} order{displayOrders.length !== 1 ? "s" : ""} shown
       </div>
 
       {/* Filter pills */}
@@ -2766,74 +2864,9 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {displayOrders.map(o => {
-            const cfg = STATUS_CFG[o.status];
-            const btn = NEXT_LABEL[o.status];
-            return (
-              <div key={o.id} style={{ backgroundColor: "#fff", borderRadius: 20, border: "1px solid rgba(249,222,218,0.2)", overflow: "hidden", boxShadow: "0 2px 16px rgba(201,162,39,0.07)" }}>
-                <div style={{ padding: "20px 22px" }}>
-
-                  {/* Top row: ID + status badge + date */}
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                      <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#C9A227", fontSize: 14, letterSpacing: "0.05em" }}>{o.id}</span>
-                      <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: cfg.bg, color: cfg.color, padding: "4px 12px", borderRadius: 999, fontSize: 10, fontWeight: 700, letterSpacing: "0.05em" }}>
-                        {cfg.icon} {cfg.label}
-                      </span>
-                    </div>
-                    <span style={{ color: "#9A7A6E", fontSize: 11, fontWeight: 600 }}>{o.createdAt.toLocaleString("en-NG")}</span>
-                  </div>
-
-                  {/* Middle row: customer info */}
-                  <div style={{ marginBottom: 14 }}>
-                    <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", fontSize: 18, lineHeight: 1.2, marginBottom: 4 }}>{o.customerName}</div>
-                    <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-                      <span style={{ color: "#5C3D2E", fontSize: 13, fontWeight: 600 }}>{o.phone}</span>
-                      {o.email && <span style={{ color: "#9A7A6E", fontSize: 12 }}>{o.email}</span>}
-                    </div>
-                  </div>
-
-                  {/* Items row */}
-                  <div style={{ backgroundColor: "#FFF6F3", borderRadius: 12, padding: "12px 16px", marginBottom: 14 }}>
-                    {o.items.map(({ product: p, quantity: q }) => (
-                      <div key={p.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "4px 0", borderBottom: "1px solid rgba(201,162,39,0.07)" }}>
-                        <span style={{ color: "#5C3D2E", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: 16 }}>{p.name} <span style={{ color: "#9A7A6E" }}>×{q}</span></span>
-                        <span style={{ color: "#1A0F0A", fontWeight: 600, flexShrink: 0 }}>{fmt(p.price * q)}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Total + action buttons */}
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-                    <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 22, color: "#C9A227" }}>{fmt(o.total)}</div>
-                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }} className="flex-col sm:flex-row">
-                      {btn && (
-                        <button
-                          onClick={() => advance(o.id)}
-                          style={{ background: "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)", color: "#fff", border: "none", borderRadius: 999, padding: "11px 22px", fontSize: 12, fontWeight: 700, cursor: "pointer", minHeight: 44, letterSpacing: "0.04em", boxShadow: "0 4px 14px rgba(201,162,39,0.25)", transition: "opacity 0.2s" }}
-                          onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
-                          onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
-                        >
-                          {btn}
-                        </button>
-                      )}
-                      {o.status !== "delivered" && (
-                        <button
-                          onClick={() => waCustomer(o)}
-                          style={{ display: "flex", alignItems: "center", gap: 8, background: "#25D366", color: "#fff", border: "none", borderRadius: 999, padding: "11px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", minHeight: 44, boxShadow: "0 4px 14px rgba(37,211,102,0.2)", transition: "opacity 0.2s" }}
-                          onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
-                          onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
-                        >
-                          <MessageCircle size={14} /> WhatsApp Customer
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-            );
-          })}
+          {displayOrders.map(o => (
+            <OrderCard key={o.id} order={o} onAdvance={advance} onWhatsApp={waCustomer} />
+          ))}
         </div>
       )}
     </div>
