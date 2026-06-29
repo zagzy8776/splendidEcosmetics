@@ -179,4 +179,37 @@ export async function changeAdminPassword(currentPassword: string, newPassword: 
   return data;
 }
 
+export async function cloudinaryUpload(file: File): Promise<string> {
+  // Step 1: get a signed signature from our backend (never exposes secret to browser)
+  const sigRes = await fetch(`${API_BASE}/api/admin/cloudinary-upload-signature`, {
+    method: "POST",
+    headers: adminHeaders(),
+  });
+  if (!sigRes.ok) {
+    const err = await sigRes.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to get upload signature");
+  }
+  const { signature, timestamp, api_key, cloud_name, folder, eager, eager_async } = await sigRes.json();
+
+  // Step 2: upload directly to Cloudinary with the signed params
+  const form = new FormData();
+  form.append("file", file);
+  form.append("api_key", api_key);
+  form.append("timestamp", String(timestamp));
+  form.append("signature", signature);
+  form.append("folder", folder);
+  form.append("eager", eager);
+  form.append("eager_async", eager_async);
+
+  const upRes = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`, {
+    method: "POST",
+    body: form,
+  });
+  const json = await upRes.json();
+  if (json.error) throw new Error(json.error.message || "Upload failed");
+
+  // Prefer the eager-transformed URL (clean 800×800 square), fall back to original
+  return json.eager?.[0]?.secure_url ?? json.secure_url;
+}
+
 export default API_BASE;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { fetchProducts, createOrder, fetchOrders, updateOrderStatus, createProduct, updateProduct, deleteProduct, adminLogin, adminLogout, getAdminToken, clearAdminToken, changeAdminPassword } from "../api";
+import { fetchProducts, createOrder, fetchOrders, updateOrderStatus, createProduct, updateProduct, deleteProduct, adminLogin, adminLogout, getAdminToken, clearAdminToken, changeAdminPassword, cloudinaryUpload } from "../api";
 import {
   ShoppingBag, X, Menu, Instagram, Facebook, Phone, MapPin,
   Star, Plus, Minus, Trash2, Package, Settings, LogOut, Check,
@@ -2578,8 +2578,8 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<PForm>(EMPTY);
   const [fErr, setFErr] = useState("");
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
+  // uploadingSlot: null = not uploading, 0 = main image, 1/2/3 = extra image index
+  const [uploadingSlot, setUploadingSlot] = useState<number | null>(null);
   const [customCatInput, setCustomCatInput] = useState("");
 
   // Derive unique categories from existing products
@@ -2588,73 +2588,55 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
   function openAdd() { setForm(EMPTY); setEditId(null); setFErr(""); setShowForm(true); }
   function openEdit(p: Product) { setForm({ name: p.name, category: p.category, price: String(p.price), image: p.image, images: p.images ?? [], videoUrl: p.videoUrl ?? "", description: p.description, badge: p.badge || "", inStock: p.inStock }); setEditId(p.id); setFErr(""); setShowForm(true); }
 
-  async function uploadImage(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleSlotUpload(e: React.ChangeEvent<HTMLInputElement>, slot: number) {
     const file = e.target.files?.[0];
     if (!file) return;
+    e.target.value = "";
 
-    // Client-side validation before upload
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/heic", "image/heif"];
-    if (!allowedTypes.includes(file.type)) {
-      setFErr("Please upload a JPEG, PNG, or WebP image.");
-      return;
-    }
-    const MAX_SIZE_MB = 15;
-    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-      setFErr(`Image is too large. Max size is ${MAX_SIZE_MB}MB.`);
-      return;
-    }
+    if (!allowedTypes.includes(file.type)) { setFErr("Please upload a JPEG, PNG, or WebP image."); return; }
+    if (file.size > 15 * 1024 * 1024) { setFErr("Image is too large. Max 15MB."); return; }
 
-    setIsUploading(true);
+    setUploadingSlot(slot);
     setFErr("");
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", "splendid_ecosmetics");
-      // Cloudinary eager transformation:
-      // - c_fill: fill the square (no letterboxing)
-      // - g_auto: AI detects subject and centres it
-      // - w_800,h_800: consistent 800×800 output
-      // - q_auto: optimal quality/size ratio
-      // - f_auto: WebP for modern browsers, JPEG fallback
-      formData.append("eager", "c_fill,g_auto,w_800,h_800,q_auto,f_auto");
-      formData.append("eager_async", "false");
-
-      const res = await fetch("https://api.cloudinary.com/v1_1/djup7klv2/image/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const json = await res.json();
-
-      if (json.error) {
-        setFErr(json.error.message || "Upload failed. Please try again.");
-        return;
-      }
-
-      // Prefer the eager-transformed URL (clean square crop), fall back to raw
-      const transformedUrl = json.eager?.[0]?.secure_url ?? json.secure_url;
-
-      if (transformedUrl) {
-        sf("image")(transformedUrl);
+      const url = await cloudinaryUpload(file);
+      if (slot === 0) {
+        setForm(f => ({ ...f, image: url }));
       } else {
-        setFErr("Failed to upload image. Please try again.");
+        setForm(f => {
+          const next = [...f.images];
+          next[slot - 1] = url;
+          return { ...f, images: next };
+        });
       }
-    } catch (err) {
-      console.error(err);
-      setFErr("An error occurred during upload. Check your connection and try again.");
+    } catch (err: any) {
+      setFErr(err.message || "Upload failed. Please try again.");
     } finally {
-      setIsUploading(false);
-      // Reset file input so same file can be re-selected after an error
-      e.target.value = "";
+      setUploadingSlot(null);
+    }
+  }
+
+  function removeSlot(slot: number) {
+    if (slot === 0) {
+      setForm(f => ({ ...f, image: "" }));
+    } else {
+      setForm(f => {
+        const next = [...f.images];
+        next[slot - 1] = "";
+        return { ...f, images: next };
+      });
     }
   }
 
   function save() {
+    if (!form.name.trim()) { setFErr("Product name is required."); return; }
     if (!form.price || isNaN(Number(form.price))) { setFErr("Enter a valid price."); return; }
     if (form.videoUrl.trim() && !form.videoUrl.trim().startsWith("https://")) {
       setFErr("Video URL must start with https://");
       return;
     }
-    
+
     if (editId) {
       const updateData = {
         name: form.name.trim(),
@@ -2667,16 +2649,9 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
         badge: form.badge.trim() || undefined,
         inStock: form.inStock
       };
-      
       updateProduct(editId, updateData)
-        .then(updated => {
-          setProducts(prev => prev.map(p => p.id === editId ? { ...p, ...updated } : p));
-          setShowForm(false); setEditId(null); setFErr("");
-        })
-        .catch(err => {
-          console.error("Failed to update product in database:", err);
-          setFErr("Failed to update product in database.");
-        });
+        .then(updated => { setProducts(prev => prev.map(p => p.id === editId ? { ...p, ...updated } : p)); setShowForm(false); setEditId(null); setFErr(""); })
+        .catch(() => setFErr("Failed to update product. Please try again."));
     } else {
       const createData = {
         id: "",
@@ -2692,49 +2667,40 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
         rating: 4.8,
         reviews: 0
       };
-      
       createProduct(createData)
-        .then(created => {
-          setProducts(prev => [created, ...prev]);
-          setShowForm(false); setEditId(null); setFErr("");
-        })
-        .catch(err => {
-          console.error("Failed to create product in database:", err);
-          setFErr("Failed to create product in database.");
-        });
+        .then(created => { setProducts(prev => [created, ...prev]); setShowForm(false); setEditId(null); setFErr(""); })
+        .catch(() => setFErr("Failed to add product. Please try again."));
     }
   }
 
   function del(id: string) {
     if (window.confirm("Delete this product?")) {
       deleteProduct(id)
-        .then(() => {
-          setProducts(prev => prev.filter(p => p.id !== id));
-        })
-        .catch(err => {
-          console.error("Failed to delete product in database:", err);
-          alert("Failed to delete product in database.");
-        });
+        .then(() => setProducts(prev => prev.filter(p => p.id !== id)))
+        .catch(() => alert("Failed to delete product."));
     }
   }
 
   function toggle(id: string) {
     const p = products.find(prod => prod.id === id);
     if (!p) return;
-    
     updateProduct(id, { inStock: !p.inStock })
-      .then(updated => {
-        setProducts(prev => prev.map(item => item.id === id ? { ...item, inStock: updated.inStock } : item));
-      })
-      .catch(err => {
-        console.error("Failed to toggle product stock in database:", err);
-      });
+      .then(updated => setProducts(prev => prev.map(item => item.id === id ? { ...item, inStock: updated.inStock } : item)))
+      .catch(() => {});
   }
 
   function sf(k: keyof PForm) { return (v: string | boolean) => setForm(f => ({ ...f, [k]: v })); }
 
   const inputStyle: React.CSSProperties = { width: "100%", border: "1px solid rgba(249,222,218,0.6)", borderRadius: 10, padding: "10px 14px", fontSize: 13, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" };
   const labelStyle: React.CSSProperties = { display: "block", fontSize: 10, fontWeight: 700, color: "#5C3D2E", marginBottom: 6, letterSpacing: "0.15em", textTransform: "uppercase" };
+
+  // Build slot data: [main, extra0, extra1, extra2]
+  const slots = [
+    { label: "Main", url: form.image },
+    { label: "Image 2", url: form.images[0] ?? "" },
+    { label: "Image 3", url: form.images[1] ?? "" },
+    { label: "Image 4", url: form.images[2] ?? "" },
+  ];
 
   return (
     <div style={{ paddingBottom: 48 }}>
@@ -2781,22 +2747,8 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
                     {existingCategories.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                   <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                    <input
-                      value={customCatInput}
-                      onChange={e => setCustomCatInput(e.target.value)}
-                      placeholder="Or type new category..."
-                      style={{ ...inputStyle, flex: 1 }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const trimmed = customCatInput.trim();
-                        if (trimmed) { sf("category")(trimmed); setCustomCatInput(""); }
-                      }}
-                      style={{ padding: "10px 14px", background: "#C9A227", color: "#fff", border: "none", borderRadius: 10, fontSize: 11, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}
-                    >
-                      USE
-                    </button>
+                    <input value={customCatInput} onChange={e => setCustomCatInput(e.target.value)} placeholder="Or type new category..." style={{ ...inputStyle, flex: 1 }} />
+                    <button type="button" onClick={() => { const t = customCatInput.trim(); if (t) { sf("category")(t); setCustomCatInput(""); } }} style={{ padding: "10px 14px", background: "#C9A227", color: "#fff", border: "none", borderRadius: 10, fontSize: 11, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>USE</button>
                   </div>
                   {form.category && !existingCategories.includes(form.category) && (
                     <p style={{ fontSize: 11, color: "#C9A227", marginTop: 6, fontWeight: 600 }}>✦ New category: "{form.category}"</p>
@@ -2815,111 +2767,90 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
                 </div>
               </div>
 
+              {/* ── Image Slots Grid ── */}
               <div>
-                <label style={labelStyle}>Product Image</label>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {/* Upload tips */}
-                  <div style={{ background: "rgba(201,162,39,0.08)", border: "1px solid rgba(201,162,39,0.2)", borderRadius: 10, padding: "10px 14px", display: "flex", gap: 10, alignItems: "flex-start" }}>
-                    <Sparkles size={14} color="#C9A227" style={{ flexShrink: 0, marginTop: 1 }} />
-                    <p style={{ color: "#5C3D2E", fontSize: 11, margin: 0, lineHeight: 1.6 }}>
-                      <strong>Tips for clean product photos:</strong> Plain or white background, good lighting, product centred. Cloudinary will auto-crop to a clean square.
-                    </p>
-                  </div>
-                  {/* Drop zone */}
-                  <div style={{ position: "relative" }}>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/webp,image/heic"
-                      onChange={uploadImage}
-                      disabled={isUploading}
-                      style={{ position: "absolute", inset: 0, opacity: 0, cursor: isUploading ? "not-allowed" : "pointer", width: "100%", height: "100%" }}
-                    />
-                    <div style={{
-                      border: `2px dashed ${isUploading ? "#C9A227" : "rgba(201,162,39,0.4)"}`,
-                      borderRadius: 12,
-                      padding: "24px 20px",
-                      textAlign: "center",
-                      background: isUploading ? "rgba(201,162,39,0.04)" : "#FFF6F3",
-                      cursor: isUploading ? "not-allowed" : "pointer",
-                      transition: "all 0.2s"
-                    }}>
-                      {isUploading ? (
-                        <>
-                          <div style={{ width: 28, height: 28, border: "3px solid rgba(201,162,39,0.2)", borderTopColor: "#C9A227", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 10px" }} />
-                          <p style={{ color: "#C9A227", fontSize: 13, fontWeight: 700, margin: 0 }}>Uploading & enhancing image...</p>
-                          <p style={{ color: "#9A7A6E", fontSize: 11, margin: "4px 0 0" }}>Auto-cropping to clean square</p>
-                        </>
-                      ) : (
-                        <>
-                          <Plus size={22} color="#C9A227" style={{ margin: "0 auto 8px" }} />
-                          <p style={{ color: "#5C3D2E", fontSize: 13, fontWeight: 700, margin: 0 }}>Tap to upload photo</p>
-                          <p style={{ color: "#9A7A6E", fontSize: 11, margin: "4px 0 0" }}>JPEG · PNG · WebP · Max 15MB</p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ height: 1, flex: 1, background: "rgba(201,162,39,0.2)" }} />
-                    <span style={{ fontSize: 11, color: "#9A7A6E", fontWeight: 700 }}>OR PASTE URL</span>
-                    <div style={{ height: 1, flex: 1, background: "rgba(201,162,39,0.2)" }} />
-                  </div>
-                  <input value={form.image} onChange={e => sf("image")(e.target.value)} placeholder="https://..." style={inputStyle} />
-                  {form.image && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 12, background: "#f0fdf4", borderRadius: 10, padding: "10px 14px", border: "1px solid #86efac" }}>
-                      <img src={form.image} alt="Preview" style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8, border: "1px solid #86efac" }} />
-                      <div>
-                        <p style={{ fontSize: 12, color: "#15803d", fontWeight: 700, margin: 0 }}>✓ Image ready</p>
-                        <p style={{ fontSize: 10, color: "#9A7A6E", margin: "2px 0 0" }}>Auto-cropped to square · Optimised</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label style={labelStyle}>Extra Images (up to 3 additional)</label>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {[0, 1, 2].map(idx => {
-                    const url = form.images[idx] ?? "";
-                    const allUrls = [form.image, ...form.images];
-                    const isDuplicate = url.trim() !== "" && allUrls.filter(u => u.trim() === url.trim()).length > 1;
+                <label style={labelStyle}>Product Photos (tap to upload from gallery)</label>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  {slots.map((slot, slotIdx) => {
+                    const isUploading = uploadingSlot === slotIdx;
+                    const isMain = slotIdx === 0;
                     return (
-                      <div key={idx}>
-                        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                          <span style={{ fontSize: 10, fontWeight: 700, color: "#9A7A6E", minWidth: 52, letterSpacing: "0.08em" }}>IMAGE {idx + 2}</span>
-                          <input
-                            value={url}
-                            onChange={e => {
-                              const next = [...form.images];
-                              next[idx] = e.target.value;
-                              setForm(f => ({ ...f, images: next }));
-                            }}
-                            placeholder="https://..."
-                            style={{ ...inputStyle, flex: 1, marginBottom: 0 }}
-                          />
-                          {url && (
-                            <img src={url} alt="" style={{ width: 36, height: 36, borderRadius: 6, objectFit: "cover", border: "1px solid rgba(201,162,39,0.3)", flexShrink: 0 }} onError={e => ((e.target as HTMLImageElement).style.display = "none")} />
+                      <div key={slotIdx} style={{ position: "relative" }}>
+                        {/* Hidden file input */}
+                        <input
+                          id={`img-slot-${slotIdx}`}
+                          type="file"
+                          accept="image/jpeg,image/jpg,image/png,image/webp,image/heic"
+                          onChange={e => handleSlotUpload(e, slotIdx)}
+                          disabled={uploadingSlot !== null}
+                          style={{ display: "none" }}
+                        />
+                        <label
+                          htmlFor={`img-slot-${slotIdx}`}
+                          style={{
+                            display: "block",
+                            aspectRatio: "1",
+                            borderRadius: 12,
+                            overflow: "hidden",
+                            border: `2px ${slot.url ? "solid" : "dashed"} ${isMain && !slot.url ? "#C9A227" : "rgba(201,162,39,0.35)"}`,
+                            background: slot.url ? "transparent" : "#FFF6F3",
+                            cursor: uploadingSlot !== null ? "not-allowed" : "pointer",
+                            position: "relative",
+                          }}
+                        >
+                          {slot.url ? (
+                            <img src={slot.url} alt={slot.label} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                          ) : (
+                            <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: 8, boxSizing: "border-box" }}>
+                              {isUploading ? (
+                                <div style={{ width: 24, height: 24, border: "3px solid rgba(201,162,39,0.2)", borderTopColor: "#C9A227", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+                              ) : (
+                                <>
+                                  <div style={{ fontSize: 22 }}>📷</div>
+                                  <span style={{ fontSize: 9, fontWeight: 700, color: "#9A7A6E", textAlign: "center", letterSpacing: "0.05em" }}>{isMain ? "MAIN PHOTO" : slot.label.toUpperCase()}</span>
+                                </>
+                              )}
+                            </div>
                           )}
-                        </div>
-                        {isDuplicate && (
-                          <p style={{ fontSize: 11, color: "#d97706", marginTop: 4, fontWeight: 600 }}>⚠ Duplicate image URL detected</p>
+                          {/* Uploading overlay on filled slot */}
+                          {isUploading && slot.url && (
+                            <div style={{ position: "absolute", inset: 0, background: "rgba(26,15,10,0.55)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <div style={{ width: 28, height: 28, border: "3px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+                            </div>
+                          )}
+                        </label>
+
+                        {/* Remove button */}
+                        {slot.url && !isUploading && (
+                          <button
+                            type="button"
+                            onClick={e => { e.preventDefault(); removeSlot(slotIdx); }}
+                            aria-label={`Remove ${slot.label}`}
+                            style={{ position: "absolute", top: 6, right: 6, width: 22, height: 22, borderRadius: "50%", background: "rgba(26,15,10,0.75)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 5 }}
+                          >
+                            <X size={11} color="#fff" />
+                          </button>
+                        )}
+
+                        {/* Main badge */}
+                        {isMain && (
+                          <span style={{ position: "absolute", bottom: 6, left: 6, background: "#C9A227", color: "#fff", fontSize: 8, fontWeight: 700, padding: "2px 7px", borderRadius: 999, letterSpacing: "0.08em", pointerEvents: "none" }}>MAIN</span>
                         )}
                       </div>
                     );
                   })}
                 </div>
+                <p style={{ fontSize: 11, color: "#9A7A6E", marginTop: 8, lineHeight: 1.5 }}>Tap any slot to pick a photo from your device. Auto-cropped to a clean square.</p>
               </div>
 
+              {/* Social Video URL */}
               <div>
                 <label style={labelStyle}>Instagram Reel or TikTok URL (optional)</label>
                 <input
                   value={form.videoUrl}
                   onChange={e => sf("videoUrl")(e.target.value)}
                   placeholder="https://www.instagram.com/reel/... or https://www.tiktok.com/..."
-                  style={{
-                    ...inputStyle,
-                    borderColor: form.videoUrl && !form.videoUrl.startsWith("https://") ? "#fca5a5" : undefined,
-                  }}
+                  style={{ ...inputStyle, borderColor: form.videoUrl && !form.videoUrl.startsWith("https://") ? "#fca5a5" : undefined }}
                 />
                 {form.videoUrl && !form.videoUrl.startsWith("https://") && (
                   <p style={{ fontSize: 11, color: "#dc2626", marginTop: 6, fontWeight: 600 }}>Video URL must start with https://</p>
@@ -2936,7 +2867,7 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
 
             {/* Modal Footer */}
             <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(249,222,218,0.2)", display: "flex", gap: 12, flexShrink: 0 }}>
-              <button onClick={save} style={{ flex: 1, background: "linear-gradient(135deg, #C9A227, #A8841A)", color: "#fff", border: "none", borderRadius: 12, padding: "14px", fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 14px rgba(201,162,39,0.3)" }}>
+              <button onClick={save} disabled={uploadingSlot !== null} style={{ flex: 1, background: uploadingSlot !== null ? "rgba(201,162,39,0.5)" : "linear-gradient(135deg, #C9A227, #A8841A)", color: "#fff", border: "none", borderRadius: 12, padding: "14px", fontSize: 13, fontWeight: 700, cursor: uploadingSlot !== null ? "not-allowed" : "pointer", boxShadow: "0 4px 14px rgba(201,162,39,0.3)" }}>
                 {editId ? "SAVE CHANGES" : "ADD PRODUCT"}
               </button>
               <button onClick={() => setShowForm(false)} style={{ padding: "14px 20px", background: "#FFF6F3", border: "1px solid rgba(201,162,39,0.3)", borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: "pointer", color: "#5C3D2E" }}>
@@ -2971,22 +2902,13 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
 
             {/* Actions */}
             <div style={{ padding: "12px 16px", borderTop: "1px solid rgba(249,222,218,0.15)", display: "flex", gap: 8 }}>
-              <button
-                onClick={() => toggle(p.id)}
-                style={{ flex: 1, padding: "8px 6px", borderRadius: 8, border: `1px solid ${p.inStock ? "#bbf7d0" : "#fecaca"}`, background: p.inStock ? "#f0fdf4" : "#fff1f2", color: p.inStock ? "#15803d" : "#dc2626", fontSize: 10, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}
-              >
+              <button onClick={() => toggle(p.id)} style={{ flex: 1, padding: "8px 6px", borderRadius: 8, border: `1px solid ${p.inStock ? "#bbf7d0" : "#fecaca"}`, background: p.inStock ? "#f0fdf4" : "#fff1f2", color: p.inStock ? "#15803d" : "#dc2626", fontSize: 10, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
                 {p.inStock ? <><Check size={10} /> Stock</> : <><X size={10} /> Restock</>}
               </button>
-              <button
-                onClick={() => openEdit(p)}
-                style={{ padding: "8px 12px", borderRadius: 8, background: "#FFF6F3", border: "1px solid rgba(201,162,39,0.2)", cursor: "pointer", color: "#5C3D2E", display: "flex", alignItems: "center", justifyContent: "center" }}
-              >
+              <button onClick={() => openEdit(p)} style={{ padding: "8px 12px", borderRadius: 8, background: "#FFF6F3", border: "1px solid rgba(201,162,39,0.2)", cursor: "pointer", color: "#5C3D2E", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Pencil size={13} />
               </button>
-              <button
-                onClick={() => del(p.id)}
-                style={{ padding: "8px 12px", borderRadius: 8, background: "#fff1f2", border: "1px solid #fecaca", cursor: "pointer", color: "#dc2626", display: "flex", alignItems: "center", justifyContent: "center" }}
-              >
+              <button onClick={() => del(p.id)} style={{ padding: "8px 12px", borderRadius: 8, background: "#fff1f2", border: "1px solid #fecaca", cursor: "pointer", color: "#dc2626", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Trash2 size={13} />
               </button>
             </div>
@@ -2995,5 +2917,4 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
       </div>
     </div>
   );
-}
-
+}

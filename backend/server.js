@@ -640,6 +640,43 @@ app.post("/api/admin/logout", requireAdminAuth, (req, res) => {
   res.json({ success: true });
 });
 
+// ─── CLOUDINARY SIGNED UPLOAD ────────────────────────────────────────────────
+
+app.post("/api/admin/cloudinary-upload-signature", requireAdminAuth, async (req, res) => {
+  const apiKey    = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "djup7klv2";
+
+  if (!apiKey || !apiSecret) {
+    return res.status(500).json({ error: "Cloudinary credentials not configured on server." });
+  }
+
+  try {
+    const timestamp = Math.round(Date.now() / 1000);
+    // Parameters that must be signed (alphabetical order, no 'file', no 'api_key')
+    const paramsToSign = {
+      eager:       "c_fill,g_auto,w_800,h_800,q_auto,f_auto",
+      eager_async: "false",
+      folder:      "splendid_products",
+      timestamp,
+    };
+
+    // Build the string_to_sign: key=value pairs sorted alphabetically joined by &
+    const stringToSign = Object.entries(paramsToSign)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([k, v]) => `${k}=${v}`)
+      .join("&") + apiSecret;
+
+    // SHA-1 of the string
+    const signature = crypto.createHash("sha1").update(stringToSign).digest("hex");
+
+    res.json({ signature, timestamp, api_key: apiKey, cloud_name: cloudName, folder: "splendid_products", eager: paramsToSign.eager, eager_async: paramsToSign.eager_async });
+  } catch (err) {
+    console.error("[Cloudinary Signature Error]", err);
+    res.status(500).json({ error: "Failed to generate upload signature." });
+  }
+});
+
 // ─── HEALTH CHECK ─────────────────────────────────────────────────────────────
 
 app.get("/api/health", (req, res) => {
