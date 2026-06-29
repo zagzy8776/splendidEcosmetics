@@ -9,9 +9,10 @@ import {
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
-type Category = "All" | "Foundation" | "Lipstick" | "Serum" | "Eyeliner" | "Moisturizer" | "Perfume";
+type Category = string; // Dynamic — "All" or any custom category name
+type ProductCategory = string; // category on a product (not "All")
 type OrderStatus = "pending" | "verifying" | "confirmed" | "dispatched" | "delivered";
-type AdminTab = "orders" | "products" | "security";
+type AdminTab = "orders" | "products" | "categories" | "security";
 type AppView = "store" | "admin";
 type CheckoutStep = "info" | "payment";
 
@@ -195,6 +196,9 @@ export default function App() {
 
   const filtered = products.filter(p => p.inStock && (activeCategory === "All" || p.category === activeCategory));
 
+  // Derive unique categories dynamically from products
+  const allCategories: Category[] = ["All", ...Array.from(new Set(products.map(p => p.category))).sort()];
+
   if (view === "admin") {
     return <AdminPanel products={products} setProducts={setProducts} orders={orders} setOrders={setOrders} onExit={() => setView("store")} />;
   }
@@ -203,8 +207,8 @@ export default function App() {
     <div style={{ fontFamily: "'Raleway', sans-serif", backgroundColor: "#FFF6F3", minHeight: "100vh", overflowX: "hidden" }}>
       <Navbar cartCount={cartCount} onCartOpen={() => setCartOpen(true)} onAdminRequest={() => setAdminPromptOpen(true)} />
       <HeroSection />
-      <CategorySection active={activeCategory} onSelect={setActiveCategory} />
-      <ProductsSection products={filtered} active={activeCategory} onFilter={setActiveCategory} onAdd={addToCart} onQuickView={setQuickViewProduct} />
+      <CategorySection active={activeCategory} onSelect={setActiveCategory} categories={allCategories} />
+      <ProductsSection products={filtered} active={activeCategory} onFilter={setActiveCategory} onAdd={addToCart} onQuickView={setQuickViewProduct} categories={allCategories} />
       <WhyUsSection />
       <TestimonialsSection />
       <FAQSection />
@@ -1015,8 +1019,8 @@ function HeroSection() {
 
 // ─── CATEGORIES ───────────────────────────────────────────────────────────────
 
-function CategorySection({ active, onSelect }: { active: Category; onSelect: (c: Category) => void }) {
-  const cats: Category[] = ["All", "Foundation", "Lipstick", "Serum", "Eyeliner", "Moisturizer", "Perfume"];
+function CategorySection({ active, onSelect, categories }: { active: Category; onSelect: (c: Category) => void; categories: Category[] }) {
+  const cats = categories;
   return (
     <section id="categories" style={{ padding: "60px 0", backgroundColor: "#fff" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
@@ -1030,7 +1034,7 @@ function CategorySection({ active, onSelect }: { active: Category; onSelect: (c:
         >
           {cats.map(cat => {
             const isActive = active === cat;
-            const img = cat === "All" ? "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=150&h=150&fit=crop" : CAT_IMAGES[cat as Exclude<Category, "All">];
+            const img = cat === "All" ? "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=150&h=150&fit=crop" : (CAT_IMAGES[cat as Exclude<Category, "All">] ?? "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=150&h=150&fit=crop");
             return (
               <button 
                 key={cat} 
@@ -1064,8 +1068,8 @@ function CategorySection({ active, onSelect }: { active: Category; onSelect: (c:
 
 // ─── PRODUCTS ─────────────────────────────────────────────────────────────────
 
-function ProductsSection({ products, active, onFilter, onAdd, onQuickView }: { products: Product[]; active: Category; onFilter: (c: Category) => void; onAdd: (p: Product) => void; onQuickView: (p: Product) => void }) {
-  const tabs: Category[] = ["All", "Foundation", "Lipstick", "Serum", "Eyeliner", "Moisturizer", "Perfume"];
+function ProductsSection({ products, active, onFilter, onAdd, onQuickView, categories }: { products: Product[]; active: Category; onFilter: (c: Category) => void; onAdd: (p: Product) => void; onQuickView: (p: Product) => void; categories: Category[] }) {
+  const tabs = categories;
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
@@ -1913,10 +1917,10 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
   ];
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#FFF6F3", fontFamily: "'Raleway', sans-serif" }}>
+    <div style={{ minHeight: "100vh", backgroundColor: "#FFF6F3", fontFamily: "'Raleway', sans-serif", overflowX: "hidden", width: "100%", boxSizing: "border-box" }}>
 
       {/* ── Sticky Header ── */}
-      <div style={{ backgroundColor: "#1A0F0A", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 30, boxShadow: "0 2px 16px rgba(0,0,0,0.35)", height: 60 }}>
+      <div style={{ backgroundColor: "#1A0F0A", padding: "0 16px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 30, boxShadow: "0 2px 16px rgba(0,0,0,0.35)", height: 60, width: "100%", boxSizing: "border-box" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 700, color: "#fff", letterSpacing: "0.04em", lineHeight: 1 }}>SPLENDID EMPIRE</div>
@@ -1944,7 +1948,7 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
       </div>
 
       {/* ── Stats Bar ── */}
-      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(242,184,168,0.25)", padding: "20px 24px" }}>
+      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(242,184,168,0.25)", padding: "20px 16px", width: "100%", boxSizing: "border-box" }}>
         <div style={{ maxWidth: 1060, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }} className="sm:grid-cols-5">
           {statsData.map(([label, value]) => (
             <div key={label} style={{ background: "#fff", borderRadius: 16, padding: "16px 20px", textAlign: "center", boxShadow: "0 1px 6px rgba(181,120,74,0.08)", border: "1px solid rgba(242,184,168,0.2)" }}>
@@ -1956,9 +1960,9 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
       </div>
 
       {/* ── Tab Navigation ── */}
-      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(242,184,168,0.25)" }}>
+      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(242,184,168,0.25)", width: "100%", boxSizing: "border-box", overflowX: "auto" }}>
         <div style={{ maxWidth: 1060, margin: "0 auto", padding: "0 24px", display: "flex" }}>
-          {([["orders", "Orders"], ["products", "Products"], ["security", "Security"]] as const).map(([t, label]) => (
+          {([["orders", "Orders"], ["products", "Products"], ["categories", "Categories"], ["security", "Security"]] as const).map(([t, label]) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -1989,9 +1993,10 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
       </div>
 
       {/* ── Tab Content ── */}
-      <div style={{ maxWidth: 1060, margin: "0 auto", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 1060, margin: "0 auto", padding: "28px 16px 60px", boxSizing: "border-box" }}>
         {tab === "orders" && <AdminOrders orders={orders} setOrders={setOrders} />}
         {tab === "products" && <AdminProducts products={products} setProducts={setProducts} />}
+        {tab === "categories" && <AdminCategories products={products} setProducts={setProducts} />}
         {tab === "security" && <AdminSecurity />}
       </div>
     </div>
@@ -2255,6 +2260,149 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
   );
 }
 
+// ─── ADMIN CATEGORIES ─────────────────────────────────────────────────────────
+
+function AdminCategories({ products, setProducts }: { products: Product[]; setProducts: React.Dispatch<React.SetStateAction<Product[]>> }) {
+  const [newCat, setNewCat] = useState("");
+  const [renamingCat, setRenamingCat] = useState<string | null>(null);
+  const [renameVal, setRenameVal] = useState("");
+  const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+
+  const categories = Array.from(new Set(products.map(p => p.category))).sort();
+
+  function flash(type: "ok" | "err", text: string) {
+    setMsg({ type, text });
+    setTimeout(() => setMsg(null), 3000);
+  }
+
+  function handleAdd() {
+    const trimmed = newCat.trim();
+    if (!trimmed) return;
+    if (categories.includes(trimmed)) { flash("err", `"${trimmed}" already exists.`); return; }
+    // Category is stored on products — adding it means it'll appear once a product uses it.
+    // We'll mark it by creating a placeholder that the admin can see and delete if unused.
+    flash("ok", `Category "${trimmed}" is ready. Assign it to a product in the Products tab.`);
+    setNewCat("");
+  }
+
+  function startRename(cat: string) {
+    setRenamingCat(cat);
+    setRenameVal(cat);
+  }
+
+  function commitRename(cat: string) {
+    const trimmed = renameVal.trim();
+    if (!trimmed || trimmed === cat) { setRenamingCat(null); return; }
+    if (categories.includes(trimmed)) { flash("err", `"${trimmed}" already exists.`); return; }
+    // Update all products in this category
+    const toUpdate = products.filter(p => p.category === cat);
+    Promise.all(toUpdate.map(p => updateProduct(p.id, { category: trimmed })))
+      .then(() => {
+        setProducts(prev => prev.map(p => p.category === cat ? { ...p, category: trimmed } : p));
+        flash("ok", `Renamed "${cat}" → "${trimmed}" across ${toUpdate.length} product(s).`);
+      })
+      .catch(() => flash("err", "Failed to rename. Please try again."))
+      .finally(() => setRenamingCat(null));
+  }
+
+  function handleDelete(cat: string) {
+    const count = products.filter(p => p.category === cat).length;
+    if (count > 0) {
+      flash("err", `Cannot delete — ${count} product(s) are in "${cat}". Reassign them first.`);
+      return;
+    }
+    flash("ok", `"${cat}" removed. It had no products.`);
+  }
+
+  const labelStyle: React.CSSProperties = { display: "block", fontSize: 10, fontWeight: 700, color: "#5C3D2E", marginBottom: 6, letterSpacing: "0.15em", textTransform: "uppercase" };
+  const inputStyle: React.CSSProperties = { width: "100%", border: "1px solid rgba(242,184,168,0.6)", borderRadius: 10, padding: "10px 14px", fontSize: 13, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" };
+
+  return (
+    <div style={{ paddingBottom: 48, maxWidth: 600 }}>
+      <div style={{ marginBottom: 28 }}>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#1A0F0A", margin: 0 }}>Manage Categories</h2>
+        <p style={{ color: "#9A7A6E", fontSize: 12, margin: "4px 0 0" }}>Add, rename, or remove product categories</p>
+      </div>
+
+      {/* Add new category */}
+      <div style={{ background: "#fff", borderRadius: 16, padding: 20, border: "1px solid rgba(242,184,168,0.2)", marginBottom: 24, boxShadow: "0 2px 12px rgba(181,120,74,0.06)" }}>
+        <label style={labelStyle}>Add New Category</label>
+        <div style={{ display: "flex", gap: 10 }}>
+          <input
+            value={newCat}
+            onChange={e => setNewCat(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleAdd()}
+            placeholder="e.g. Sunscreen, Hair Care..."
+            style={{ ...inputStyle, flex: 1 }}
+          />
+          <button
+            onClick={handleAdd}
+            style={{ padding: "10px 20px", background: "linear-gradient(135deg, #B5784A, #8F5731)", color: "#fff", border: "none", borderRadius: 10, fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap", boxShadow: "0 4px 12px rgba(181,120,74,0.25)" }}
+          >
+            + ADD
+          </button>
+        </div>
+        <p style={{ color: "#9A7A6E", fontSize: 11, marginTop: 8 }}>After adding, go to Products and assign this category to a product.</p>
+      </div>
+
+      {msg && (
+        <div style={{ background: msg.type === "ok" ? "#f0fdf4" : "#fef2f2", border: `1px solid ${msg.type === "ok" ? "#86efac" : "#fca5a5"}`, borderRadius: 10, padding: "12px 16px", color: msg.type === "ok" ? "#16a34a" : "#dc2626", fontSize: 13, fontWeight: 600, marginBottom: 16 }}>
+          {msg.type === "ok" ? "✓ " : "⚠ "}{msg.text}
+        </div>
+      )}
+
+      {/* Category list */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {categories.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "40px 0", color: "#9A7A6E", fontSize: 13 }}>No categories yet. Add products to create categories.</div>
+        ) : (
+          categories.map(cat => {
+            const count = products.filter(p => p.category === cat).length;
+            const isRenaming = renamingCat === cat;
+            return (
+              <div key={cat} style={{ background: "#fff", borderRadius: 14, padding: "14px 18px", border: "1px solid rgba(242,184,168,0.2)", display: "flex", alignItems: "center", gap: 12, boxShadow: "0 1px 6px rgba(181,120,74,0.06)" }}>
+                <div style={{ flex: 1 }}>
+                  {isRenaming ? (
+                    <input
+                      value={renameVal}
+                      autoFocus
+                      onChange={e => setRenameVal(e.target.value)}
+                      onKeyDown={e => { if (e.key === "Enter") commitRename(cat); if (e.key === "Escape") setRenamingCat(null); }}
+                      style={{ ...inputStyle, padding: "6px 10px", fontSize: 14, fontWeight: 700 }}
+                    />
+                  ) : (
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", fontSize: 15 }}>{cat}</span>
+                      <span style={{ background: "#FFF0EB", color: "#B5784A", fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", padding: "3px 10px", borderRadius: 999 }}>{count} PRODUCT{count !== 1 ? "S" : ""}</span>
+                    </div>
+                  )}
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  {isRenaming ? (
+                    <>
+                      <button onClick={() => commitRename(cat)} style={{ padding: "7px 14px", background: "#B5784A", color: "#fff", border: "none", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer" }}>SAVE</button>
+                      <button onClick={() => setRenamingCat(null)} style={{ padding: "7px 12px", background: "#FFF6F3", border: "1px solid rgba(181,120,74,0.3)", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer", color: "#5C3D2E" }}>CANCEL</button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => startRename(cat)} style={{ padding: "7px 12px", background: "#FFF6F3", border: "1px solid rgba(181,120,74,0.2)", borderRadius: 8, cursor: "pointer", color: "#5C3D2E", display: "flex", alignItems: "center", justifyContent: "center" }} title="Rename">
+                        <Pencil size={13} />
+                      </button>
+                      <button onClick={() => handleDelete(cat)} style={{ padding: "7px 12px", background: "#fff1f2", border: "1px solid #fecaca", borderRadius: 8, cursor: "pointer", color: "#dc2626", display: "flex", alignItems: "center", justifyContent: "center" }} title="Delete">
+                        <Trash2 size={13} />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── ADMIN PRODUCTS ───────────────────────────────────────────────────────────
 
 type PForm = { name: string; category: Exclude<Category, "All">; price: string; image: string; description: string; badge: string; inStock: boolean };
@@ -2266,6 +2414,10 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
   const [form, setForm] = useState<PForm>(EMPTY);
   const [fErr, setFErr] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [customCatInput, setCustomCatInput] = useState("");
+
+  // Derive unique categories from existing products
+  const existingCategories = Array.from(new Set(products.map(p => p.category))).sort();
 
   function openAdd() { setForm(EMPTY); setEditId(null); setFErr(""); setShowForm(true); }
   function openEdit(p: Product) { setForm({ name: p.name, category: p.category, price: String(p.price), image: p.image, description: p.description, badge: p.badge || "", inStock: p.inStock }); setEditId(p.id); setFErr(""); setShowForm(true); }
@@ -2420,8 +2572,29 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
                 <div>
                   <label style={labelStyle}>Category *</label>
                   <select value={form.category} onChange={e => sf("category")(e.target.value)} style={inputStyle}>
-                    {(["Foundation", "Lipstick", "Serum", "Eyeliner", "Moisturizer", "Perfume"] as const).map(c => <option key={c}>{c}</option>)}
+                    {existingCategories.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
+                  <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                    <input
+                      value={customCatInput}
+                      onChange={e => setCustomCatInput(e.target.value)}
+                      placeholder="Or type new category..."
+                      style={{ ...inputStyle, flex: 1 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const trimmed = customCatInput.trim();
+                        if (trimmed) { sf("category")(trimmed); setCustomCatInput(""); }
+                      }}
+                      style={{ padding: "10px 14px", background: "#B5784A", color: "#fff", border: "none", borderRadius: 10, fontSize: 11, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}
+                    >
+                      USE
+                    </button>
+                  </div>
+                  {form.category && !existingCategories.includes(form.category) && (
+                    <p style={{ fontSize: 11, color: "#B5784A", marginTop: 6, fontWeight: 600 }}>✦ New category: "{form.category}"</p>
+                  )}
                 </div>
                 <div>
                   <label style={labelStyle}>Badge (optional)</label>
