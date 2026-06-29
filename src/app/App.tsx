@@ -10,7 +10,6 @@ import {
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
 type Category = string; // Dynamic — "All" or any custom category name
-type ProductCategory = string; // category on a product (not "All")
 type OrderStatus = "pending" | "verifying" | "confirmed" | "dispatched" | "delivered";
 type AdminTab = "orders" | "products" | "categories" | "security";
 type AppView = "store" | "admin";
@@ -203,10 +202,21 @@ export default function App() {
     return <AdminPanel products={products} setProducts={setProducts} orders={orders} setOrders={setOrders} onExit={() => setView("store")} />;
   }
 
+  if (loading) {
+    return (
+      <div style={{ fontFamily: "'Raleway', sans-serif", backgroundColor: "#FFF6F3", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#1A0F0A", letterSpacing: "-0.02em" }}>SPLENDID</div>
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#B5784A", fontWeight: 600 }}>EMPIRE COSMETICS</div>
+        <div style={{ width: 32, height: 32, border: "3px solid rgba(181,120,74,0.2)", borderTopColor: "#B5784A", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
   return (
     <div style={{ fontFamily: "'Raleway', sans-serif", backgroundColor: "#FFF6F3", minHeight: "100vh", overflowX: "hidden" }}>
       <Navbar cartCount={cartCount} onCartOpen={() => setCartOpen(true)} onAdminRequest={() => setAdminPromptOpen(true)} />
-      <HeroSection />
+      <HeroSection onQuizOpen={() => setQuizOpen(true)} />
       <CategorySection active={activeCategory} onSelect={setActiveCategory} categories={allCategories} />
       <ProductsSection products={filtered} active={activeCategory} onFilter={setActiveCategory} onAdd={addToCart} onQuickView={setQuickViewProduct} categories={allCategories} />
       <WhyUsSection />
@@ -214,7 +224,7 @@ export default function App() {
       <FAQSection />
       <LocationSection />
       <SEOSection />
-      <SiteFooter onSelectCategory={setActiveCategory} />
+      <SiteFooter onSelectCategory={setActiveCategory} categories={allCategories} />
 
       {cartOpen && <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 40 }} onClick={() => setCartOpen(false)} />}
 
@@ -944,7 +954,7 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
 
 // ─── HERO ─────────────────────────────────────────────────────────────────────
 
-function HeroSection() {
+function HeroSection({ onQuizOpen }: { onQuizOpen: () => void }) {
   return (
     <section id="home" style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", overflow: "hidden", paddingTop: 80, paddingBottom: 40 }}>
       <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 15% 20%, rgba(242,184,168,0.45) 0, transparent 28%), radial-gradient(circle at 85% 10%, rgba(181,120,74,0.22) 0, transparent 30%), linear-gradient(135deg, #FFF7F4 0%, #FDE8E0 52%, #F4C7B7 100%)" }} />
@@ -985,6 +995,9 @@ function HeroSection() {
             <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" style={{ border: "2px solid #B5784A", color: "#B5784A", background: "rgba(255,255,255,0.55)", padding: "12px 28px", borderRadius: 999, fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, textDecoration: "none", width: "100%", maxWidth: 280, textAlign: "center", backdropFilter: "blur(10px)" }} className="sm:w-auto">
               WHATSAPP ORDER
             </a>
+            <button onClick={onQuizOpen} style={{ border: "2px solid rgba(181,120,74,0.4)", color: "#B5784A", background: "rgba(255,255,255,0.55)", padding: "12px 28px", borderRadius: 999, fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: "pointer", width: "100%", maxWidth: 280, textAlign: "center", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }} className="sm:w-auto">
+              <Sparkles size={13} /> FIND MY PRODUCTS
+            </button>
           </div>
 
           <div style={{ display: "flex", gap: 18, paddingTop: 20, borderTop: "1px solid rgba(181,120,74,0.2)", flexWrap: "wrap" }} className="justify-center md:justify-start">
@@ -1506,7 +1519,7 @@ function SEOSection() {
 
 // ─── FOOTER ───────────────────────────────────────────────────────────────────
 
-function SiteFooter({ onSelectCategory }: { onSelectCategory?: (c: Category) => void }) {
+function SiteFooter({ onSelectCategory, categories }: { onSelectCategory?: (c: Category) => void; categories?: Category[] }) {
   const [copiedEmail, setCopiedEmail] = useState(false);
 
   function handleCopyEmail() {
@@ -1579,7 +1592,7 @@ function SiteFooter({ onSelectCategory }: { onSelectCategory?: (c: Category) => 
           <div>
             <h4 style={{ color: "#fff", fontWeight: 700, fontSize: 11, letterSpacing: "0.2em", marginBottom: 20 }}>CATEGORIES</h4>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {["Foundation", "Lipstick", "Serum", "Eyeliner", "Moisturizer", "Perfume"].map(c => (
+              {(categories?.filter(c => c !== "All") ?? ["Foundation", "Lipstick", "Serum", "Eyeliner", "Moisturizer", "Perfume"]).map(c => (
                 <a key={c} href="#products" 
                   onClick={e => {
                     e.preventDefault();

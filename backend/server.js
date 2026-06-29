@@ -497,28 +497,8 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// ─── TEMP DEBUG (remove after login is confirmed working) ────────────────────
-app.get("/api/debug/auth", async (req, res) => {
-  try {
-    const row = await prisma.adminSetting.findUnique({ where: { key: "admin_password" } });
-    const envSet = !!ADMIN_PASSWORD_ENV;
-    const envLength = ADMIN_PASSWORD_ENV?.length ?? 0;
-    const dbHasRow = !!row;
-    // Test if current env password would match stored hash
-    let envMatchesDb = false;
-    if (row && ADMIN_PASSWORD_ENV) {
-      envMatchesDb = await bcrypt.compare(ADMIN_PASSWORD_ENV, row.value);
-    }
-    res.json({
-      envVarSet: envSet,
-      envVarLength: envLength,
-      dbRowExists: dbHasRow,
-      envMatchesStoredHash: envMatchesDb,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+// ─── TEMP DEBUG (REMOVE BEFORE PRODUCTION) ───────────────────────────────────
+// This endpoint is intentionally removed for security.
 
 app.listen(PORT, async () => {
   await ensureAdminPassword();
