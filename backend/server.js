@@ -640,6 +640,21 @@ app.post("/api/admin/logout", requireAdminAuth, (req, res) => {
   res.json({ success: true });
 });
 
+// ─── CLOUDINARY DIAGNOSTIC ────────────────────────────────────────────────────
+
+app.get("/api/admin/cloudinary-status", requireAdminAuth, (req, res) => {
+  const apiKey    = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "djup7klv2";
+
+  res.json({
+    cloud_name: cloudName,
+    api_key_configured: !!apiKey,
+    api_secret_configured: !!apiSecret,
+    api_key_prefix: apiKey ? apiKey.slice(0, 6) + "..." : null,
+  });
+});
+
 // ─── CLOUDINARY SIGNED UPLOAD ────────────────────────────────────────────────
 
 app.post("/api/admin/cloudinary-upload-signature", requireAdminAuth, async (req, res) => {
@@ -648,7 +663,8 @@ app.post("/api/admin/cloudinary-upload-signature", requireAdminAuth, async (req,
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "djup7klv2";
 
   if (!apiKey || !apiSecret) {
-    return res.status(500).json({ error: "Cloudinary credentials not configured on server." });
+    console.error("[Cloudinary] Missing credentials — CLOUDINARY_API_KEY or CLOUDINARY_API_SECRET not set in environment.");
+    return res.status(500).json({ error: "Cloudinary credentials not configured on server. Contact the administrator." });
   }
 
   try {
@@ -669,6 +685,8 @@ app.post("/api/admin/cloudinary-upload-signature", requireAdminAuth, async (req,
 
     // SHA-1 of the string
     const signature = crypto.createHash("sha1").update(stringToSign).digest("hex");
+
+    console.log(`[Cloudinary] Signature generated for cloud_name="${cloudName}", api_key="${apiKey?.slice(0, 6)}..." (truncated)`);
 
     res.json({ signature, timestamp, api_key: apiKey, cloud_name: cloudName, folder: "splendid_products", eager: paramsToSign.eager, eager_async: paramsToSign.eager_async });
   } catch (err) {

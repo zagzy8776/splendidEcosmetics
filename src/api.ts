@@ -187,7 +187,7 @@ export async function cloudinaryUpload(file: File): Promise<string> {
   });
   if (!sigRes.ok) {
     const err = await sigRes.json().catch(() => ({}));
-    throw new Error(err.error || "Failed to get upload signature");
+    throw new Error(err.error || `Failed to get upload signature (HTTP ${sigRes.status})`);
   }
   const { signature, timestamp, api_key, cloud_name, folder, eager, eager_async } = await sigRes.json();
 
@@ -206,7 +206,13 @@ export async function cloudinaryUpload(file: File): Promise<string> {
     body: form,
   });
   const json = await upRes.json();
-  if (json.error) throw new Error(json.error.message || "Upload failed");
+  if (json.error) {
+    // Provide a detailed error so the admin knows exactly what's wrong
+    const detail = json.error.message || JSON.stringify(json.error);
+    console.error(`[Cloudinary Upload Failed] HTTP ${upRes.status}: ${detail}`);
+    throw new Error(`Image upload rejected by Cloudinary (${upRes.status}): ${detail}. 
+      Check that CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET are correctly set in the backend environment variables.`);
+  }
 
   // Prefer the eager-transformed URL (clean 800×800 square), fall back to original
   return json.eager?.[0]?.secure_url ?? json.secure_url;
