@@ -47,9 +47,9 @@ interface Order {
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
 const WHATSAPP_NUMBER = "2348104748683";
-const BANK_NAME = "Access Bank";
-const BANK_ACCOUNT_NAME = "Splendid Empire Cosmetics";
-const BANK_ACCOUNT_NUMBER = "0123456789";
+const BANK_NAME = "Moniepoint";
+const BANK_ACCOUNT_NAME = "Splendid Dam Enterprise";
+const BANK_ACCOUNT_NUMBER = "5224231596";
 
 const INITIAL_PRODUCTS: Product[] = [
   { id: "p1", name: "Velvet Matte Foundation", category: "Foundation", price: 8500, image: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=500&h=500&fit=crop", description: "Full-coverage foundation with a luxurious velvet matte finish. 24-hour wear.", inStock: true, badge: "NEW", rating: 4.8, reviews: 124 },

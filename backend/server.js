@@ -37,9 +37,9 @@ if (!RESEND_REPLY_TO) {
 
 // ─── BUSINESS CONSTANTS ───────────────────────────────────────────────────────
 
-const BANK_NAME = "Access Bank";
-const BANK_ACCOUNT_NAME = "Splendid Empire Cosmetics";
-const BANK_ACCOUNT_NUMBER = "0123456789";
+const BANK_NAME = "Moniepoint";
+const BANK_ACCOUNT_NAME = "Splendid Dam Enterprise";
+const BANK_ACCOUNT_NUMBER = "5224231596";
 const INSTAGRAM_URL = "https://www.instagram.com/owerriskincarevendor15";
 
 // ─── RESEND CLIENT ────────────────────────────────────────────────────────────
