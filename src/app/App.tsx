@@ -1990,11 +1990,26 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
     if (contentRef.current) contentRef.current.scrollTop = 0;
   }
 
-  // Lock body scroll while admin panel is mounted
+  // Lock body scroll while admin panel is mounted (works on iOS too)
   useEffect(() => {
-    const prev = document.body.style.overflow;
+    const prevOverflow = document.body.style.overflow;
+    const prevPosition = document.body.style.position;
+    const prevWidth = document.body.style.width;
+    const prevTop = document.body.style.top;
+    const scrollY = window.scrollY;
+
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
+    document.body.style.position = "fixed";
+    document.body.style.width = "100%";
+    document.body.style.top = `-${scrollY}px`;
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.body.style.position = prevPosition;
+      document.body.style.width = prevWidth;
+      document.body.style.top = prevTop;
+      window.scrollTo(0, scrollY);
+    };
   }, []);
 
   function login() {
@@ -2733,9 +2748,17 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
 
       {/* Full-screen modal overlay for Add/Edit */}
       {showForm && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "flex-end", justifyContent: "center" }} className="sm:items-center sm:p-4">
-          <div style={{ position: "absolute", inset: 0, background: "rgba(26,15,10,0.7)", backdropFilter: "blur(6px)" }} onClick={() => setShowForm(false)} />
-          <div style={{ position: "relative", background: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 640, maxHeight: "92vh", display: "flex", flexDirection: "column", boxShadow: "0 -20px 60px rgba(0,0,0,0.3)", overflowY: "auto" }} className="sm:rounded-3xl">
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+          className="sm:items-center sm:p-4"
+          onTouchMove={e => e.preventDefault()} // prevent background scroll on mobile
+        >
+          <div style={{ position: "absolute", inset: 0, background: "rgba(26,15,10,0.7)", backdropFilter: "blur(6px)" }} onClick={() => setShowForm(false)} onTouchMove={e => e.preventDefault()} />
+          <div
+            style={{ position: "relative", background: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 640, maxHeight: "92vh", display: "flex", flexDirection: "column", boxShadow: "0 -20px 60px rgba(0,0,0,0.3)", overflowY: "auto", WebkitOverflowScrolling: "touch" }}
+            className="sm:rounded-3xl"
+            onTouchMove={e => e.stopPropagation()} // allow scroll inside modal
+          >
             {/* Modal Header */}
             <div style={{ background: "#1A0F0A", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, borderRadius: "24px 24px 0 0" }}>
               <div>
