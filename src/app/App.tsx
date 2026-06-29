@@ -515,15 +515,6 @@ function ProductQuickViewModal({ product: p, onClose, onAdd }: ProductQuickViewP
                 <p style={{ color: "#5C3D2E", fontSize: 13, lineHeight: 1.6 }}>{p.description}</p>
               </div>
 
-              <div style={{ borderBottom: "1px solid rgba(201,162,39,0.1)", paddingBottom: 16, marginBottom: 16 }}>
-                <h4 style={{ color: "#1A0F0A", fontWeight: 700, fontSize: 11, letterSpacing: "0.08em", marginBottom: 6 }}>KEY INGREDIENTS</h4>
-                <p style={{ color: "#5C3D2E", fontSize: 12, lineHeight: 1.6, fontStyle: "italic" }}>{ingredients}</p>
-              </div>
-
-              <div style={{ paddingBottom: 16, marginBottom: 16 }}>
-                <h4 style={{ color: "#1A0F0A", fontWeight: 700, fontSize: 11, letterSpacing: "0.08em", marginBottom: 6 }}>HOW TO USE</h4>
-                <p style={{ color: "#5C3D2E", fontSize: 12, lineHeight: 1.6 }}>{howToUse}</p>
-              </div>
             </div>
 
             {/* Actions */}
@@ -1336,7 +1327,7 @@ function ProductCard({ product: p, onAdd, onQuickView }: { product: Product; onA
       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(201,162,39,0.09)"; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
     >
       <div onClick={() => onQuickView(p)} style={{ position: "relative", aspectRatio: "1", overflow: "hidden", backgroundColor: "#FFF0EB", cursor: "pointer" }}>
-        <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.5s" }}
+        <img src={p.image} alt={p.name} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.5s" }}
           onMouseEnter={e => ((e.target as HTMLElement).style.transform = "scale(1.08)")}
           onMouseLeave={e => ((e.target as HTMLElement).style.transform = "scale(1)")}
         />
