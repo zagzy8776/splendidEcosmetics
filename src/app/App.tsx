@@ -2463,7 +2463,7 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
       </div>
 
       {/* ── Stats Bar ── */}
-      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(249,222,218,0.25)", padding: "12px 16px", width: "100%", boxSizing: "border-box", flexShrink: 0 }}>
+      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(249,222,218,0.25)", padding: "12px 16px", width: "100%", boxSizing: "border-box", flexShrink: 0, position: "sticky", top: "calc(60px + env(safe-area-inset-top, 0px))", zIndex: 15 }}>
         <div style={{ maxWidth: 1060, margin: "0 auto", display: "flex", gap: 10, overflowX: "auto", paddingBottom: 2 }}>
           {statsData.map(([label, value]) => (
             <div key={label} style={{ background: "#fff", borderRadius: 14, padding: "12px 20px", textAlign: "center", boxShadow: "0 1px 6px rgba(201,162,39,0.08)", border: "1px solid rgba(249,222,218,0.2)", flexShrink: 0, minWidth: 110 }}>
@@ -2475,7 +2475,7 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
       </div>
 
       {/* ── Tab Navigation ── */}
-      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(249,222,218,0.25)", width: "100%", boxSizing: "border-box", overflowX: "auto", flexShrink: 0 }}>
+      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(249,222,218,0.25)", width: "100%", boxSizing: "border-box", overflowX: "auto", flexShrink: 0, position: "sticky", top: "calc(60px + env(safe-area-inset-top, 0px))", zIndex: 10 }}>
         <div style={{ maxWidth: 1060, margin: "0 auto", padding: "0 16px", display: "flex" }}>
           {([["orders", "Orders"], ["products", "Products"], ["categories", "Categories"], ["security", "Security"]] as const).map(([t, label]) => (
             <button
@@ -2510,7 +2510,7 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
 
       {/* ── Tab Content — scrolls independently ── */}
       <div ref={contentRef} style={{ flex: 1, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
-        <div style={{ maxWidth: 1060, margin: "0 auto", padding: "calc(28px + 142px + env(safe-area-inset-top, 0px)) 16px 20px", boxSizing: "border-box" }}>
+        <div style={{ maxWidth: 1060, margin: "0 auto", padding: "calc(28px + 60px + env(safe-area-inset-top, 0px)) 16px 20px", boxSizing: "border-box" }}>
           {tab === "orders" && <AdminOrders orders={orders} setOrders={setOrders} />}
           {tab === "products" && <AdminProducts products={products} setProducts={setProducts} />}
           {tab === "categories" && <AdminCategories products={products} setProducts={setProducts} />}
