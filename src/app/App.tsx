@@ -3,8 +3,9 @@ import { fetchProducts, createOrder, fetchOrders, updateOrderStatus, createProdu
 import {
   ShoppingBag, X, Menu, Instagram, Facebook, Phone, MapPin,
   Star, Plus, Minus, Trash2, Package, Settings, LogOut, Check,
-  Clock, Truck, Eye, Shield, Sparkles, Heart, MessageCircle,
+  Clock, Truck, Eye, EyeOff, RefreshCw, Shield, Sparkles, Heart, MessageCircle,
   Copy, CheckCircle, AlertTriangle, Pencil, ChevronRight, ChevronLeft,
+  ArrowUp, Search,
 } from "lucide-react";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
@@ -78,6 +79,25 @@ const CAT_IMAGES: Record<Exclude<Category, "All">, string> = {
 function genId() { return "SEC-" + Math.floor(1000 + Math.random() * 9000); }
 function fmt(n: number) { return "₦" + n.toLocaleString("en-NG"); }
 
+// Safe clipboard copy with fallback for HTTP / older Android WebViews
+function safeCopy(text: string): void {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text: string): void {
+  const el = document.createElement("textarea");
+  el.value = text;
+  el.style.position = "fixed";
+  el.style.opacity = "0";
+  document.body.appendChild(el);
+  el.select();
+  try { document.execCommand("copy"); } catch (_) {}
+  document.body.removeChild(el);
+}
+
 function TikTokIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -110,6 +130,14 @@ export default function App() {
   const [customerEmail, setCustomerEmail] = useState("");
   const [orderId, setOrderId] = useState("");
   const [copied, setCopied] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [toasts, setToasts] = useState<{ id: number; msg: string }[]>([]);
+  const toastCounter = useRef(0);
+  function addToast(msg: string) {
+    const id = ++toastCounter.current;
+    setToasts(prev => [...prev, { id, msg }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 2800);
+  }
 
   // Premium Features & Hidden Admin States
   const [adminPromptOpen, setAdminPromptOpen] = useState(false);
@@ -125,7 +153,8 @@ export default function App() {
       if (ex) return prev.map(i => i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i);
       return [...prev, { product, quantity: 1 }];
     });
-    // Don't open cart drawer — let customer keep browsing
+    const label = product.name.length > 28 ? product.name.slice(0, 28) + "\u2026" : product.name;
+    addToast(`${label} added to cart \uD83D\uDECD\uFE0F`);
   }
 
   function removeFromCart(id: string) { setCart(prev => prev.filter(i => i.product.id !== id)); }
@@ -182,12 +211,21 @@ export default function App() {
   }
 
   function copyAccount() {
-    navigator.clipboard.writeText(BANK_ACCOUNT_NUMBER);
+    safeCopy(BANK_ACCOUNT_NUMBER);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   }
 
+  // Dismiss checkout without clearing the cart (customer can re-open cart)
   function closeCheckout() {
+    setCheckoutStep(null);
+    setCustomerName("");
+    setCustomerPhone("");
+    setCustomerEmail("");
+  }
+
+  // Called after WhatsApp notification sent — order is complete, clear cart
+  function finishAndClose() {
     setCheckoutStep(null);
     setCart([]);
     setCustomerName("");
@@ -195,7 +233,15 @@ export default function App() {
     setCustomerEmail("");
   }
 
-  const filtered = products.filter(p => p.inStock && (activeCategory === "All" || p.category === activeCategory));
+  const filtered = products.filter(p =>
+    p.inStock &&
+    (activeCategory === "All" || p.category === activeCategory) &&
+    (!searchQuery ||
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.description.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  );
 
   // Derive unique categories dynamically from products
   const allCategories: Category[] = ["All", ...Array.from(new Set(products.map(p => p.category))).sort()];
@@ -217,7 +263,15 @@ export default function App() {
 
   return (
     <div style={{ fontFamily: "'Raleway', sans-serif", backgroundColor: "#FFF6F3", minHeight: "100vh", overflowX: "hidden" }}>
-      <Navbar cartCount={cartCount} onCartOpen={() => setCartOpen(true)} onAdminRequest={() => setAdminPromptOpen(true)} />
+      <Navbar
+        cartCount={cartCount}
+        onCartOpen={() => setCartOpen(true)}
+        onAdminRequest={() => setAdminPromptOpen(true)}
+        onSearch={(q) => {
+          setSearchQuery(q);
+          if (q) setTimeout(() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth" }), 100);
+        }}
+      />
       <HeroSection onQuizOpen={() => setQuizOpen(true)} />
       <CategorySection active={activeCategory} onSelect={setActiveCategory} categories={allCategories} />
       <ProductsSection products={filtered} active={activeCategory} onFilter={setActiveCategory} onAdd={addToCart} onQuickView={setQuickViewProduct} categories={allCategories} />
@@ -232,13 +286,19 @@ export default function App() {
 
       <CartDrawer open={cartOpen} cart={cart} total={cartTotal} onClose={() => setCartOpen(false)} onRemove={removeFromCart} onQty={updateQty} onCheckout={beginCheckout} />
 
+      {/* Scroll Progress Bar */}
+      <ScrollProgress />
+
+      {/* Back to Top Button */}
+      <BackToTop />
+
       {/* Sticky Cart Bar — shows when cart has items */}
       {cartCount > 0 && !cartOpen && !checkoutStep && (
         <div
           onClick={() => setCartOpen(true)}
           style={{
             position: "fixed",
-            bottom: 24,
+            bottom: "calc(24px + env(safe-area-inset-bottom, 0px))",
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 50,
@@ -275,7 +335,24 @@ export default function App() {
       )}
 
       {checkoutStep && (
-        <CheckoutModal step={checkoutStep} cart={cart} total={cartTotal} orderId={orderId} name={customerName} phone={customerPhone} email={customerEmail} onName={setCustomerName} onPhone={setCustomerPhone} onEmail={setCustomerEmail} onPlace={placeOrder} onWhatsApp={sendWhatsApp} onCopy={copyAccount} copied={copied} onClose={closeCheckout} />
+        <CheckoutModal
+          step={checkoutStep}
+          cart={cart}
+          total={cartTotal}
+          orderId={orderId}
+          name={customerName}
+          phone={customerPhone}
+          email={customerEmail}
+          onName={setCustomerName}
+          onPhone={setCustomerPhone}
+          onEmail={setCustomerEmail}
+          onPlace={placeOrder}
+          onWhatsApp={sendWhatsApp}
+          onCopy={copyAccount}
+          copied={copied}
+          onClose={closeCheckout}
+          onFinish={finishAndClose}
+        />
       )}
 
 
@@ -304,6 +381,35 @@ export default function App() {
       {quizOpen && (
         <BeautyQuizModal products={products} onClose={() => setQuizOpen(false)} onAdd={addToCart} />
       )}
+
+      {/* Floating WhatsApp Button */}
+      <a
+        href={`https://wa.me/${WHATSAPP_NUMBER}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Chat with us on WhatsApp"
+        className="animate-float"
+        style={{
+          position: "fixed",
+          bottom: "calc(88px + env(safe-area-inset-bottom, 0px))",
+          right: 16,
+          zIndex: 45,
+          width: 54,
+          height: 54,
+          borderRadius: "50%",
+          background: "#25D366",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 6px 24px rgba(37,211,102,0.45)",
+          textDecoration: "none",
+        }}
+      >
+        <MessageCircle size={26} color="#fff" fill="#fff" />
+      </a>
+
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} />
     </div>
   );
 }
@@ -744,10 +850,12 @@ function BeautyQuizModal({ products, onClose, onAdd }: BeautyQuizModalProps) {
   );
 }
 
-function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; onCartOpen: () => void; onAdminRequest: () => void }) {
+function Navbar({ cartCount, onCartOpen, onAdminRequest, onSearch }: { cartCount: number; onCartOpen: () => void; onAdminRequest: () => void; onSearch: (q: string) => void }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [animOut, setAnimOut] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const clickCount = useRef(0);
   const clickTimeout = useRef<any>(null);
@@ -764,21 +872,27 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
     }, 400);
   };
 
-  // Lock body scroll when mobile menu is open
+  const menuScrollY = useRef(0);
+  // Lock body scroll when mobile menu is open (saves + restores scroll position)
   useEffect(() => {
     if (open) {
+      menuScrollY.current = window.scrollY;
       document.body.style.overflow = "hidden";
       document.body.style.position = "fixed";
       document.body.style.width = "100%";
+      document.body.style.top = `-${menuScrollY.current}px`;
     } else {
       document.body.style.overflow = "";
       document.body.style.position = "";
       document.body.style.width = "";
+      document.body.style.top = "";
+      window.scrollTo(0, menuScrollY.current);
     }
     return () => {
       document.body.style.overflow = "";
       document.body.style.position = "";
       document.body.style.width = "";
+      document.body.style.top = "";
     };
   }, [open]);
 
@@ -849,7 +963,7 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
   return (
     <>
       <header className="glass" style={navStyle}>
-        <div style={{ backgroundColor: "#C9A227", color: "#fff", textAlign: "center", padding: "5px 12px", fontSize: 10, letterSpacing: "0.15em", fontWeight: 700 }} className="hidden sm:block">
+        <div style={{ backgroundColor: "#C9A227", color: "#fff", textAlign: "center", padding: "5px 12px", fontSize: 10, letterSpacing: "0.15em", fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           FREE DELIVERY IN OWERRI ON ORDERS ABOVE ₦15,000 &nbsp;·&nbsp; ORDER VIA WHATSAPP IN MINUTES
         </div>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -877,6 +991,15 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
           </nav>
 
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+            {/* Mobile Search Toggle */}
+            <button
+              onClick={() => setSearchOpen(!searchOpen)}
+              aria-label={searchOpen ? "Close search" : "Open search"}
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 8, color: "#1A0F0A", display: searchOpen ? "none" : "flex" }}
+              className="flex md:hidden"
+            >
+              <Search size={22} />
+            </button>
             <button onClick={onCartOpen} style={{ position: "relative", background: "none", border: "none", cursor: "pointer", padding: 8, color: "#1A0F0A" }}>
               <ShoppingBag size={22} />
               {cartCount > 0 && (
@@ -919,7 +1042,84 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
         </div>
       </header>
 
-      {/* Backdrop overlay */}
+      {/* Search Bar — slides down on mobile */}
+      <div
+        style={{
+          position: "fixed",
+          top: scrolled ? 60 : 72,
+          left: 0,
+          right: 0,
+          zIndex: 9997,
+          backgroundColor: "#fff",
+          borderBottom: "1px solid rgba(201,162,39,0.15)",
+          padding: "12px 16px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+          transform: searchOpen ? "translateY(0)" : "translateY(-100%)",
+          opacity: searchOpen ? 1 : 0,
+          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          visibility: searchOpen ? "visible" : "hidden",
+        }}
+        className="md:hidden"
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ flex: 1, position: "relative" }}>
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === "Enter" && searchQuery.trim()) {
+                  onSearch(searchQuery.trim());
+                  setSearchOpen(false);
+                  setSearchQuery("");
+                }
+              }}
+              autoFocus
+              style={{
+                width: "100%",
+                padding: "12px 16px 12px 40px",
+                borderRadius: 12,
+                border: "1px solid rgba(201,162,39,0.3)",
+                backgroundColor: "#FFF6F3",
+                fontSize: 14,
+                outline: "none",
+                color: "#1A0F0A",
+                boxSizing: "border-box",
+              }}
+              onFocus={e => (e.currentTarget.style.borderColor = "#C9A227")}
+              onBlur={e => (e.currentTarget.style.borderColor = "rgba(201,162,39,0.3)")}
+            />
+            <Search size={16} color="#9A7A6E" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+          </div>
+          <button
+            onClick={() => {
+              if (searchQuery.trim()) {
+                onSearch(searchQuery.trim());
+              } else {
+                onSearch("");
+              }
+              setSearchOpen(false);
+              setSearchQuery("");
+            }}
+            style={{
+              background: searchQuery.trim() ? "#C9A227" : "rgba(201,162,39,0.1)",
+              border: "none",
+              borderRadius: 10,
+              padding: "10px 14px",
+              fontSize: 11,
+              fontWeight: 700,
+              color: searchQuery.trim() ? "#fff" : "#C9A227",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {searchQuery.trim() ? "SEARCH" : "CANCEL"}
+          </button>
+        </div>
+      </div>
+
+      {/* Backdrop overlay for mobile menu */}
       <div
         onClick={closeMenu}
         aria-hidden="true"
@@ -1217,7 +1417,7 @@ function ProductsSection({ products, active, onFilter, onAdd, onQuickView, categ
           </div>
         ) : (
           <>
-            <div style={{ display: "grid" }} className="grid-cols-3 gap-2 sm:gap-4 lg:gap-6">
+            <div style={{ display: "grid" }} className="grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 lg:gap-6">
               {paginatedProducts.map(p => <ProductCard key={p.id} product={p} onAdd={onAdd} onQuickView={onQuickView} />)}
             </div>
 
@@ -1334,8 +1534,8 @@ function ProductCard({ product: p, onAdd, onQuickView }: { product: Product; onA
         {p.badge && (
           <span style={{ position: "absolute", top: 8, left: 8, background: "#C9A227", color: "#fff", fontSize: 8, letterSpacing: "0.1em", fontWeight: 700, padding: "2px 6px", borderRadius: 999 }}>{p.badge}</span>
         )}
-        <button onClick={e => { e.stopPropagation(); setWished(!wished); }} style={{ position: "absolute", top: 8, right: 8, width: 26, height: 26, background: "#fff", border: "none", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.1)", zIndex: 10 }}>
-          <Heart size={11} fill={wished ? "#C9A227" : "none"} color={wished ? "#C9A227" : "#1A0F0A"} />
+        <button onClick={e => { e.stopPropagation(); setWished(!wished); }} style={{ position: "absolute", top: 8, right: 8, width: 36, height: 36, background: "#fff", border: "none", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.1)", zIndex: 10 }}>
+          <Heart size={16} fill={wished ? "#C9A227" : "none"} color={wished ? "#C9A227" : "#1A0F0A"} />
         </button>
 
         {/* ▶ Watch badge — opens video in new tab */}
@@ -1386,8 +1586,8 @@ function ProductCard({ product: p, onAdd, onQuickView }: { product: Product; onA
         <p style={{ color: "#5C3D2E", fontSize: 11, lineHeight: 1.55, marginBottom: 12, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }} className="hidden sm:block">{p.description}</p>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#C9A227" }} className="text-xs sm:text-base">{fmt(p.price)}</span>
-          <button onClick={e => { e.stopPropagation(); handleAdd(); }} className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-white cursor-pointer transition-all duration-200" style={{ border: "none", background: justAdded ? "#22c55e" : "#C9A227", transform: justAdded ? "scale(1.15)" : "scale(1)" }}>
-            {justAdded ? <Check size={11} className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Plus size={11} className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+          <button onClick={e => { e.stopPropagation(); handleAdd(); }} className="w-11 h-11 flex items-center justify-center rounded-full text-white cursor-pointer transition-all duration-200" style={{ border: "none", background: justAdded ? "#22c55e" : "#C9A227", transform: justAdded ? "scale(1.15)" : "scale(1)", minWidth: 44, minHeight: 44, flexShrink: 0 }}>
+            {justAdded ? <Check size={14} /> : <Plus size={14} />}
           </button>
         </div>
       </div>
@@ -1779,6 +1979,102 @@ function SiteFooter({ onSelectCategory, categories }: { onSelectCategory?: (c: C
   );
 }
 
+// ─── SCROLL PROGRESS BAR ──────────────────────────────────────────────────────
+
+function ScrollProgress() {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercent = docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0;
+      setProgress(scrollPercent);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  if (progress <= 0) return null;
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 3,
+        zIndex: 99999,
+        backgroundColor: "transparent",
+      }}
+    >
+      <div
+        style={{
+          height: "100%",
+          width: `${progress}%`,
+          background: "linear-gradient(90deg, #C9A227, #A8841A)",
+          transition: "width 0.1s ease",
+          borderRadius: "0 2px 2px 0",
+        }}
+      />
+    </div>
+  );
+}
+
+// ─── BACK TO TOP BUTTON ───────────────────────────────────────────────────────
+
+function BackToTop() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setVisible(window.scrollY > 600);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      aria-label="Back to top"
+      style={{
+        position: "fixed",
+        bottom: 96,
+        right: 16,
+        zIndex: 45,
+        width: 44,
+        height: 44,
+        borderRadius: "50%",
+        background: "#1A0F0A",
+        border: "2px solid rgba(201,162,39,0.4)",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#C9A227",
+        boxShadow: "0 4px 16px rgba(26,15,10,0.3)",
+        transition: "all 0.2s",
+        animation: "slideUpIn 0.3s ease",
+      }}
+      onMouseEnter={e => {
+        (e.currentTarget as HTMLElement).style.background = "#C9A227";
+        (e.currentTarget as HTMLElement).style.color = "#fff";
+      }}
+      onMouseLeave={e => {
+        (e.currentTarget as HTMLElement).style.background = "#1A0F0A";
+        (e.currentTarget as HTMLElement).style.color = "#C9A227";
+      }}
+    >
+      <ArrowUp size={20} />
+    </button>
+  );
+}
+
 // ─── CART DRAWER ──────────────────────────────────────────────────────────────
 
 function CartDrawer({ open, cart, total, onClose, onRemove, onQty, onCheckout }: { open: boolean; cart: CartItem[]; total: number; onClose: () => void; onRemove: (id: string) => void; onQty: (id: string, d: number) => void; onCheckout: () => void }) {
@@ -1827,7 +2123,7 @@ function CartDrawer({ open, cart, total, onClose, onRemove, onQty, onCheckout }:
               <span style={{ color: "#5C3D2E", fontWeight: 500, fontSize: 14 }}>Subtotal</span>
               <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#C9A227" }} className="text-xl sm:text-2xl">{fmt(total)}</span>
             </div>
-            <button onClick={onCheckout} style={{ width: "100%", background: "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)", color: "#fff", border: "none", borderRadius: 999, padding: "14px 20px", fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 8px 22px rgba(201,162,39,0.32)" }}>
+            <button onClick={onCheckout} style={{ width: "100%", background: "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)", color: "#fff", border: "none", borderRadius: 999, padding: "16px 20px", fontSize: 12, letterSpacing: "0.2em", fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 8px 22px rgba(201,162,39,0.32)" }}>
               PROCEED TO CHECKOUT <ChevronRight size={16} />
             </button>
             <p style={{ textAlign: "center", color: "#9A7A6E", fontSize: 10, marginTop: 10 }}>Secure bank transfer · Confirmed via WhatsApp</p>
@@ -1840,7 +2136,13 @@ function CartDrawer({ open, cart, total, onClose, onRemove, onQty, onCheckout }:
 
 // ─── CHECKOUT MODAL ───────────────────────────────────────────────────────────
 
-function CheckoutModal({ step, cart, total, orderId, name, phone, email, onName, onPhone, onEmail, onPlace, onWhatsApp, onCopy, copied, onClose }: { step: CheckoutStep; cart: CartItem[]; total: number; orderId: string; name: string; phone: string; email: string; onName: (v: string) => void; onPhone: (v: string) => void; onEmail: (v: string) => void; onPlace: () => void; onWhatsApp: () => void; onCopy: () => void; copied: boolean; onClose: () => void }) {
+function CheckoutModal({ step, cart, total, orderId, name, phone, email, onName, onPhone, onEmail, onPlace, onWhatsApp, onCopy, copied, onClose, onFinish }: { 
+  step: CheckoutStep; cart: CartItem[]; total: number; orderId: string; 
+  name: string; phone: string; email: string; 
+  onName: (v: string) => void; onPhone: (v: string) => void; onEmail: (v: string) => void; 
+  onPlace: () => void; onWhatsApp: () => void; onCopy: () => void; 
+  copied: boolean; onClose: () => void; onFinish: () => void;
+}) {
   const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) && v.length <= 254;
   const canProceed = name.trim().length >= 2 && phone.trim().replace(/\D/g, "").length >= 10 && isValidEmail(email.trim());
   const emailTouched = email.length > 0;
@@ -1856,7 +2158,15 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, email, onName,
             <h2 style={{ fontFamily: "'Playfair Display', serif", color: "#fff", fontSize: 20, fontWeight: 700 }}>{step === "info" ? "Your Details" : "Complete Your Order"}</h2>
             <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, fontFamily: "monospace", fontWeight: 700, marginTop: 2 }}>{orderId}</p>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.8)", display: "flex" }}><X size={20} /></button>
+          <button
+            onClick={() => {
+              if (window.confirm("Are you sure you want to close? You can return later.")) {
+                onClose();
+              }
+            }}
+            style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.8)", display: "flex" }}
+            aria-label="Close checkout"
+          ><X size={20} /></button>
         </div>
 
         <div style={{ display: "flex", borderBottom: "1px solid rgba(249,222,218,0.3)", flexShrink: 0 }}>
@@ -1885,10 +2195,10 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, email, onName,
                 </div>
               </div>
 
-              {[{ label: "Full Name", val: name, set: onName, ph: "Your name", type: "text" }, { label: "WhatsApp Number", val: phone, set: onPhone, ph: "08012345678", type: "tel" }].map(({ label, val, set, ph, type }) => (
+              {[{ label: "Full Name", val: name, set: onName, ph: "Your name", type: "text", ac: "name", im: undefined }, { label: "WhatsApp Number", val: phone, set: onPhone, ph: "08012345678", type: "tel", ac: "tel", im: "numeric" as const }].map(({ label, val, set, ph, type, ac, im }) => (
                 <div key={label}>
                   <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#1A0F0A", marginBottom: 8, letterSpacing: "0.1em", textTransform: "uppercase" }}>{label}</label>
-                  <input type={type} value={val} onChange={e => set(e.target.value)} placeholder={ph} style={{ width: "100%", border: "1px solid rgba(249,222,218,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 14, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }} />
+                  <input type={type} value={val} onChange={e => set(e.target.value)} placeholder={ph} autoComplete={ac} inputMode={im} style={{ width: "100%", border: "1px solid rgba(249,222,218,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 16, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }} />
                 </div>
               ))}
               <div>
@@ -1898,7 +2208,9 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, email, onName,
                   value={email}
                   onChange={e => onEmail(e.target.value)}
                   placeholder="you@example.com"
-                  style={{ width: "100%", border: emailError ? "1.5px solid #ef4444" : "1px solid rgba(249,222,218,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 14, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }}
+                  autoComplete="email"
+                  inputMode="email"
+                  style={{ width: "100%", border: emailError ? "1.5px solid #ef4444" : "1px solid rgba(249,222,218,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 16, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }}
                 />
                 {emailError && <p style={{ color: "#ef4444", fontSize: 11, marginTop: 6, fontWeight: 600 }}>{emailError}</p>}
                 <p style={{ color: "#9A7A6E", fontSize: 11, marginTop: 6 }}>Your order confirmation will be sent here</p>
@@ -1967,7 +2279,7 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, email, onName,
 // ─── ADMIN PANEL ──────────────────────────────────────────────────────────────
 
 function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { products: Product[]; setProducts: React.Dispatch<React.SetStateAction<Product[]>>; orders: Order[]; setOrders: React.Dispatch<React.SetStateAction<Order[]>>; onExit: () => void }) {
-  const [authed, setAuthed] = useState(false);
+  const [authed, setAuthed] = useState(() => !!getAdminToken());
   const [pw, setPw] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [err, setErr] = useState("");
@@ -2060,7 +2372,7 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
                   onClick={() => setShowPw(s => !s)}
                   style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.4)", display: "flex", alignItems: "center", padding: 0 }}
                 >
-                  {showPw ? <Eye size={16} /> : <Eye size={16} style={{ opacity: 0.5 }} />}
+                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
@@ -2097,7 +2409,7 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
     ["Pending", orders.filter(o => o.status === "pending").length],
     ["Confirmed", orders.filter(o => o.status === "confirmed").length],
     ["Dispatched", orders.filter(o => o.status === "dispatched").length],
-    ["Revenue", fmt(orders.filter(o => ["confirmed", "dispatched", "delivered"].includes(o.status)).reduce((s, o) => s + o.total, 0))],
+    ["Revenue", fmt(orders.filter(o => ["verifying", "confirmed", "dispatched", "delivered"].includes(o.status)).reduce((s, o) => s + o.total, 0))],
   ];
 
   return (
@@ -2122,7 +2434,11 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
             <Eye size={13} /> VIEW STORE
           </button>
           <button
-            onClick={() => { adminLogout(); setAuthed(false); setPw(""); onExit(); }}
+            onClick={() => {
+              if (window.confirm("Log out of admin panel?")) {
+                adminLogout(); setAuthed(false); setPw(""); onExit();
+              }
+            }}
             style={{ background: "rgba(201,162,39,0.15)", border: "1px solid rgba(201,162,39,0.3)", cursor: "pointer", color: "#C9A227", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, letterSpacing: "0.1em", padding: "8px 14px", borderRadius: 8, transition: "all 0.2s" }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(201,162,39,0.25)"; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(201,162,39,0.15)"; }}
@@ -2133,10 +2449,10 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
       </div>
 
       {/* ── Stats Bar ── */}
-      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(249,222,218,0.25)", padding: "16px", width: "100%", boxSizing: "border-box", flexShrink: 0 }}>
-        <div style={{ maxWidth: 1060, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }} className="sm:grid-cols-5">
+      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(249,222,218,0.25)", padding: "12px 16px", width: "100%", boxSizing: "border-box", flexShrink: 0 }}>
+        <div style={{ maxWidth: 1060, margin: "0 auto", display: "flex", gap: 10, overflowX: "auto", paddingBottom: 2 }}>
           {statsData.map(([label, value]) => (
-            <div key={label} style={{ background: "#fff", borderRadius: 14, padding: "12px 16px", textAlign: "center", boxShadow: "0 1px 6px rgba(201,162,39,0.08)", border: "1px solid rgba(249,222,218,0.2)" }}>
+            <div key={label} style={{ background: "#fff", borderRadius: 14, padding: "12px 20px", textAlign: "center", boxShadow: "0 1px 6px rgba(201,162,39,0.08)", border: "1px solid rgba(249,222,218,0.2)", flexShrink: 0, minWidth: 110 }}>
               <div style={{ fontSize: 9, color: "#9A7A6E", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 4, fontWeight: 700 }}>{label}</div>
               <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: label === "Revenue" ? "#C9A227" : "#1A0F0A", fontSize: label === "Revenue" ? 16 : 22, lineHeight: 1 }}>{value}</div>
             </div>
@@ -2290,6 +2606,33 @@ const NEXT_LABEL: Record<OrderStatus, string | null> = { pending: "Mark Verifyin
 
 function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.Dispatch<React.SetStateAction<Order[]>> }) {
   const [filterStatus, setFilterStatus] = useState<"All" | OrderStatus>("All");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [advanceToast, setAdvanceToast] = useState<string | null>(null);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Auto-refresh every 60 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchOrders()
+        .then(data => { setOrders(data.map((o: any) => ({ ...o, status: o.status as OrderStatus }))); setLastRefresh(new Date()); })
+        .catch(() => {});
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  function manualRefresh() {
+    setRefreshing(true);
+    fetchOrders()
+      .then(data => { setOrders(data.map((o: any) => ({ ...o, status: o.status as OrderStatus }))); setLastRefresh(new Date()); })
+      .catch(() => {})
+      .finally(() => setRefreshing(false));
+  }
+
+  function showToast(msg: string) {
+    setAdvanceToast(msg);
+    setTimeout(() => setAdvanceToast(null), 2500);
+  }
 
   function advance(id: string) {
     const o = orders.find(ord => ord.id === id);
@@ -2299,29 +2642,37 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
 
     updateOrderStatus(id, n)
       .then(updated => {
-        const typedUpdated = {
-          ...updated,
-          status: updated.status as OrderStatus
-        };
+        const typedUpdated = { ...updated, status: updated.status as OrderStatus };
         setOrders(prev => prev.map(item => item.id === id ? typedUpdated : item));
+        showToast(`✔ Order ${id} → ${STATUS_CFG[n].label}`);
       })
       .catch(err => {
-        console.error("Failed to update order status in database:", err);
+        console.error("Failed to update order status:", err);
+        showToast(`⚠ Update failed — retrying locally`);
         setOrders(prev => prev.map(item => item.id === id ? { ...item, status: n } : item));
       });
   }
 
   function waCustomer(o: Order) {
-    const msg = o.status === "confirmed"
-      ? `Hi ${o.customerName}, great news! ✨\n\nYour payment for order *${o.id}* (${fmt(o.total)}) has been received and confirmed. We're packing your items now and will dispatch shortly.\n\nThank you for shopping with Splendid Empire Cosmetics. 🛍️`
-      : `Hi ${o.customerName}! 🚚\n\nYour order *${o.id}* is on its way. You'll receive it very soon.\n\nFor any questions, just reply here. — Splendid Empire Cosmetics`;
-    window.open(`https://wa.me/${o.phone.replace(/^0/, "234").replace(/\D/g, "")}?text=${encodeURIComponent(msg)}`, "_blank");
+    const msgs: Record<OrderStatus, string> = {
+      pending: `Hi ${o.customerName}! 👋\n\nWe received your order *${o.id}* (${fmt(o.total)}). Kindly send your payment proof to this number so we can verify and confirm your order.\n\n— Splendid Empire Cosmetics`,
+      verifying: `Hi ${o.customerName}! 🔍\n\nWe’re currently verifying your payment for order *${o.id}* (${fmt(o.total)}). We’ll confirm shortly.\n\n— Splendid Empire Cosmetics`,
+      confirmed: `Hi ${o.customerName}, great news! ✨\n\nYour payment for order *${o.id}* (${fmt(o.total)}) has been received and confirmed. We’re packing your items now and will dispatch shortly.\n\nThank you for shopping with Splendid Empire Cosmetics. 🛍️`,
+      dispatched: `Hi ${o.customerName}! 🚚\n\nYour order *${o.id}* is on its way. You’ll receive it very soon.\n\nFor any questions, just reply here. — Splendid Empire Cosmetics`,
+      delivered: `Hi ${o.customerName}! ❤️\n\nWe hope you love your items from order *${o.id}*. Thank you for choosing Splendid Empire Cosmetics! We’d love your review. 😊`,
+    };
+    window.open(`https://wa.me/${o.phone.replace(/^0/, "234").replace(/\D/g, "")}?text=${encodeURIComponent(msgs[o.status])}`, "_blank");
   }
 
   const filterOptions: Array<"All" | OrderStatus> = ["All", "pending", "verifying", "confirmed", "dispatched", "delivered"];
   const filterLabels: Record<string, string> = { All: "All", pending: "Pending", verifying: "Verifying", confirmed: "Confirmed", dispatched: "Dispatched", delivered: "Delivered" };
 
-  const displayOrders = filterStatus === "All" ? orders : orders.filter(o => o.status === filterStatus);
+  const displayOrders = (filterStatus === "All" ? orders : orders.filter(o => o.status === filterStatus))
+    .filter(o => !searchTerm ||
+      o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      o.phone.includes(searchTerm) ||
+      o.id.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   if (orders.length === 0) {
     return (
@@ -2335,6 +2686,33 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
 
   return (
     <div style={{ paddingBottom: 48 }}>
+      {/* Advance toast */}
+      {advanceToast && (
+        <div style={{ position: "fixed", top: 70, right: 16, zIndex: 999, background: "#1A0F0A", color: "#fff", borderRadius: 10, padding: "10px 18px", fontSize: 13, fontWeight: 700, boxShadow: "0 6px 20px rgba(0,0,0,0.3)", border: "1px solid rgba(201,162,39,0.4)", animation: "slideUpIn 0.3s ease" }}>
+          {advanceToast}
+        </div>
+      )}
+
+      {/* Search + refresh row */}
+      <div style={{ display: "flex", gap: 10, marginBottom: 16, alignItems: "center" }}>
+        <div style={{ position: "relative", flex: 1 }}>
+          <Search size={14} color="#9A7A6E" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+          <input
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            placeholder="Search by name, phone or order ID…"
+            style={{ width: "100%", border: "1px solid rgba(201,162,39,0.25)", borderRadius: 10, padding: "10px 12px 10px 34px", fontSize: 13, outline: "none", backgroundColor: "#fff", boxSizing: "border-box", color: "#1A0F0A" }}
+          />
+        </div>
+        <button
+          onClick={manualRefresh}
+          title={`Last refreshed: ${lastRefresh.toLocaleTimeString()}`}
+          style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 14px", background: "#fff", border: "1px solid rgba(201,162,39,0.25)", borderRadius: 10, cursor: "pointer", color: "#C9A227", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", flexShrink: 0 }}
+        >
+          <RefreshCw size={13} style={{ animation: refreshing ? "spin 0.8s linear infinite" : "none" }} /> REFRESH
+        </button>
+      </div>
+
       {/* Filter pills */}
       <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
         {filterOptions.map(status => {
@@ -2425,7 +2803,7 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
                           {btn}
                         </button>
                       )}
-                      {(o.status === "confirmed" || o.status === "dispatched") && (
+                      {o.status !== "delivered" && (
                         <button
                           onClick={() => waCustomer(o)}
                           style={{ display: "flex", alignItems: "center", gap: 8, background: "#25D366", color: "#fff", border: "none", borderRadius: 999, padding: "11px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", minHeight: 44, boxShadow: "0 4px 14px rgba(37,211,102,0.2)", transition: "opacity 0.2s" }}
@@ -2512,25 +2890,15 @@ function AdminCategories({ products, setProducts }: { products: Product[]; setPr
         <p style={{ color: "#9A7A6E", fontSize: 12, margin: "4px 0 0" }}>Add, rename, or remove product categories</p>
       </div>
 
-      {/* Add new category */}
-      <div style={{ background: "#fff", borderRadius: 16, padding: 20, border: "1px solid rgba(249,222,218,0.2)", marginBottom: 24, boxShadow: "0 2px 12px rgba(201,162,39,0.06)" }}>
-        <label style={labelStyle}>Add New Category</label>
-        <div style={{ display: "flex", gap: 10 }}>
-          <input
-            value={newCat}
-            onChange={e => setNewCat(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && handleAdd()}
-            placeholder="e.g. Sunscreen, Hair Care..."
-            style={{ ...inputStyle, flex: 1 }}
-          />
-          <button
-            onClick={handleAdd}
-            style={{ padding: "10px 20px", background: "linear-gradient(135deg, #C9A227, #A8841A)", color: "#fff", border: "none", borderRadius: 10, fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap", boxShadow: "0 4px 12px rgba(201,162,39,0.25)" }}
-          >
-            + ADD
-          </button>
+      {/* Informative helper on how categories work */}
+      <div style={{ background: "#fff", borderRadius: 16, padding: 20, border: "1px solid rgba(249,222,218,0.2)", marginBottom: 24, boxShadow: "0 2px 12px rgba(201,162,39,0.06)", display: "flex", gap: 12, alignItems: "flex-start" }}>
+        <div style={{ fontSize: 20, marginTop: 2 }}>💡</div>
+        <div>
+          <h4 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#1A0F0A", marginBottom: 4 }}>How to add a new category:</h4>
+          <p style={{ color: "#9A7A6E", fontSize: 12, lineHeight: 1.6, margin: 0 }}>
+            Categories are dynamic and derived directly from your products. To create a new one, go to the <strong>Products</strong> tab, click <strong>ADD PRODUCT</strong>, and type your new category name in the Category field.
+          </p>
         </div>
-        <p style={{ color: "#9A7A6E", fontSize: 11, marginTop: 8 }}>After adding, go to Products and assign this category to a product.</p>
       </div>
 
       {msg && (
@@ -2601,9 +2969,10 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<PForm>(EMPTY);
   const [fErr, setFErr] = useState("");
-  // uploadingSlot: null = not uploading, 0 = main image, 1/2/3 = extra image index
   const [uploadingSlot, setUploadingSlot] = useState<number | null>(null);
   const [customCatInput, setCustomCatInput] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [productSearch, setProductSearch] = useState("");
 
   // Derive unique categories from existing products
   const existingCategories = Array.from(new Set(products.map(p => p.category))).sort();
@@ -2697,11 +3066,9 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
   }
 
   function del(id: string) {
-    if (window.confirm("Delete this product?")) {
-      deleteProduct(id)
-        .then(() => setProducts(prev => prev.filter(p => p.id !== id)))
-        .catch(() => alert("Failed to delete product."));
-    }
+    deleteProduct(id)
+      .then(() => { setProducts(prev => prev.filter(p => p.id !== id)); setConfirmDeleteId(null); })
+      .catch(() => { setConfirmDeleteId(null); alert("Failed to delete product. Please try again."); });
   }
 
   function toggle(id: string) {
@@ -2744,7 +3111,9 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
           className="sm:items-center sm:p-4"
           onTouchMove={e => e.preventDefault()} // prevent background scroll on mobile
         >
-          <div style={{ position: "absolute", inset: 0, background: "rgba(26,15,10,0.7)", backdropFilter: "blur(6px)" }} onClick={() => setShowForm(false)} onTouchMove={e => e.preventDefault()} />
+          <div style={{ position: "absolute", inset: 0, background: "rgba(26,15,10,0.7)", backdropFilter: "blur(6px)" }} onClick={() => {
+            if (window.confirm("Discard unsaved changes?")) setShowForm(false);
+          }} onTouchMove={e => e.preventDefault()} />
           <div
             style={{ position: "relative", background: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 640, maxHeight: "92vh", display: "flex", flexDirection: "column", boxShadow: "0 -20px 60px rgba(0,0,0,0.3)", overflowY: "auto", WebkitOverflowScrolling: "touch" }}
             className="sm:rounded-3xl"
@@ -2763,7 +3132,7 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
 
             {/* Modal Body */}
             <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 18 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }} className="sm:grid-cols-2">
                 <div style={{ gridColumn: "1 / -1" }}>
                   <label style={labelStyle}>Product Name *</label>
                   <input value={form.name} onChange={e => sf("name")(e.target.value)} placeholder="e.g. Velvet Matte Foundation" style={inputStyle} />
@@ -2909,9 +3278,18 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
         </div>
       )}
 
-      {/* Products Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16 }}>
-        {products.map(p => (
+      {/* Products Search + Grid */}
+      <div style={{ position: "relative", marginBottom: 16 }}>
+        <Search size={14} color="#9A7A6E" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+        <input
+          value={productSearch}
+          onChange={e => setProductSearch(e.target.value)}
+          placeholder="Search products by name or category…"
+          style={{ width: "100%", border: "1px solid rgba(201,162,39,0.25)", borderRadius: 10, padding: "10px 12px 10px 34px", fontSize: 13, outline: "none", backgroundColor: "#fff", boxSizing: "border-box", color: "#1A0F0A" }}
+        />
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 16 }}>
+        {products.filter(p => !productSearch || p.name.toLowerCase().includes(productSearch.toLowerCase()) || p.category.toLowerCase().includes(productSearch.toLowerCase())).map(p => (
           <div key={p.id} style={{ backgroundColor: "#fff", borderRadius: 20, border: "1px solid rgba(249,222,218,0.2)", overflow: "hidden", boxShadow: "0 2px 16px rgba(201,162,39,0.07)", display: "flex", flexDirection: "column" }}>
             {/* Image */}
             <div style={{ position: "relative", aspectRatio: "1", overflow: "hidden", backgroundColor: "#FFF0EB" }}>
@@ -2939,9 +3317,16 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
               <button onClick={() => openEdit(p)} style={{ padding: "8px 12px", borderRadius: 8, background: "#FFF6F3", border: "1px solid rgba(201,162,39,0.2)", cursor: "pointer", color: "#5C3D2E", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Pencil size={13} />
               </button>
-              <button onClick={() => del(p.id)} style={{ padding: "8px 12px", borderRadius: 8, background: "#fff1f2", border: "1px solid #fecaca", cursor: "pointer", color: "#dc2626", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Trash2 size={13} />
-              </button>
+              {confirmDeleteId === p.id ? (
+                <div style={{ display: "flex", gap: 4 }}>
+                  <button onClick={() => del(p.id)} style={{ padding: "6px 10px", borderRadius: 8, background: "#dc2626", border: "none", cursor: "pointer", color: "#fff", fontSize: 10, fontWeight: 700, whiteSpace: "nowrap" }}>YES</button>
+                  <button onClick={() => setConfirmDeleteId(null)} style={{ padding: "6px 10px", borderRadius: 8, background: "#FFF6F3", border: "1px solid #fecaca", cursor: "pointer", color: "#5C3D2E", fontSize: 10, fontWeight: 700 }}>NO</button>
+                </div>
+              ) : (
+                <button onClick={() => setConfirmDeleteId(p.id)} style={{ padding: "8px 12px", borderRadius: 8, background: "#fff1f2", border: "1px solid #fecaca", cursor: "pointer", color: "#dc2626", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Trash2 size={13} />
+                </button>
+              )}
             </div>
           </div>
         ))}
@@ -2949,3 +3334,39 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
     </div>
   );
 }
+
+// ─── TOAST CONTAINER ──────────────────────────────────────────────────────────
+function ToastContainer({ toasts }: { toasts: { id: number; msg: string }[] }) {
+  return (
+    <div
+      className="fixed top-4 left-4 right-4 sm:left-auto sm:right-6 sm:top-6 z-[9999] flex flex-col gap-2 pointer-events-none max-w-[340px] mx-auto sm:mx-0"
+    >
+      {toasts.map(t => (
+        <div
+          key={t.id}
+          className="animate-slideUpIn"
+          style={{
+            background: "#1A0F0A",
+            color: "#fff",
+            borderRadius: 12,
+            padding: "12px 18px",
+            fontSize: 13,
+            fontWeight: 600,
+            boxShadow: "0 10px 25px rgba(26,15,10,0.15)",
+            border: "1px solid rgba(201,162,39,0.35)",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            pointerEvents: "auto",
+          }}
+        >
+          <div style={{ background: "#C9A227", borderRadius: "50%", width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Check size={11} color="#fff" />
+          </div>
+          <span style={{ flex: 1 }}>{t.msg}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
