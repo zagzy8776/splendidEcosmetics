@@ -1,51 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
   <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1A0F0A;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#2C1810;stop-opacity:1" />
-    </linearGradient>
-    <linearGradient id="bronzeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#D4956A;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#B5784A;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#8F5731;stop-opacity:1" />
-    </linearGradient>
-    <linearGradient id="shimmer" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#F2B8A8;stop-opacity:0.4" />
-      <stop offset="100%" style="stop-color:#B5784A;stop-opacity:0" />
+    <radialGradient id="bgGrad" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#FADADD"/>
+      <stop offset="100%" stop-color="#F2C4BC"/>
+    </radialGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E8C547"/>
+      <stop offset="50%" stop-color="#C9A227"/>
+      <stop offset="100%" stop-color="#A8841A"/>
     </linearGradient>
   </defs>
-
-  <!-- Dark rounded square background -->
-  <rect width="64" height="64" rx="14" fill="url(#bgGrad)" />
-
-  <!-- Subtle inner glow border -->
-  <rect x="1.5" y="1.5" width="61" height="61" rx="13" fill="none" stroke="url(#bronzeGrad)" stroke-width="1.5" opacity="0.6" />
-
-  <!-- Diamond accent shape behind S -->
-  <path d="M32 10 L50 32 L32 54 L14 32 Z" fill="none" stroke="url(#bronzeGrad)" stroke-width="1" opacity="0.35" />
-
-  <!-- Inner diamond -->
-  <path d="M32 18 L44 32 L32 46 L20 32 Z" fill="none" stroke="#B5784A" stroke-width="0.8" opacity="0.25" />
-
-  <!-- Shimmer overlay top-left -->
-  <ellipse cx="18" cy="18" rx="16" ry="12" fill="url(#shimmer)" opacity="0.3" transform="rotate(-30 18 18)" />
-
-  <!-- Bold S letterform -->
-  <text
-    x="32"
-    y="42"
-    text-anchor="middle"
-    font-family="Georgia, 'Times New Roman', serif"
-    font-size="32"
-    font-weight="700"
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="31" fill="url(#bgGrad)"/>
+  <!-- Gold border ring -->
+  <circle cx="32" cy="32" r="30" fill="none" stroke="url(#goldGrad)" stroke-width="2"/>
+  <!-- "Se" monogram -->
+  <text x="32" y="42" 
+    font-family="Georgia, 'Times New Roman', serif" 
+    font-size="28" 
     font-style="italic"
-    fill="url(#bronzeGrad)"
-    letter-spacing="-1"
-  >S</text>
-
-  <!-- Small dot accents at diamond corners -->
-  <circle cx="32" cy="11" r="1.5" fill="#B5784A" opacity="0.8" />
-  <circle cx="49" cy="32" r="1.5" fill="#B5784A" opacity="0.8" />
-  <circle cx="32" cy="53" r="1.5" fill="#B5784A" opacity="0.8" />
-  <circle cx="15" cy="32" r="1.5" fill="#B5784A" opacity="0.8" />
+    font-weight="700"
+    text-anchor="middle" 
+    fill="url(#goldGrad)"
+    letter-spacing="-1">Se</text>
 </svg>

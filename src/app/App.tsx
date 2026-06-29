@@ -206,8 +206,8 @@ export default function App() {
     return (
       <div style={{ fontFamily: "'Raleway', sans-serif", backgroundColor: "#FFF6F3", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
         <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#1A0F0A", letterSpacing: "-0.02em" }}>SPLENDID</div>
-        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#B5784A", fontWeight: 600 }}>EMPIRE COSMETICS</div>
-        <div style={{ width: 32, height: 32, border: "3px solid rgba(181,120,74,0.2)", borderTopColor: "#B5784A", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#C9A227", fontWeight: 600 }}>EMPIRE COSMETICS</div>
+        <div style={{ width: 32, height: 32, border: "3px solid rgba(201,162,39,0.2)", borderTopColor: "#C9A227", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
@@ -248,7 +248,7 @@ export default function App() {
             gap: 16,
             boxShadow: "0 8px 32px rgba(26,15,10,0.35)",
             cursor: "pointer",
-            border: "1px solid rgba(181,120,74,0.3)",
+            border: "1px solid rgba(201,162,39,0.3)",
             minWidth: 260,
             justifyContent: "space-between",
             transition: "transform 0.2s",
@@ -256,17 +256,17 @@ export default function App() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ background: "#B5784A", borderRadius: 999, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ background: "#C9A227", borderRadius: 999, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ShoppingBag size={14} color="#fff" />
             </div>
             <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, fontWeight: 600 }}>
               {cartCount} {cartCount === 1 ? "item" : "items"}
             </span>
           </div>
-          <span style={{ fontFamily: "'Playfair Display', serif", color: "#F2B8A8", fontSize: 18, fontWeight: 700 }}>
+          <span style={{ fontFamily: "'Playfair Display', serif", color: "#F9DEDA", fontSize: 18, fontWeight: 700 }}>
             {fmt(cartTotal)}
           </span>
-          <span style={{ color: "#fff", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", background: "#B5784A", padding: "6px 16px", borderRadius: 999 }}>
+          <span style={{ color: "#fff", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", background: "#C9A227", padding: "6px 16px", borderRadius: 999 }}>
             VIEW CART →
           </span>
         </div>
@@ -337,7 +337,7 @@ function PasscodeModal({ onClose, onSuccess }: PasscodeModalProps) {
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(15, 7, 5, 0.6)", backdropFilter: "blur(4px)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-      <div style={{ background: "#fff", borderRadius: 24, padding: 32, width: "100%", maxWidth: 400, boxShadow: "0 20px 50px rgba(0,0,0,0.15)", border: "1px solid rgba(242,184,168,0.3)" }} className="animate-modal-zoom">
+      <div style={{ background: "#fff", borderRadius: 24, padding: 32, width: "100%", maxWidth: 400, boxShadow: "0 20px 50px rgba(0,0,0,0.15)", border: "1px solid rgba(249,222,218,0.3)" }} className="animate-modal-zoom">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#1A0F0A" }}>Admin Verification</h3>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#9A7A6E" }}><X size={20} /></button>
@@ -349,10 +349,10 @@ function PasscodeModal({ onClose, onSuccess }: PasscodeModalProps) {
             placeholder="Enter Admin Passcode"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            style={{ width: "100%", padding: "12px 16px", borderRadius: 12, border: error ? "1.5px solid #ef4444" : "1px solid rgba(181,120,74,0.3)", outline: "none", fontSize: 14, marginBottom: 16, transition: "border-color 0.2s" }}
+            style={{ width: "100%", padding: "12px 16px", borderRadius: 12, border: error ? "1.5px solid #ef4444" : "1px solid rgba(201,162,39,0.3)", outline: "none", fontSize: 14, marginBottom: 16, transition: "border-color 0.2s" }}
           />
           {error && <p style={{ color: "#ef4444", fontSize: 12, marginTop: -8, marginBottom: 16, fontWeight: 600 }}>Invalid passcode. Please try again.</p>}
-          <button type="submit" style={{ width: "100%", background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", border: "none", padding: "14px", borderRadius: 12, fontWeight: 700, fontSize: 12, letterSpacing: "0.15em", cursor: "pointer", boxShadow: "0 10px 20px rgba(181,120,74,0.2)" }}>
+          <button type="submit" style={{ width: "100%", background: "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)", color: "#fff", border: "none", padding: "14px", borderRadius: 12, fontWeight: 700, fontSize: 12, letterSpacing: "0.15em", cursor: "pointer", boxShadow: "0 10px 20px rgba(201,162,39,0.2)" }}>
             VERIFY PASSWORD
           </button>
         </form>
@@ -399,9 +399,9 @@ function ProductQuickViewModal({ product: p, onClose, onAdd }: ProductQuickViewP
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(15, 7, 5, 0.6)", backdropFilter: "blur(4px)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-      <div style={{ background: "#fff", borderRadius: 24, width: "100%", maxWidth: 800, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 24px 70px rgba(0,0,0,0.2)", border: "1px solid rgba(242,184,168,0.3)" }} className="animate-modal-zoom">
-        <div style={{ position: "sticky", top: 0, background: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 24px", borderBottom: "1px solid rgba(181,120,74,0.1)", zIndex: 10 }}>
-          <span style={{ fontSize: 10, letterSpacing: "0.15em", fontWeight: 700, color: "#B5784A" }}>PRODUCT QUICK VIEW</span>
+      <div style={{ background: "#fff", borderRadius: 24, width: "100%", maxWidth: 800, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 24px 70px rgba(0,0,0,0.2)", border: "1px solid rgba(249,222,218,0.3)" }} className="animate-modal-zoom">
+        <div style={{ position: "sticky", top: 0, background: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 24px", borderBottom: "1px solid rgba(201,162,39,0.1)", zIndex: 10 }}>
+          <span style={{ fontSize: 10, letterSpacing: "0.15em", fontWeight: 700, color: "#C9A227" }}>PRODUCT QUICK VIEW</span>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#9A7A6E" }}><X size={20} /></button>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 24, padding: 24 }} className="md:grid-cols-2">
@@ -409,7 +409,7 @@ function ProductQuickViewModal({ product: p, onClose, onAdd }: ProductQuickViewP
           <div style={{ position: "relative", aspectRatio: "1", borderRadius: 16, overflow: "hidden", backgroundColor: "#FFF0EB", height: "fit-content" }}>
             <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             {p.badge && (
-              <span style={{ position: "absolute", top: 16, left: 16, background: "#B5784A", color: "#fff", fontSize: 9, letterSpacing: "0.18em", fontWeight: 700, padding: "4px 10px", borderRadius: 999 }}>{p.badge}</span>
+              <span style={{ position: "absolute", top: 16, left: 16, background: "#C9A227", color: "#fff", fontSize: 9, letterSpacing: "0.18em", fontWeight: 700, padding: "4px 10px", borderRadius: 999 }}>{p.badge}</span>
             )}
             <span style={{ position: "absolute", bottom: 16, right: 16, background: p.inStock ? "rgba(34,197,94,0.9)" : "rgba(239,68,68,0.9)", color: "#fff", fontSize: 9, letterSpacing: "0.1em", fontWeight: 700, padding: "4px 10px", borderRadius: 999 }}>
               {p.inStock ? "IN STOCK" : "OUT OF STOCK"}
@@ -420,23 +420,23 @@ function ProductQuickViewModal({ product: p, onClose, onAdd }: ProductQuickViewP
           <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             <div>
               <div style={{ display: "flex", gap: 2, marginBottom: 8, alignItems: "center" }}>
-                {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={11} fill={i < Math.floor(p.rating) ? "#B5784A" : "none"} color="#B5784A" />)}
+                {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={11} fill={i < Math.floor(p.rating) ? "#C9A227" : "none"} color="#C9A227" />)}
                 <span style={{ color: "#9A7A6E", fontSize: 11, marginLeft: 6 }}>({p.reviews} verified reviews)</span>
               </div>
               <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#1A0F0A", marginBottom: 8, lineHeight: 1.25 }}>{p.name}</h2>
-              <div style={{ display: "inline-block", backgroundColor: "rgba(181,120,74,0.1)", color: "#B5784A", fontSize: 9, letterSpacing: "0.1em", fontWeight: 700, padding: "4px 8px", borderRadius: 6, marginBottom: 16 }}>
+              <div style={{ display: "inline-block", backgroundColor: "rgba(201,162,39,0.1)", color: "#C9A227", fontSize: 9, letterSpacing: "0.1em", fontWeight: 700, padding: "4px 8px", borderRadius: 6, marginBottom: 16 }}>
                 {p.category.toUpperCase()}
               </div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#B5784A", marginBottom: 16 }}>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#C9A227", marginBottom: 16 }}>
                 {fmt(p.price)}
               </div>
               
-              <div style={{ borderBottom: "1px solid rgba(181,120,74,0.1)", paddingBottom: 16, marginBottom: 16 }}>
+              <div style={{ borderBottom: "1px solid rgba(201,162,39,0.1)", paddingBottom: 16, marginBottom: 16 }}>
                 <h4 style={{ color: "#1A0F0A", fontWeight: 700, fontSize: 11, letterSpacing: "0.08em", marginBottom: 6 }}>DESCRIPTION</h4>
                 <p style={{ color: "#5C3D2E", fontSize: 13, lineHeight: 1.6 }}>{p.description}</p>
               </div>
 
-              <div style={{ borderBottom: "1px solid rgba(181,120,74,0.1)", paddingBottom: 16, marginBottom: 16 }}>
+              <div style={{ borderBottom: "1px solid rgba(201,162,39,0.1)", paddingBottom: 16, marginBottom: 16 }}>
                 <h4 style={{ color: "#1A0F0A", fontWeight: 700, fontSize: 11, letterSpacing: "0.08em", marginBottom: 6 }}>KEY INGREDIENTS</h4>
                 <p style={{ color: "#5C3D2E", fontSize: 12, lineHeight: 1.6, fontStyle: "italic" }}>{ingredients}</p>
               </div>
@@ -450,12 +450,12 @@ function ProductQuickViewModal({ product: p, onClose, onAdd }: ProductQuickViewP
             {/* Actions */}
             {p.inStock ? (
               <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 12 }}>
-                <div style={{ display: "flex", alignItems: "center", border: "1px solid rgba(181,120,74,0.3)", borderRadius: 12, overflow: "hidden" }}>
+                <div style={{ display: "flex", alignItems: "center", border: "1px solid rgba(201,162,39,0.3)", borderRadius: 12, overflow: "hidden" }}>
                   <button onClick={() => setQuantity(q => Math.max(1, q - 1))} style={{ padding: "10px 14px", background: "none", border: "none", cursor: "pointer", color: "#5C3D2E" }}><Minus size={13} /></button>
                   <span style={{ padding: "0 10px", fontSize: 13, fontWeight: 700, color: "#1A0F0A", minWidth: 24, textAlign: "center" }}>{quantity}</span>
                   <button onClick={() => setQuantity(q => q + 1)} style={{ padding: "10px 14px", background: "none", border: "none", cursor: "pointer", color: "#5C3D2E" }}><Plus size={13} /></button>
                 </div>
-                <button onClick={handleAdd} style={{ flex: 1, background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", border: "none", padding: "14px", borderRadius: 12, fontWeight: 700, fontSize: 11, letterSpacing: "0.15em", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 10px 24px rgba(181,120,74,0.25)" }}>
+                <button onClick={handleAdd} style={{ flex: 1, background: "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)", color: "#fff", border: "none", padding: "14px", borderRadius: 12, fontWeight: 700, fontSize: 11, letterSpacing: "0.15em", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 10px 24px rgba(201,162,39,0.25)" }}>
                   <ShoppingBag size={14} /> ADD TO CART — {fmt(p.price * quantity)}
                 </button>
               </div>
@@ -559,18 +559,18 @@ function BeautyQuizModal({ products, onClose, onAdd }: BeautyQuizModalProps) {
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(15, 7, 5, 0.6)", backdropFilter: "blur(4px)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-      <div style={{ background: "#fff", borderRadius: 24, width: "100%", maxWidth: 550, maxHeight: "90vh", overflowY: "auto", padding: 32, boxShadow: "0 24px 70px rgba(0,0,0,0.2)", border: "1px solid rgba(242,184,168,0.3)" }} className="animate-modal-zoom">
+      <div style={{ background: "#fff", borderRadius: 24, width: "100%", maxWidth: 550, maxHeight: "90vh", overflowY: "auto", padding: 32, boxShadow: "0 24px 70px rgba(0,0,0,0.2)", border: "1px solid rgba(249,222,218,0.3)" }} className="animate-modal-zoom">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-          <span style={{ fontSize: 10, letterSpacing: "0.15em", fontWeight: 700, color: "#B5784A" }}>BEAUTY CONSULTATION</span>
+          <span style={{ fontSize: 10, letterSpacing: "0.15em", fontWeight: 700, color: "#C9A227" }}>BEAUTY CONSULTATION</span>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#9A7A6E" }}><X size={20} /></button>
         </div>
 
         {step === 0 && (
           <div style={{ textAlign: "center" }} className="animate-slide-up">
-            <Sparkles size={40} color="#B5784A" style={{ margin: "0 auto 16px" }} />
+            <Sparkles size={40} color="#C9A227" style={{ margin: "0 auto 16px" }} />
             <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#1A0F0A", marginBottom: 8 }}>Your Personalised Beauty Edit</h3>
             <p style={{ color: "#5C3D2E", fontSize: 13, lineHeight: 1.6, marginBottom: 24 }}>Answer three quick questions and we'll recommend products matched to your skin type, tone, and finish preference.</p>
-            <button onClick={() => setStep(1)} style={{ background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", border: "none", padding: "14px 28px", borderRadius: 12, fontWeight: 700, fontSize: 11, letterSpacing: "0.15em", cursor: "pointer", boxShadow: "0 10px 24px rgba(181,120,74,0.2)" }}>
+            <button onClick={() => setStep(1)} style={{ background: "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)", color: "#fff", border: "none", padding: "14px 28px", borderRadius: 12, fontWeight: 700, fontSize: 11, letterSpacing: "0.15em", cursor: "pointer", boxShadow: "0 10px 24px rgba(201,162,39,0.2)" }}>
               BEGIN MY EDIT
             </button>
           </div>
@@ -578,7 +578,7 @@ function BeautyQuizModal({ products, onClose, onAdd }: BeautyQuizModalProps) {
 
         {step > 0 && step <= questions.length && (
           <div className="animate-slide-up">
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#B5784A", marginBottom: 6 }}>STEP {step} OF {questions.length}</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#C9A227", marginBottom: 6 }}>STEP {step} OF {questions.length}</div>
             <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#1A0F0A", marginBottom: 4 }}>{questions[step - 1].title}</h3>
             <p style={{ color: "#9A7A6E", fontSize: 12, marginBottom: 20 }}>{questions[step - 1].subtitle}</p>
 
@@ -592,18 +592,18 @@ function BeautyQuizModal({ products, onClose, onAdd }: BeautyQuizModalProps) {
                     textAlign: "left",
                     padding: "16px 20px",
                     borderRadius: 14,
-                    border: "1px solid rgba(181,120,74,0.25)",
+                    border: "1px solid rgba(201,162,39,0.25)",
                     background: "linear-gradient(180deg, #FFFFFF 0%, #FFFDFD 100%)",
                     cursor: "pointer",
                     transition: "all 0.2s ease",
                   }}
                   onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "#B5784A";
+                    (e.currentTarget as HTMLElement).style.borderColor = "#C9A227";
                     (e.currentTarget as HTMLElement).style.transform = "translateX(4px)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(181,120,74,0.06)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(201,162,39,0.06)";
                   }}
                   onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(181,120,74,0.25)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(201,162,39,0.25)";
                     (e.currentTarget as HTMLElement).style.transform = "translateX(0)";
                     (e.currentTarget as HTMLElement).style.boxShadow = "none";
                   }}
@@ -626,13 +626,13 @@ function BeautyQuizModal({ products, onClose, onAdd }: BeautyQuizModalProps) {
 
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
               {recs.map(rec => (
-                <div key={rec.id} style={{ display: "flex", gap: 14, padding: 14, borderRadius: 16, border: "1px solid rgba(181,120,74,0.15)", background: "#FFFBF9", alignItems: "center" }}>
+                <div key={rec.id} style={{ display: "flex", gap: 14, padding: 14, borderRadius: 16, border: "1px solid rgba(201,162,39,0.15)", background: "#FFFBF9", alignItems: "center" }}>
                   <img src={rec.image} alt={rec.name} style={{ width: 56, height: 56, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 12, color: "#1A0F0A" }}>{rec.name}</div>
-                    <div style={{ color: "#B5784A", fontWeight: 600, fontSize: 11, marginTop: 2 }}>{fmt(rec.price)}</div>
+                    <div style={{ color: "#C9A227", fontWeight: 600, fontSize: 11, marginTop: 2 }}>{fmt(rec.price)}</div>
                   </div>
-                  <button onClick={() => { onAdd(rec); }} style={{ background: "#B5784A", color: "#fff", border: "none", padding: "8px 12px", borderRadius: 8, fontSize: 10, fontWeight: 700, cursor: "pointer", transition: "background 0.2s" }} onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#8F5731")} onMouseLeave={e => (e.currentTarget.style.backgroundColor = "#B5784A")}>
+                  <button onClick={() => { onAdd(rec); }} style={{ background: "#C9A227", color: "#fff", border: "none", padding: "8px 12px", borderRadius: 8, fontSize: 10, fontWeight: 700, cursor: "pointer", transition: "background 0.2s" }} onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#A8841A")} onMouseLeave={e => (e.currentTarget.style.backgroundColor = "#C9A227")}>
                     ADD
                   </button>
                 </div>
@@ -640,8 +640,8 @@ function BeautyQuizModal({ products, onClose, onAdd }: BeautyQuizModalProps) {
             </div>
 
             <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={() => setStep(0)} style={{ flex: 1, border: "1px solid rgba(181,120,74,0.4)", color: "#B5784A", background: "none", padding: "12px", borderRadius: 12, fontWeight: 700, fontSize: 11, cursor: "pointer" }}>RETAKE QUIZ</button>
-              <button onClick={onClose} style={{ flex: 1, background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", border: "none", padding: "12px", borderRadius: 12, fontWeight: 700, fontSize: 11, cursor: "pointer" }}>DONE</button>
+              <button onClick={() => setStep(0)} style={{ flex: 1, border: "1px solid rgba(201,162,39,0.4)", color: "#C9A227", background: "none", padding: "12px", borderRadius: 12, fontWeight: 700, fontSize: 11, cursor: "pointer" }}>RETAKE QUIZ</button>
+              <button onClick={onClose} style={{ flex: 1, background: "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)", color: "#fff", border: "none", padding: "12px", borderRadius: 12, fontWeight: 700, fontSize: 11, cursor: "pointer" }}>DONE</button>
             </div>
           </div>
         )}
@@ -721,7 +721,7 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
 
   const navStyle: React.CSSProperties = {
     position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999,
-    boxShadow: scrolled ? "0 1px 12px rgba(181,120,74,0.12)" : "none",
+    boxShadow: scrolled ? "0 1px 12px rgba(201,162,39,0.12)" : "none",
     transition: "all 0.3s",
   };
 
@@ -755,13 +755,16 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
   return (
     <>
       <header className="glass" style={navStyle}>
-        <div style={{ backgroundColor: "#B5784A", color: "#fff", textAlign: "center", padding: "5px 12px", fontSize: 10, letterSpacing: "0.15em", fontWeight: 700 }} className="hidden sm:block">
+        <div style={{ backgroundColor: "#C9A227", color: "#fff", textAlign: "center", padding: "5px 12px", fontSize: 10, letterSpacing: "0.15em", fontWeight: 700 }} className="hidden sm:block">
           FREE DELIVERY IN OWERRI ON ORDERS ABOVE ₦15,000 &nbsp;·&nbsp; ORDER VIA WHATSAPP IN MINUTES
         </div>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div onClick={handleSecretClick} style={{ lineHeight: 1.1, flexShrink: 0, cursor: "pointer", userSelect: "none", WebkitUserSelect: "none" }} title="Tap 3 times fast to enter Admin Panel">
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#1A0F0A", letterSpacing: "-0.02em" }}>SPLENDID</div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#B5784A", fontWeight: 600 }}>EMPIRE COSMETICS</div>
+            <img
+              src="/logo.jpg"
+              alt="Splendid Empire Cosmetics"
+              style={{ height: 48, width: 48, borderRadius: "50%", objectFit: "cover", display: "block", boxShadow: "0 2px 10px rgba(201,162,39,0.25)" }}
+            />
           </div>
 
           <nav style={{ gap: 28, fontSize: 11, letterSpacing: "0.15em", fontWeight: 700, color: "#1A0F0A", flexShrink: 0 }} className="hidden md:flex">
@@ -771,9 +774,9 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
               return (
                 <a key={l} href={h} 
                   onClick={e => handleScrollTo(e, targetSection)}
-                  style={{ textDecoration: "none", color: isActive ? "#B5784A" : "inherit", transition: "color 0.2s" }}
-                  onMouseEnter={e => (e.currentTarget.style.color = "#B5784A")}
-                  onMouseLeave={e => (e.currentTarget.style.color = isActive ? "#B5784A" : "#1A0F0A")}
+                  style={{ textDecoration: "none", color: isActive ? "#C9A227" : "inherit", transition: "color 0.2s" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "#C9A227")}
+                  onMouseLeave={e => (e.currentTarget.style.color = isActive ? "#C9A227" : "#1A0F0A")}
                 >{l}</a>
               );
             })}
@@ -783,7 +786,7 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
             <button onClick={onCartOpen} style={{ position: "relative", background: "none", border: "none", cursor: "pointer", padding: 8, color: "#1A0F0A" }}>
               <ShoppingBag size={22} />
               {cartCount > 0 && (
-                <span style={{ position: "absolute", top: 0, right: 0, width: 20, height: 20, background: "#B5784A", color: "#fff", fontSize: 10, fontWeight: 700, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ position: "absolute", top: 0, right: 0, width: 20, height: 20, background: "#C9A227", color: "#fff", fontSize: 10, fontWeight: 700, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   {cartCount}
                 </span>
               )}
@@ -865,14 +868,17 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
         {/* Mobile menu header */}
         <div style={{
           padding: "24px 24px 16px",
-          borderBottom: "1px solid rgba(181,120,74,0.1)",
+          borderBottom: "1px solid rgba(201,162,39,0.1)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
         }}>
           <div style={{ lineHeight: 1.1 }}>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: "#1A0F0A", letterSpacing: "-0.02em" }}>SPLENDID</div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 7, letterSpacing: "0.45em", color: "#B5784A", fontWeight: 600 }}>EMPIRE COSMETICS</div>
+            <img
+              src="/logo.jpg"
+              alt="Splendid Empire Cosmetics"
+              style={{ height: 44, width: 44, borderRadius: "50%", objectFit: "cover", boxShadow: "0 2px 8px rgba(201,162,39,0.2)" }}
+            />
           </div>
           <button
             onClick={closeMenu}
@@ -899,10 +905,10 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
                   padding: "18px 24px",
                   fontSize: 14,
                   fontWeight: 700,
-                  color: isActive ? "#B5784A" : "#1A0F0A",
+                  color: isActive ? "#C9A227" : "#1A0F0A",
                   textDecoration: "none",
                   letterSpacing: "0.12em",
-                  borderLeft: `3px solid ${isActive ? "#B5784A" : "transparent"}`,
+                  borderLeft: `3px solid ${isActive ? "#C9A227" : "transparent"}`,
                   backgroundColor: isActive ? "#FFF6F3" : "transparent",
                   transition: "all 0.2s ease",
                   animation: open && !animOut
@@ -911,18 +917,18 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
                 }}
                 onMouseEnter={e => {
                   (e.currentTarget as HTMLElement).style.backgroundColor = "#FFF6F3";
-                  (e.currentTarget as HTMLElement).style.borderLeftColor = "#B5784A";
-                  (e.currentTarget as HTMLElement).style.color = "#B5784A";
+                  (e.currentTarget as HTMLElement).style.borderLeftColor = "#C9A227";
+                  (e.currentTarget as HTMLElement).style.color = "#C9A227";
                 }}
                 onMouseLeave={e => {
                   (e.currentTarget as HTMLElement).style.backgroundColor = isActive ? "#FFF6F3" : "transparent";
-                  (e.currentTarget as HTMLElement).style.borderLeftColor = isActive ? "#B5784A" : "transparent";
-                  (e.currentTarget as HTMLElement).style.color = isActive ? "#B5784A" : "#1A0F0A";
+                  (e.currentTarget as HTMLElement).style.borderLeftColor = isActive ? "#C9A227" : "transparent";
+                  (e.currentTarget as HTMLElement).style.color = isActive ? "#C9A227" : "#1A0F0A";
                 }}
               >
                 <span style={{
                   width: 6, height: 6, borderRadius: "50%",
-                  backgroundColor: "#B5784A", marginRight: 14, flexShrink: 0,
+                  backgroundColor: "#C9A227", marginRight: 14, flexShrink: 0,
                   opacity: isActive ? 1 : 0.4,
                 }} />
                 {l}
@@ -934,13 +940,13 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
         {/* Bottom actions */}
         <div style={{
           padding: "20px 24px 28px",
-          borderTop: "1px solid rgba(181,120,74,0.1)",
+          borderTop: "1px solid rgba(201,162,39,0.1)",
           display: "flex",
           flexDirection: "column",
           gap: 8,
         }}>
           <div style={{ color: "#1A0F0A", fontWeight: 700, fontSize: 10, letterSpacing: "0.1em" }}>NEED HELP\?</div>
-          <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: "#B5784A", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
+          <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: "#C9A227", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
             <MessageCircle size={13} /> WHATSAPP CHAT
           </a>
           <a href="mailto:obilodoris15@gmail.com" style={{ textDecoration: "none", color: "#5C3D2E", fontSize: 12, display: "flex", alignItems: "center", gap: 6 }}>
@@ -957,7 +963,7 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest }: { cartCount: number; 
 function HeroSection({ onQuizOpen }: { onQuizOpen: () => void }) {
   return (
     <section id="home" style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", overflow: "hidden", paddingTop: 80, paddingBottom: 40 }}>
-      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 15% 20%, rgba(242,184,168,0.45) 0, transparent 28%), radial-gradient(circle at 85% 10%, rgba(181,120,74,0.22) 0, transparent 30%), linear-gradient(135deg, #FFF7F4 0%, #FDE8E0 52%, #F4C7B7 100%)" }} />
+      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 15% 20%, rgba(249,222,218,0.65) 0, transparent 28%), radial-gradient(circle at 85% 10%, rgba(201,162,39,0.18) 0, transparent 30%), linear-gradient(135deg, #FFF7F4 0%, #FAE8E2 52%, #F9DEDA 100%)" }} />
 
       <div style={{ position: "absolute", inset: 0, opacity: 0.15 }} className="md:hidden">
         <img src="https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=600&h=600&fit=crop" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", filter: "blur(40px)" }} />
@@ -970,18 +976,18 @@ function HeroSection({ onQuizOpen }: { onQuizOpen: () => void }) {
 
       <div style={{ position: "relative", zIndex: 10, maxWidth: 1200, margin: "0 auto", width: "100%" }} className="px-4 py-8 sm:px-6 md:py-10 lg:px-8">
         <div className="flex flex-col items-center gap-8 text-center md:max-w-[48%] md:items-start md:text-left">
-          <div className="md:hidden" style={{ width: "min(82vw, 320px)", aspectRatio: "1", borderRadius: 32, overflow: "hidden", boxShadow: "0 24px 70px rgba(181,120,74,0.26)", border: "1px solid rgba(255,255,255,0.65)" }}>
-            <img src="https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=700&h=700&fit=crop" alt="Premium skincare products" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <div className="md:hidden" style={{ width: "min(82vw, 300px)", aspectRatio: "1", borderRadius: "50%", overflow: "hidden", boxShadow: "0 24px 70px rgba(201,162,39,0.3), 0 0 0 4px rgba(201,162,39,0.2)", border: "3px solid rgba(201,162,39,0.4)" }}>
+            <img src="/logo.jpg" alt="Splendid Empire Cosmetics" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
 
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.58)", border: "1px solid rgba(181,120,74,0.25)", borderRadius: 999, padding: "6px 14px", marginBottom: 0, flexWrap: "wrap", justifyContent: "center", boxShadow: "0 10px 30px rgba(181,120,74,0.12)", backdropFilter: "blur(10px)" }}>
-            <Sparkles size={12} color="#B5784A" />
-            <span style={{ color: "#B5784A", fontSize: 9, letterSpacing: "0.2em", fontWeight: 700 }}>OWERRI'S AUTHENTIC SKINCARE DESTINATION</span>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.58)", border: "1px solid rgba(201,162,39,0.25)", borderRadius: 999, padding: "6px 14px", marginBottom: 0, flexWrap: "wrap", justifyContent: "center", boxShadow: "0 10px 30px rgba(201,162,39,0.12)", backdropFilter: "blur(10px)" }}>
+            <Sparkles size={12} color="#C9A227" />
+            <span style={{ color: "#C9A227", fontSize: 9, letterSpacing: "0.2em", fontWeight: 700 }}>OWERRI'S AUTHENTIC SKINCARE DESTINATION</span>
           </div>
 
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", lineHeight: 1.05, marginBottom: 0, fontSize: "clamp(34px, 9vw, 62px)" }}>
             Authentic Skincare,<br />
-            <span style={{ color: "#B5784A", fontStyle: "italic" }}>Delivered.</span>
+            <span style={{ color: "#C9A227", fontStyle: "italic" }}>Delivered.</span>
           </h1>
 
           <p style={{ color: "#5C3D2E", fontSize: 14, lineHeight: 1.65, marginBottom: 0, maxWidth: 500 }} className="mx-auto md:mx-0 sm:text-base">
@@ -989,21 +995,21 @@ function HeroSection({ onQuizOpen }: { onQuizOpen: () => void }) {
           </p>
 
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }} className="w-full flex-col justify-center md:justify-start sm:w-auto sm:flex-row">
-            <a href="#products" style={{ background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", padding: "12px 28px", borderRadius: 999, fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, textDecoration: "none", boxShadow: "0 12px 28px rgba(181,120,74,0.34)", width: "100%", maxWidth: 280, textAlign: "center" }} className="sm:w-auto">
+            <a href="#products" style={{ background: "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)", color: "#fff", padding: "12px 28px", borderRadius: 999, fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, textDecoration: "none", boxShadow: "0 12px 28px rgba(201,162,39,0.34)", width: "100%", maxWidth: 280, textAlign: "center" }} className="sm:w-auto">
               SHOP NOW
             </a>
-            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" style={{ border: "2px solid #B5784A", color: "#B5784A", background: "rgba(255,255,255,0.55)", padding: "12px 28px", borderRadius: 999, fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, textDecoration: "none", width: "100%", maxWidth: 280, textAlign: "center", backdropFilter: "blur(10px)" }} className="sm:w-auto">
+            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" style={{ border: "2px solid #C9A227", color: "#C9A227", background: "rgba(255,255,255,0.55)", padding: "12px 28px", borderRadius: 999, fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, textDecoration: "none", width: "100%", maxWidth: 280, textAlign: "center", backdropFilter: "blur(10px)" }} className="sm:w-auto">
               WHATSAPP ORDER
             </a>
-            <button onClick={onQuizOpen} style={{ border: "2px solid rgba(181,120,74,0.4)", color: "#B5784A", background: "rgba(255,255,255,0.55)", padding: "12px 28px", borderRadius: 999, fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: "pointer", width: "100%", maxWidth: 280, textAlign: "center", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }} className="sm:w-auto">
+            <button onClick={onQuizOpen} style={{ border: "2px solid rgba(201,162,39,0.4)", color: "#C9A227", background: "rgba(255,255,255,0.55)", padding: "12px 28px", borderRadius: 999, fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: "pointer", width: "100%", maxWidth: 280, textAlign: "center", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }} className="sm:w-auto">
               <Sparkles size={13} /> FIND MY PRODUCTS
             </button>
           </div>
 
-          <div style={{ display: "flex", gap: 18, paddingTop: 20, borderTop: "1px solid rgba(181,120,74,0.2)", flexWrap: "wrap" }} className="justify-center md:justify-start">
+          <div style={{ display: "flex", gap: 18, paddingTop: 20, borderTop: "1px solid rgba(201,162,39,0.2)", flexWrap: "wrap" }} className="justify-center md:justify-start">
             {[["500+", "Products"], ["1,200+", "Satisfied Clients"], ["5★", "Google Rating"]].map(([v, l]) => (
               <div key={l} style={{ minWidth: 80 }}>
-                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#B5784A" }}>{v}</div>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#C9A227" }}>{v}</div>
                 <div style={{ fontSize: 9, color: "#5C3D2E", letterSpacing: "0.12em", marginTop: 2 }}>{l}</div>
               </div>
             ))}
@@ -1020,9 +1026,9 @@ function HeroSection({ onQuizOpen }: { onQuizOpen: () => void }) {
           { href: `https://wa.me/${WHATSAPP_NUMBER}`, icon: <MessageCircle size={15} />, label: "WhatsApp" }
         ].map(({ href, icon, label }) => (
           <a key={label} href={href} target="_blank" rel="noopener noreferrer" title={label}
-            style={{ width: 36, height: 36, background: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#B5784A", textDecoration: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.1)", transition: "all 0.2s" }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#B5784A"; (e.currentTarget as HTMLElement).style.color = "#fff"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.85)"; (e.currentTarget as HTMLElement).style.color = "#B5784A"; }}
+            style={{ width: 36, height: 36, background: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#C9A227", textDecoration: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.1)", transition: "all 0.2s" }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#C9A227"; (e.currentTarget as HTMLElement).style.color = "#fff"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.85)"; (e.currentTarget as HTMLElement).style.color = "#C9A227"; }}
           >{icon}</a>
         ))}
       </div>
@@ -1061,15 +1067,15 @@ function CategorySection({ active, onSelect, categories }: { active: Category; o
                 <div 
                   className="w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] rounded-full overflow-hidden flex-shrink-0"
                   style={{ 
-                    border: `3px solid ${isActive ? "#B5784A" : "transparent"}`, 
-                    boxShadow: isActive ? "0 6px 20px rgba(181,120,74,0.25)" : "none", 
+                    border: `3px solid ${isActive ? "#C9A227" : "transparent"}`, 
+                    boxShadow: isActive ? "0 6px 20px rgba(201,162,39,0.25)" : "none", 
                     transform: isActive ? "scale(1.1)" : "scale(1)", 
                     transition: "all 0.3s" 
                   }}
                 >
                   <img src={img} alt={cat} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 </div>
-                <span style={{ fontSize: 10, letterSpacing: "0.12em", fontWeight: 700, color: isActive ? "#B5784A" : "#5C3D2E" }}>{cat.toUpperCase()}</span>
+                <span style={{ fontSize: 10, letterSpacing: "0.12em", fontWeight: 700, color: isActive ? "#C9A227" : "#5C3D2E" }}>{cat.toUpperCase()}</span>
               </button>
             );
           })}
@@ -1104,7 +1110,7 @@ function ProductsSection({ products, active, onFilter, onAdd, onQuickView, categ
 
         <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 8, marginBottom: 32, justifyContent: "center", flexWrap: "wrap" }}>
           {tabs.map(tab => (
-            <button key={tab} onClick={() => onFilter(tab)} style={{ padding: "7px 16px", borderRadius: 999, fontSize: 9, letterSpacing: "0.15em", fontWeight: 700, border: `1px solid ${active === tab ? "#B5784A" : "rgba(181,120,74,0.3)"}`, background: active === tab ? "#B5784A" : "transparent", color: active === tab ? "#fff" : "#5C3D2E", cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.2s" }}>
+            <button key={tab} onClick={() => onFilter(tab)} style={{ padding: "7px 16px", borderRadius: 999, fontSize: 9, letterSpacing: "0.15em", fontWeight: 700, border: `1px solid ${active === tab ? "#C9A227" : "rgba(201,162,39,0.3)"}`, background: active === tab ? "#C9A227" : "transparent", color: active === tab ? "#fff" : "#5C3D2E", cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.2s" }}>
               {tab.toUpperCase()}
             </button>
           ))}
@@ -1137,7 +1143,7 @@ function ProductsSection({ products, active, onFilter, onAdd, onQuickView, categ
                     fontSize: 11,
                     fontWeight: 700,
                     letterSpacing: "0.08em",
-                    border: "1px solid rgba(181, 120, 74, 0.3)",
+                    border: "1px solid rgba(201,162,39, 0.3)",
                     background: "transparent",
                     color: currentPage === 1 ? "#d1d5db" : "#5C3D2E",
                     cursor: currentPage === 1 ? "not-allowed" : "pointer",
@@ -1162,11 +1168,11 @@ function ProductsSection({ products, active, onFilter, onAdd, onQuickView, categ
                         borderRadius: "50%",
                         fontSize: 11,
                         fontWeight: 700,
-                        border: isPageActive ? "none" : "1px solid rgba(181, 120, 74, 0.2)",
-                        background: isPageActive ? "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)" : "transparent",
+                        border: isPageActive ? "none" : "1px solid rgba(201,162,39, 0.2)",
+                        background: isPageActive ? "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)" : "transparent",
                         color: isPageActive ? "#fff" : "#5C3D2E",
                         cursor: "pointer",
-                        boxShadow: isPageActive ? "0 4px 12px rgba(181,120,74,0.2)" : "none",
+                        boxShadow: isPageActive ? "0 4px 12px rgba(201,162,39,0.2)" : "none",
                         transition: "all 0.2s"
                       }}
                     >
@@ -1188,7 +1194,7 @@ function ProductsSection({ products, active, onFilter, onAdd, onQuickView, categ
                     fontSize: 11,
                     fontWeight: 700,
                     letterSpacing: "0.08em",
-                    border: "1px solid rgba(181, 120, 74, 0.3)",
+                    border: "1px solid rgba(201,162,39, 0.3)",
                     background: "transparent",
                     color: currentPage === totalPages ? "#d1d5db" : "#5C3D2E",
                     cursor: currentPage === totalPages ? "not-allowed" : "pointer",
@@ -1217,9 +1223,9 @@ function ProductCard({ product: p, onAdd, onQuickView }: { product: Product; onA
   }
 
   return (
-    <div style={{ background: "linear-gradient(180deg, #FFFFFF 0%, #FFF8F5 100%)", borderRadius: 16, overflow: "hidden", boxShadow: "0 8px 24px rgba(181,120,74,0.09)", transition: "all 0.3s", border: "1px solid rgba(242,184,168,0.22)" }}
-      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 30px rgba(181,120,74,0.18)"; (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)"; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(181,120,74,0.09)"; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
+    <div style={{ background: "linear-gradient(180deg, #FFFFFF 0%, #FFF8F5 100%)", borderRadius: 16, overflow: "hidden", boxShadow: "0 8px 24px rgba(201,162,39,0.09)", transition: "all 0.3s", border: "1px solid rgba(249,222,218,0.22)" }}
+      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 30px rgba(201,162,39,0.18)"; (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)"; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(201,162,39,0.09)"; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
     >
       <div onClick={() => onQuickView(p)} style={{ position: "relative", aspectRatio: "1", overflow: "hidden", backgroundColor: "#FFF0EB", cursor: "pointer" }}>
         <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.5s" }}
@@ -1227,24 +1233,24 @@ function ProductCard({ product: p, onAdd, onQuickView }: { product: Product; onA
           onMouseLeave={e => ((e.target as HTMLElement).style.transform = "scale(1)")}
         />
         {p.badge && (
-          <span style={{ position: "absolute", top: 8, left: 8, background: "#B5784A", color: "#fff", fontSize: 8, letterSpacing: "0.1em", fontWeight: 700, padding: "2px 6px", borderRadius: 999 }}>{p.badge}</span>
+          <span style={{ position: "absolute", top: 8, left: 8, background: "#C9A227", color: "#fff", fontSize: 8, letterSpacing: "0.1em", fontWeight: 700, padding: "2px 6px", borderRadius: 999 }}>{p.badge}</span>
         )}
         <button onClick={e => { e.stopPropagation(); setWished(!wished); }} style={{ position: "absolute", top: 8, right: 8, width: 26, height: 26, background: "#fff", border: "none", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.1)", zIndex: 10 }}>
-          <Heart size={11} fill={wished ? "#B5784A" : "none"} color={wished ? "#B5784A" : "#1A0F0A"} />
+          <Heart size={11} fill={wished ? "#C9A227" : "none"} color={wished ? "#C9A227" : "#1A0F0A"} />
         </button>
       </div>
       <div className="p-2 sm:p-4">
         <div style={{ display: "flex", gap: 1, marginBottom: 4, alignItems: "center" }}>
           {Array.from({ length: 5 }).map((_, i) => (
-            <Star key={i} size={8} fill={i < Math.floor(p.rating) ? "#B5784A" : "none"} color="#B5784A" className="w-[8px] h-[8px] sm:w-[10px] sm:h-[10px]" />
+            <Star key={i} size={8} fill={i < Math.floor(p.rating) ? "#C9A227" : "none"} color="#C9A227" className="w-[8px] h-[8px] sm:w-[10px] sm:h-[10px]" />
           ))}
           <span style={{ color: "#9A7A6E", fontSize: 9, marginLeft: 2 }} className="text-[8px] sm:text-[10px]">({p.reviews})</span>
         </div>
-        <h3 onClick={() => onQuickView(p)} style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, color: "#1A0F0A", lineHeight: 1.35, marginBottom: 4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", cursor: "pointer" }} className="text-[11px] sm:text-sm hover:text-[#B5784A] transition-colors">{p.name}</h3>
+        <h3 onClick={() => onQuickView(p)} style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, color: "#1A0F0A", lineHeight: 1.35, marginBottom: 4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", cursor: "pointer" }} className="text-[11px] sm:text-sm hover:text-[#C9A227] transition-colors">{p.name}</h3>
         <p style={{ color: "#5C3D2E", fontSize: 11, lineHeight: 1.55, marginBottom: 12, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }} className="hidden sm:block">{p.description}</p>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#B5784A" }} className="text-xs sm:text-base">{fmt(p.price)}</span>
-          <button onClick={e => { e.stopPropagation(); handleAdd(); }} className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-white cursor-pointer transition-all duration-200" style={{ border: "none", background: justAdded ? "#22c55e" : "#B5784A", transform: justAdded ? "scale(1.15)" : "scale(1)" }}>
+          <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#C9A227" }} className="text-xs sm:text-base">{fmt(p.price)}</span>
+          <button onClick={e => { e.stopPropagation(); handleAdd(); }} className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-white cursor-pointer transition-all duration-200" style={{ border: "none", background: justAdded ? "#22c55e" : "#C9A227", transform: justAdded ? "scale(1.15)" : "scale(1)" }}>
             {justAdded ? <Check size={11} className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Plus size={11} className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
           </button>
         </div>
@@ -1271,7 +1277,7 @@ function WhyUsSection() {
             { icon: <Star size={30} />, title: "Authentic Quality", desc: "Global brands curated specifically for Nigerian skin tones and climate." },
           ].map(({ icon, title, desc }) => (
             <div key={title} style={{ textAlign: "center" }}>
-              <div style={{ color: "#F2B8A8", marginBottom: 16, display: "flex", justifyContent: "center" }}>{icon}</div>
+              <div style={{ color: "#F9DEDA", marginBottom: 16, display: "flex", justifyContent: "center" }}>{icon}</div>
               <h3 style={{ fontFamily: "'Playfair Display', serif", color: "#fff", fontWeight: 600, marginBottom: 8, fontSize: 16 }}>{title}</h3>
               <p style={{ color: "#9A7A6E", fontSize: 12, lineHeight: 1.7 }}>{desc}</p>
             </div>
@@ -1300,16 +1306,16 @@ function TestimonialsSection() {
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 24 }}>
           {reviews.map(({ name, loc, text, stars }) => (
-            <div key={name} style={{ background: "#FFF6F3", borderRadius: 20, padding: 28, border: "1px solid rgba(242,184,168,0.3)" }}>
+            <div key={name} style={{ background: "#FFF6F3", borderRadius: 20, padding: 28, border: "1px solid rgba(249,222,218,0.3)" }}>
               <div style={{ display: "flex", gap: 3, marginBottom: 16 }}>
-                {Array.from({ length: stars }).map((_, i) => <Star key={i} size={14} fill="#B5784A" color="#B5784A" />)}
+                {Array.from({ length: stars }).map((_, i) => <Star key={i} size={14} fill="#C9A227" color="#C9A227" />)}
               </div>
               <p style={{ color: "#5C3D2E", fontSize: 13, lineHeight: 1.8, marginBottom: 20, fontStyle: "italic" }}>"{text}"</p>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(181,120,74,0.15)", display: "flex", alignItems: "center", justifyContent: "center", color: "#B5784A", fontWeight: 700, fontSize: 14 }}>{name[0]}</div>
+                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(201,162,39,0.15)", display: "flex", alignItems: "center", justifyContent: "center", color: "#C9A227", fontWeight: 700, fontSize: 14 }}>{name[0]}</div>
                 <div>
                   <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, color: "#1A0F0A", fontSize: 14 }}>{name}</div>
-                  <div style={{ color: "#B5784A", fontSize: 11, letterSpacing: "0.08em" }}>{loc}</div>
+                  <div style={{ color: "#C9A227", fontSize: 11, letterSpacing: "0.08em" }}>{loc}</div>
                 </div>
               </div>
             </div>
@@ -1341,20 +1347,20 @@ function LocationSection() {
   return (
     <section id="location" style={{ background: "linear-gradient(180deg, #FFFDFC 0%, #FFF6F3 100%)" }} className="py-10 sm:py-14">
       <div style={{ maxWidth: 1200, margin: "0 auto" }} className="px-4 sm:px-6">
-        <div style={{ borderRadius: 24, overflow: "hidden", display: "grid", boxShadow: "0 24px 70px rgba(26,15,10,0.16)", border: "1px solid rgba(242,184,168,0.28)" }} className="grid-cols-1 md:grid-cols-2">
-          <div style={{ background: "radial-gradient(circle at 18% 15%, rgba(181,120,74,0.34) 0, transparent 28%), linear-gradient(145deg, #1A0F0A 0%, #2A160E 100%)", display: "flex", flexDirection: "column", justifyContent: "center" }} className="p-6 sm:p-8 lg:p-10">
+        <div style={{ borderRadius: 24, overflow: "hidden", display: "grid", boxShadow: "0 24px 70px rgba(26,15,10,0.16)", border: "1px solid rgba(249,222,218,0.28)" }} className="grid-cols-1 md:grid-cols-2">
+          <div style={{ background: "radial-gradient(circle at 18% 15%, rgba(201,162,39,0.34) 0, transparent 28%), linear-gradient(145deg, #1A0F0A 0%, #2A160E 100%)", display: "flex", flexDirection: "column", justifyContent: "center" }} className="p-6 sm:p-8 lg:p-10">
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: "#fff", marginBottom: 6 }}>Find Us</h2>
-            <p style={{ color: "#F2B8A8", fontSize: 13, marginBottom: 28, letterSpacing: "0.05em" }}>Come see us in Owerri</p>
+            <p style={{ color: "#F9DEDA", fontSize: 13, marginBottom: 28, letterSpacing: "0.05em" }}>Come see us in Owerri</p>
             
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(181,120,74,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <MapPin size={14} color="#B5784A" />
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(201,162,39,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <MapPin size={14} color="#C9A227" />
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div style={{ color: "#fff", fontWeight: 600, fontSize: 12 }}>Shop D, World Centre</div>
-                    <button onClick={handleCopyAddr} style={{ background: "none", border: "none", color: copiedAddr ? "#22c55e" : "#B5784A", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", gap: 3, fontWeight: 700 }}>
+                    <button onClick={handleCopyAddr} style={{ background: "none", border: "none", color: copiedAddr ? "#22c55e" : "#C9A227", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", gap: 3, fontWeight: 700 }}>
                       <Copy size={10} /> {copiedAddr ? "COPIED" : "COPY"}
                     </button>
                   </div>
@@ -1363,8 +1369,8 @@ function LocationSection() {
               </div>
 
               <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(181,120,74,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Phone size={14} color="#B5784A" />
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(201,162,39,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Phone size={14} color="#C9A227" />
                 </div>
                 <div>
                   <div style={{ color: "#fff", fontWeight: 600, fontSize: 12, marginBottom: 2 }}>WhatsApp Us</div>
@@ -1375,8 +1381,8 @@ function LocationSection() {
               </div>
 
               <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(181,120,74,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Clock size={14} color="#B5784A" />
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(201,162,39,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Clock size={14} color="#C9A227" />
                 </div>
                 <div>
                   <div style={{ color: "#fff", fontWeight: 600, fontSize: 12, marginBottom: 2 }}>Mon – Sat</div>
@@ -1385,13 +1391,13 @@ function LocationSection() {
               </div>
 
               <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(181,120,74,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Eye size={14} color="#B5784A" />
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(201,162,39,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Eye size={14} color="#C9A227" />
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div style={{ color: "#fff", fontWeight: 600, fontSize: 12 }}>Email Support</div>
-                    <button onClick={handleCopyEmail} style={{ background: "none", border: "none", color: copiedEmail ? "#22c55e" : "#B5784A", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", gap: 3, fontWeight: 700 }}>
+                    <button onClick={handleCopyEmail} style={{ background: "none", border: "none", color: copiedEmail ? "#22c55e" : "#C9A227", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", gap: 3, fontWeight: 700 }}>
                       <Copy size={10} /> {copiedEmail ? "COPIED" : "COPY"}
                     </button>
                   </div>
@@ -1401,7 +1407,7 @@ function LocationSection() {
             </div>
 
             <a href="https://share.google/0alXyLa5msMwqjFq6" target="_blank" rel="noopener noreferrer"
-              style={{ marginTop: 24, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6, background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", padding: "10px 20px", borderRadius: 999, fontSize: 10, fontWeight: 700, letterSpacing: "0.15em", textDecoration: "none", width: "fit-content", boxShadow: "0 10px 24px rgba(181,120,74,0.3)" }} className="max-sm:w-full">
+              style={{ marginTop: 24, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6, background: "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)", color: "#fff", padding: "10px 20px", borderRadius: 999, fontSize: 10, fontWeight: 700, letterSpacing: "0.15em", textDecoration: "none", width: "fit-content", boxShadow: "0 10px 24px rgba(201,162,39,0.3)" }} className="max-sm:w-full">
               <MapPin size={13} /> GET DIRECTIONS
             </a>
           </div>
@@ -1415,7 +1421,7 @@ function LocationSection() {
             <div style={{ position: "absolute", bottom: 18, left: 18, right: 18, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(10px)", borderRadius: 16, padding: "12px 16px", boxShadow: "0 12px 30px rgba(26,15,10,0.14)" }} className="sm:right-auto sm:p-5">
               <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", fontSize: 14 }}>Splendid Empire Cosmetics</div>
               <div style={{ display: "flex", alignItems: "center", gap: 3, marginTop: 4 }}>
-                {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={10} fill="#B5784A" color="#B5784A" />)}
+                {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={10} fill="#C9A227" color="#C9A227" />)}
                 <span style={{ color: "#5C3D2E", fontSize: 10, marginLeft: 4 }}>Owerri Store</span>
               </div>
             </div>
@@ -1443,19 +1449,19 @@ function FAQSection() {
     <section style={{ padding: "60px 0", backgroundColor: "#FFF6F3" }}>
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "0 24px" }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <p style={{ color: "#B5784A", fontSize: 10, letterSpacing: "0.25em", fontWeight: 700, marginBottom: 10 }}>EVERYTHING YOU NEED TO KNOW</p>
+          <p style={{ color: "#C9A227", fontSize: 10, letterSpacing: "0.25em", fontWeight: 700, marginBottom: 10 }}>EVERYTHING YOU NEED TO KNOW</p>
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: "#1A0F0A", marginBottom: 8 }}>Frequently Asked Questions</h2>
           <p style={{ color: "#5C3D2E", fontSize: 13 }}>About Splendid Empire Cosmetics, Owerri</p>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {faqs.map((faq, i) => (
-            <div key={i} style={{ borderRadius: 14, border: "1px solid rgba(181,120,74,0.18)", overflow: "hidden", backgroundColor: open === i ? "#fff" : "rgba(255,255,255,0.6)", transition: "all 0.2s" }}>
+            <div key={i} style={{ borderRadius: 14, border: "1px solid rgba(201,162,39,0.18)", overflow: "hidden", backgroundColor: open === i ? "#fff" : "rgba(255,255,255,0.6)", transition: "all 0.2s" }}>
               <button onClick={() => setOpen(open === i ? null : i)} aria-expanded={open === i} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 22px", background: "none", border: "none", cursor: "pointer", textAlign: "left", gap: 16 }}>
                 <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, color: "#1A0F0A", fontSize: 15, lineHeight: 1.4 }}>{faq.q}</span>
-                <span style={{ flexShrink: 0, width: 24, height: 24, borderRadius: "50%", background: open === i ? "#B5784A" : "rgba(181,120,74,0.12)", color: open === i ? "#fff" : "#B5784A", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, transition: "all 0.2s", transform: open === i ? "rotate(45deg)" : "rotate(0deg)" }}>+</span>
+                <span style={{ flexShrink: 0, width: 24, height: 24, borderRadius: "50%", background: open === i ? "#C9A227" : "rgba(201,162,39,0.12)", color: open === i ? "#fff" : "#C9A227", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, transition: "all 0.2s", transform: open === i ? "rotate(45deg)" : "rotate(0deg)" }}>+</span>
               </button>
               {open === i && (
-                <div style={{ padding: "0 22px 20px", borderTop: "1px solid rgba(181,120,74,0.1)" }}>
+                <div style={{ padding: "0 22px 20px", borderTop: "1px solid rgba(201,162,39,0.1)" }}>
                   <p style={{ color: "#5C3D2E", fontSize: 13, lineHeight: 1.8, marginTop: 14 }}>{faq.a}</p>
                 </div>
               )}
@@ -1537,12 +1543,12 @@ function SiteFooter({ onSelectCategory, categories }: { onSelectCategory?: (c: C
   };
 
   return (
-    <footer id="contact" style={{ backgroundColor: "#110B09", borderTop: "1px solid rgba(181, 120, 74, 0.25)", paddingTop: 60, paddingBottom: 28 }}>
+    <footer id="contact" style={{ backgroundColor: "#110B09", borderTop: "1px solid rgba(201,162,39, 0.25)", paddingTop: 60, paddingBottom: 28 }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 20px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 36, marginBottom: 48 }}>
           <div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#fff", lineHeight: 1, letterSpacing: "-0.01em" }}>SPLENDID</div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#B5784A", marginBottom: 16, fontWeight: 600 }}>EMPIRE COSMETICS</div>
+            <img src="/logo.jpg" alt="Splendid Empire Cosmetics" style={{ height: 56, width: 56, borderRadius: "50%", objectFit: "cover", marginBottom: 12, border: "2px solid rgba(201,162,39,0.4)" }} />
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 8, letterSpacing: "0.45em", color: "#C9A227", marginBottom: 16, fontWeight: 600 }}>EMPIRE COSMETICS</div>
             <p style={{ color: "#9A7A6E", fontSize: 13, lineHeight: 1.7, marginBottom: 20 }}>Premium cosmetics, curated for the modern Nigerian woman. From skincare to fragrance — every product earned its place in our collection.</p>
             <div style={{ display: "flex", gap: 10 }}>
               {[
@@ -1554,21 +1560,21 @@ function SiteFooter({ onSelectCategory, categories }: { onSelectCategory?: (c: C
                 <a key={label} href={href} target="_blank" rel="noopener noreferrer" title={label}
                   style={{
                     width: 36, height: 36, borderRadius: "50%",
-                    border: "1px solid rgba(181, 120, 74, 0.25)",
+                    border: "1px solid rgba(201,162,39, 0.25)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     color: "#9A7A6E", textDecoration: "none", transition: "all 0.25s ease"
                   }}
                   onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.background = "#B5784A";
+                    (e.currentTarget as HTMLElement).style.background = "#C9A227";
                     (e.currentTarget as HTMLElement).style.color = "#fff";
-                    (e.currentTarget as HTMLElement).style.borderColor = "#B5784A";
+                    (e.currentTarget as HTMLElement).style.borderColor = "#C9A227";
                     (e.currentTarget as HTMLElement).style.transform = "scale(1.1)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "0 0 12px rgba(181, 120, 74, 0.4)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "0 0 12px rgba(201,162,39, 0.4)";
                   }}
                   onMouseLeave={e => {
                     (e.currentTarget as HTMLElement).style.background = "transparent";
                     (e.currentTarget as HTMLElement).style.color = "#9A7A6E";
-                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(181, 120, 74, 0.25)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(201,162,39, 0.25)";
                     (e.currentTarget as HTMLElement).style.transform = "scale(1)";
                     (e.currentTarget as HTMLElement).style.boxShadow = "none";
                   }}
@@ -1583,7 +1589,7 @@ function SiteFooter({ onSelectCategory, categories }: { onSelectCategory?: (c: C
                 <a key={l} href={`#${id}`} 
                   onClick={e => scrollToSection(e, id)}
                   style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", transition: "color 0.2s" }}
-                  onMouseEnter={e => ((e.target as HTMLElement).style.color = "#B5784A")}
+                  onMouseEnter={e => ((e.target as HTMLElement).style.color = "#C9A227")}
                   onMouseLeave={e => ((e.target as HTMLElement).style.color = "#9A7A6E")}
                 >{l}</a>
               ))}
@@ -1603,7 +1609,7 @@ function SiteFooter({ onSelectCategory, categories }: { onSelectCategory?: (c: C
                     if (el) el.scrollIntoView({ behavior: "smooth" });
                   }}
                   style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", transition: "color 0.2s" }}
-                  onMouseEnter={e => ((e.target as HTMLElement).style.color = "#B5784A")}
+                  onMouseEnter={e => ((e.target as HTMLElement).style.color = "#C9A227")}
                   onMouseLeave={e => ((e.target as HTMLElement).style.color = "#9A7A6E")}
                 >{c}</a>
               ))}
@@ -1617,14 +1623,14 @@ function SiteFooter({ onSelectCategory, categories }: { onSelectCategory?: (c: C
                 <a href="mailto:obilodoris15@gmail.com" style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "#9A7A6E"}>
                   obilodoris15@gmail.com
                 </a>
-                <button onClick={handleCopyEmail} style={{ background: "none", border: "none", color: copiedEmail ? "#22c55e" : "#B5784A", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", gap: 3, fontWeight: 700 }}>
+                <button onClick={handleCopyEmail} style={{ background: "none", border: "none", color: copiedEmail ? "#22c55e" : "#C9A227", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", gap: 3, fontWeight: 700 }}>
                   <Copy size={10} /> {copiedEmail ? "COPIED" : "COPY"}
                 </button>
               </div>
               <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" style={{ color: "#9A7A6E", fontSize: 13, textDecoration: "none", display: "flex", alignItems: "center", gap: 8, transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "#9A7A6E"}>
-                <MessageCircle size={13} color="#B5784A" /> WhatsApp Support
+                <MessageCircle size={13} color="#C9A227" /> WhatsApp Support
               </a>
-              <p style={{ color: "#B5784A", fontSize: 13, fontWeight: 600, margin: 0 }}>Mon–Sat: 9:00am – 7:00pm</p>
+              <p style={{ color: "#C9A227", fontSize: 13, fontWeight: 600, margin: 0 }}>Mon–Sat: 9:00am – 7:00pm</p>
             </div>
           </div>
         </div>
@@ -1642,7 +1648,7 @@ function SiteFooter({ onSelectCategory, categories }: { onSelectCategory?: (c: C
 function CartDrawer({ open, cart, total, onClose, onRemove, onQty, onCheckout }: { open: boolean; cart: CartItem[]; total: number; onClose: () => void; onRemove: (id: string) => void; onQty: (id: string, d: number) => void; onCheckout: () => void }) {
   return (
     <div style={{ position: "fixed", top: 0, right: 0, height: "100%", width: "min(420px, 100vw)", zIndex: 50, backgroundColor: "#fff", boxShadow: "-8px 0 40px rgba(0,0,0,0.12)", display: "flex", flexDirection: "column", transform: open ? "translateX(0)" : "translateX(100%)", transition: "transform 0.3s ease-in-out" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(242,184,168,0.3)" }} className="px-4 py-4 sm:px-6 sm:py-5">
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(249,222,218,0.3)" }} className="px-4 py-4 sm:px-6 sm:py-5">
         <div>
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#1A0F0A" }}>Your Cart</h2>
           {cart.length > 0 && <p style={{ color: "#5C3D2E", fontSize: 12, marginTop: 2 }}>{cart.length} item{cart.length !== 1 ? "s" : ""}</p>}
@@ -1657,20 +1663,20 @@ function CartDrawer({ open, cart, total, onClose, onRemove, onQty, onCheckout }:
           <ShoppingBag size={52} style={{ opacity: 0.15 }} />
           <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 500 }}>Nothing here yet</p>
           <p style={{ fontSize: 13, color: "#9A7A6E", textAlign: "center" }}>Browse the collection and find something you love.</p>
-          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#B5784A", fontSize: 13, textDecoration: "underline", marginTop: 8 }}>Back to Collection</button>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#C9A227", fontSize: 13, textDecoration: "underline", marginTop: 8 }}>Back to Collection</button>
         </div>
       ) : (
         <>
           <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }} className="gap-3 p-3 sm:gap-4 sm:p-5">
             {cart.map(({ product: p, quantity: q }) => (
-              <div key={p.id} style={{ display: "flex", background: "linear-gradient(180deg, #FFF8F5 0%, #FFF1EB 100%)", borderRadius: 14, border: "1px solid rgba(242,184,168,0.28)" }} className="gap-3 p-3 sm:gap-4 sm:p-3.5">
+              <div key={p.id} style={{ display: "flex", background: "linear-gradient(180deg, #FFF8F5 0%, #FFF1EB 100%)", borderRadius: 14, border: "1px solid rgba(249,222,218,0.28)" }} className="gap-3 p-3 sm:gap-4 sm:p-3.5">
                 <img src={p.image} alt={p.name} style={{ borderRadius: 10, objectFit: "cover", flexShrink: 0 }} className="h-14 w-14 sm:h-[68px] sm:w-[68px]" />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <h4 style={{ fontSize: 13, fontWeight: 600, color: "#1A0F0A", lineHeight: 1.4, marginBottom: 4 }}>{p.name}</h4>
-                  <p style={{ fontFamily: "'Playfair Display', serif", color: "#B5784A", fontWeight: 700, fontSize: 14, marginBottom: 10 }}>{fmt(p.price)}</p>
+                  <p style={{ fontFamily: "'Playfair Display', serif", color: "#C9A227", fontWeight: 700, fontSize: 14, marginBottom: 10 }}>{fmt(p.price)}</p>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     {[{ delta: -1, icon: <Minus size={10} /> }, { delta: 1, icon: <Plus size={10} /> }].map(({ delta, icon }, idx) => (
-                      <button key={idx} onClick={() => onQty(p.id, delta)} style={{ width: 24, height: 24, borderRadius: "50%", border: "1px solid rgba(181,120,74,0.4)", background: "none", color: "#B5784A", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>{icon}</button>
+                      <button key={idx} onClick={() => onQty(p.id, delta)} style={{ width: 24, height: 24, borderRadius: "50%", border: "1px solid rgba(201,162,39,0.4)", background: "none", color: "#C9A227", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>{icon}</button>
                     )).reduce((acc, el, i) => i === 0 ? [el] : [...acc, <span key="q" style={{ fontSize: 13, fontWeight: 700, color: "#1A0F0A", minWidth: 20, textAlign: "center" }}>{q}</span>, el], [] as React.ReactNode[])}
                     <button onClick={() => onRemove(p.id)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "#9A7A6E", display: "flex", padding: 4 }}>
                       <Trash2 size={13} />
@@ -1680,12 +1686,12 @@ function CartDrawer({ open, cart, total, onClose, onRemove, onQty, onCheckout }:
               </div>
             ))}
           </div>
-          <div style={{ borderTop: "1px solid rgba(242,184,168,0.3)", backgroundColor: "#fff" }} className="p-4 sm:p-6">
+          <div style={{ borderTop: "1px solid rgba(249,222,218,0.3)", backgroundColor: "#fff" }} className="p-4 sm:p-6">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <span style={{ color: "#5C3D2E", fontWeight: 500, fontSize: 14 }}>Subtotal</span>
-              <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#B5784A" }} className="text-xl sm:text-2xl">{fmt(total)}</span>
+              <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#C9A227" }} className="text-xl sm:text-2xl">{fmt(total)}</span>
             </div>
-            <button onClick={onCheckout} style={{ width: "100%", background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", border: "none", borderRadius: 999, padding: "14px 20px", fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 8px 22px rgba(181,120,74,0.32)" }}>
+            <button onClick={onCheckout} style={{ width: "100%", background: "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)", color: "#fff", border: "none", borderRadius: 999, padding: "14px 20px", fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 8px 22px rgba(201,162,39,0.32)" }}>
               PROCEED TO CHECKOUT <ChevronRight size={16} />
             </button>
             <p style={{ textAlign: "center", color: "#9A7A6E", fontSize: 10, marginTop: 10 }}>Secure bank transfer · Confirmed via WhatsApp</p>
@@ -1709,7 +1715,7 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, email, onName,
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }} />
       <div className="glass" style={{ position: "relative", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 480, maxHeight: "95vh", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 -20px 60px rgba(0,0,0,0.2)" }}>
 
-        <div style={{ background: "#B5784A", padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+        <div style={{ background: "#C9A227", padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div>
             <h2 style={{ fontFamily: "'Playfair Display', serif", color: "#fff", fontSize: 20, fontWeight: 700 }}>{step === "info" ? "Your Details" : "Complete Your Order"}</h2>
             <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, fontFamily: "monospace", fontWeight: 700, marginTop: 2 }}>{orderId}</p>
@@ -1717,9 +1723,9 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, email, onName,
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.8)", display: "flex" }}><X size={20} /></button>
         </div>
 
-        <div style={{ display: "flex", borderBottom: "1px solid rgba(242,184,168,0.3)", flexShrink: 0 }}>
+        <div style={{ display: "flex", borderBottom: "1px solid rgba(249,222,218,0.3)", flexShrink: 0 }}>
           {[["info", "1. Details"], ["payment", "2. Payment"]].map(([s, label]) => (
-            <div key={s} style={{ flex: 1, padding: "12px 8px", textAlign: "center", fontSize: 10, letterSpacing: "0.15em", fontWeight: 700, color: step === s ? "#B5784A" : "#9A7A6E", borderBottom: step === s ? "2px solid #B5784A" : "2px solid transparent", transition: "all 0.2s" }}>{label}</div>
+            <div key={s} style={{ flex: 1, padding: "12px 8px", textAlign: "center", fontSize: 10, letterSpacing: "0.15em", fontWeight: 700, color: step === s ? "#C9A227" : "#9A7A6E", borderBottom: step === s ? "2px solid #C9A227" : "2px solid transparent", transition: "all 0.2s" }}>{label}</div>
           ))}
         </div>
 
@@ -1729,7 +1735,7 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, email, onName,
               <div style={{ background: "#FFF6F3", borderRadius: 16, padding: 16 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                   <span style={{ fontWeight: 700, color: "#1A0F0A", fontSize: 14 }}>Your Order</span>
-                  <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#B5784A", fontSize: 11, background: "rgba(181,120,74,0.1)", padding: "2px 10px", borderRadius: 999 }}>{orderId}</span>
+                  <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#C9A227", fontSize: 11, background: "rgba(201,162,39,0.1)", padding: "2px 10px", borderRadius: 999 }}>{orderId}</span>
                 </div>
                 {cart.map(({ product: p, quantity: q }) => (
                   <div key={p.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "#5C3D2E", padding: "4px 0" }}>
@@ -1737,16 +1743,16 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, email, onName,
                     <span style={{ fontWeight: 600, color: "#1A0F0A", flexShrink: 0 }}>{fmt(p.price * q)}</span>
                   </div>
                 ))}
-                <div style={{ borderTop: "1px solid rgba(242,184,168,0.4)", marginTop: 12, paddingTop: 12, display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
+                <div style={{ borderTop: "1px solid rgba(249,222,218,0.4)", marginTop: 12, paddingTop: 12, display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
                   <span style={{ color: "#1A0F0A" }}>Total</span>
-                  <span style={{ fontFamily: "'Playfair Display', serif", color: "#B5784A", fontSize: 20 }}>{fmt(total)}</span>
+                  <span style={{ fontFamily: "'Playfair Display', serif", color: "#C9A227", fontSize: 20 }}>{fmt(total)}</span>
                 </div>
               </div>
 
               {[{ label: "Full Name", val: name, set: onName, ph: "Your name", type: "text" }, { label: "WhatsApp Number", val: phone, set: onPhone, ph: "08012345678", type: "tel" }].map(({ label, val, set, ph, type }) => (
                 <div key={label}>
                   <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#1A0F0A", marginBottom: 8, letterSpacing: "0.1em", textTransform: "uppercase" }}>{label}</label>
-                  <input type={type} value={val} onChange={e => set(e.target.value)} placeholder={ph} style={{ width: "100%", border: "1px solid rgba(242,184,168,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 14, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }} />
+                  <input type={type} value={val} onChange={e => set(e.target.value)} placeholder={ph} style={{ width: "100%", border: "1px solid rgba(249,222,218,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 14, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }} />
                 </div>
               ))}
               <div>
@@ -1756,13 +1762,13 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, email, onName,
                   value={email}
                   onChange={e => onEmail(e.target.value)}
                   placeholder="you@example.com"
-                  style={{ width: "100%", border: emailError ? "1.5px solid #ef4444" : "1px solid rgba(242,184,168,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 14, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }}
+                  style={{ width: "100%", border: emailError ? "1.5px solid #ef4444" : "1px solid rgba(249,222,218,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 14, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }}
                 />
                 {emailError && <p style={{ color: "#ef4444", fontSize: 11, marginTop: 6, fontWeight: 600 }}>{emailError}</p>}
                 <p style={{ color: "#9A7A6E", fontSize: 11, marginTop: 6 }}>Your order confirmation will be sent here</p>
               </div>
 
-              <button onClick={onPlace} disabled={!canProceed} style={{ width: "100%", background: canProceed ? "#B5784A" : "#d1b8a8", color: "#fff", border: "none", borderRadius: 999, padding: "16px 24px", fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: canProceed ? "pointer" : "not-allowed", boxShadow: canProceed ? "0 6px 20px rgba(181,120,74,0.3)" : "none", transition: "all 0.2s" }}>
+              <button onClick={onPlace} disabled={!canProceed} style={{ width: "100%", background: canProceed ? "#C9A227" : "#d1b8a8", color: "#fff", border: "none", borderRadius: 999, padding: "16px 24px", fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: canProceed ? "pointer" : "not-allowed", boxShadow: canProceed ? "0 6px 20px rgba(201,162,39,0.3)" : "none", transition: "all 0.2s" }}>
                 CONTINUE TO PAYMENT →
               </button>
             </div>
@@ -1772,15 +1778,15 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, email, onName,
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <div style={{ background: "#FFF6F3", borderRadius: 16, padding: 20, textAlign: "center" }}>
                 <p style={{ color: "#5C3D2E", fontSize: 12, letterSpacing: "0.1em", marginBottom: 6 }}>TRANSFER EXACTLY</p>
-                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, fontWeight: 700, color: "#B5784A", margin: 0 }}>{fmt(total)}</p>
-                <div style={{ marginTop: 10, display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(181,120,74,0.12)", borderRadius: 999, padding: "4px 14px" }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, color: "#B5784A", letterSpacing: "0.1em" }}>USE AS REFERENCE:</span>
+                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, fontWeight: 700, color: "#C9A227", margin: 0 }}>{fmt(total)}</p>
+                <div style={{ marginTop: 10, display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(201,162,39,0.12)", borderRadius: 999, padding: "4px 14px" }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: "#C9A227", letterSpacing: "0.1em" }}>USE AS REFERENCE:</span>
                   <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#1A0F0A", fontSize: 11 }}>{orderId}</span>
                 </div>
               </div>
 
               <div style={{ background: "#1A0F0A", borderRadius: 16, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
-                <h3 style={{ color: "#F2B8A8", fontWeight: 700, fontSize: 11, letterSpacing: "0.2em", marginBottom: 4 }}>TRANSFER TO</h3>
+                <h3 style={{ color: "#F9DEDA", fontWeight: 700, fontSize: 11, letterSpacing: "0.2em", marginBottom: 4 }}>TRANSFER TO</h3>
                 {[["Bank", BANK_NAME], ["Account Name", BANK_ACCOUNT_NAME]].map(([l, v]) => (
                   <div key={l} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span style={{ color: "#9A7A6E", fontSize: 13 }}>{l}</span>
@@ -1791,14 +1797,14 @@ function CheckoutModal({ step, cart, total, orderId, name, phone, email, onName,
                   <span style={{ color: "#9A7A6E", fontSize: 13 }}>Account Number</span>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ color: "#fff", fontWeight: 700, fontSize: 22, letterSpacing: "0.06em" }}>{BANK_ACCOUNT_NUMBER}</span>
-                    <button onClick={onCopy} style={{ background: "none", border: "none", cursor: "pointer", color: copied ? "#4ade80" : "#F2B8A8", display: "flex" }}>
+                    <button onClick={onCopy} style={{ background: "none", border: "none", cursor: "pointer", color: copied ? "#4ade80" : "#F9DEDA", display: "flex" }}>
                       {copied ? <CheckCircle size={18} /> : <Copy size={18} />}
                     </button>
                   </div>
                 </div>
                 <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span style={{ color: "#9A7A6E", fontSize: 13 }}>Reference</span>
-                  <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#F2B8A8", fontSize: 14 }}>{orderId}</span>
+                  <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#F9DEDA", fontSize: 14 }}>{orderId}</span>
                 </div>
               </div>
 
@@ -1857,17 +1863,17 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
     return (
       <div style={{ minHeight: "100vh", backgroundColor: "#1A0F0A", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'Raleway', sans-serif", position: "relative", overflow: "hidden" }}>
         {/* Decorative blobs */}
-        <div style={{ position: "absolute", top: -120, right: -80, width: 400, height: 400, background: "radial-gradient(circle, rgba(181,120,74,0.12) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: -100, left: -60, width: 350, height: 350, background: "radial-gradient(circle, rgba(242,184,168,0.07) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", top: -120, right: -80, width: 400, height: 400, background: "radial-gradient(circle, rgba(201,162,39,0.12) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", bottom: -100, left: -60, width: 350, height: 350, background: "radial-gradient(circle, rgba(249,222,218,0.07) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
 
-        <div style={{ borderRadius: 24, padding: "44px 40px", width: "100%", maxWidth: 400, boxShadow: "0 0 0 1px rgba(181,120,74,0.35), 0 24px 64px rgba(0,0,0,0.55)", background: "rgba(30,18,12,0.85)", backdropFilter: "blur(20px)", position: "relative" }}>
+        <div style={{ borderRadius: 24, padding: "44px 40px", width: "100%", maxWidth: 400, boxShadow: "0 0 0 1px rgba(201,162,39,0.35), 0 24px 64px rgba(0,0,0,0.55)", background: "rgba(30,18,12,0.85)", backdropFilter: "blur(20px)", position: "relative" }}>
           {/* Glow ring */}
-          <div style={{ position: "absolute", inset: -1, borderRadius: 25, background: "linear-gradient(135deg, rgba(181,120,74,0.5) 0%, transparent 50%, rgba(181,120,74,0.2) 100%)", zIndex: -1, pointerEvents: "none" }} />
+          <div style={{ position: "absolute", inset: -1, borderRadius: 25, background: "linear-gradient(135deg, rgba(201,162,39,0.5) 0%, transparent 50%, rgba(201,162,39,0.2) 100%)", zIndex: -1, pointerEvents: "none" }} />
 
           <div style={{ textAlign: "center", marginBottom: 36 }}>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: "#ffffff", letterSpacing: "0.08em", lineHeight: 1 }}>SPLENDID EMPIRE</div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 9, letterSpacing: "0.45em", color: "#B5784A", marginTop: 8, marginBottom: 20, fontWeight: 600 }}>ADMIN COMMAND CENTRE</div>
-            <div style={{ height: 1, background: "linear-gradient(to right, transparent, rgba(181,120,74,0.5), transparent)", margin: "0 auto" }} />
+            <img src="/logo.jpg" alt="Splendid Empire Cosmetics" style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover", margin: "0 auto 16px", border: "3px solid rgba(201,162,39,0.5)", boxShadow: "0 8px 24px rgba(201,162,39,0.2)" }} />
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 9, letterSpacing: "0.45em", color: "#C9A227", marginTop: 4, marginBottom: 20, fontWeight: 600 }}>ADMIN COMMAND CENTRE</div>
+            <div style={{ height: 1, background: "linear-gradient(to right, transparent, rgba(201,162,39,0.5), transparent)", margin: "0 auto" }} />
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -1880,9 +1886,9 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
                   onChange={e => setPw(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && !loginLoading && login()}
                   placeholder="Enter admin password"
-                  style={{ width: "100%", border: "1px solid rgba(181,120,74,0.3)", borderRadius: 12, padding: "13px 48px 13px 16px", fontSize: 14, outline: "none", backgroundColor: "rgba(255,255,255,0.06)", color: "#fff", boxSizing: "border-box", transition: "border-color 0.2s" }}
-                  onFocus={e => (e.currentTarget.style.borderColor = "#B5784A")}
-                  onBlur={e => (e.currentTarget.style.borderColor = "rgba(181,120,74,0.3)")}
+                  style={{ width: "100%", border: "1px solid rgba(201,162,39,0.3)", borderRadius: 12, padding: "13px 48px 13px 16px", fontSize: 14, outline: "none", backgroundColor: "rgba(255,255,255,0.06)", color: "#fff", boxSizing: "border-box", transition: "border-color 0.2s" }}
+                  onFocus={e => (e.currentTarget.style.borderColor = "#C9A227")}
+                  onBlur={e => (e.currentTarget.style.borderColor = "rgba(201,162,39,0.3)")}
                 />
                 <button
                   type="button"
@@ -1903,7 +1909,7 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
             <button
               onClick={login}
               disabled={loginLoading}
-              style={{ background: loginLoading ? "rgba(181,120,74,0.5)" : "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", border: "none", borderRadius: 12, padding: "14px 24px", fontSize: 12, letterSpacing: "0.2em", fontWeight: 700, cursor: loginLoading ? "not-allowed" : "pointer", boxShadow: loginLoading ? "none" : "0 8px 24px rgba(181,120,74,0.3)", transition: "all 0.2s" }}
+              style={{ background: loginLoading ? "rgba(201,162,39,0.5)" : "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)", color: "#fff", border: "none", borderRadius: 12, padding: "14px 24px", fontSize: 12, letterSpacing: "0.2em", fontWeight: 700, cursor: loginLoading ? "not-allowed" : "pointer", boxShadow: loginLoading ? "none" : "0 8px 24px rgba(201,162,39,0.3)", transition: "all 0.2s" }}
             >
               {loginLoading ? "VERIFYING..." : "LOGIN →"}
             </button>
@@ -1935,9 +1941,10 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
       {/* ── Sticky Header ── */}
       <div style={{ backgroundColor: "#1A0F0A", padding: "0 16px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 30, boxShadow: "0 2px 16px rgba(0,0,0,0.35)", height: 60, width: "100%", boxSizing: "border-box" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <img src="/logo.jpg" alt="Splendid Empire Cosmetics" style={{ height: 36, width: 36, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(201,162,39,0.5)" }} />
           <div>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 700, color: "#fff", letterSpacing: "0.04em", lineHeight: 1 }}>SPLENDID EMPIRE</div>
-            <div style={{ color: "#B5784A", fontSize: 8, letterSpacing: "0.4em", fontWeight: 700, marginTop: 2 }}>ADMIN</div>
+            <div style={{ color: "#C9A227", fontSize: 8, letterSpacing: "0.4em", fontWeight: 700, marginTop: 2 }}>ADMIN</div>
           </div>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -1951,9 +1958,9 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
           </button>
           <button
             onClick={() => { adminLogout(); setAuthed(false); setPw(""); onExit(); }}
-            style={{ background: "rgba(181,120,74,0.15)", border: "1px solid rgba(181,120,74,0.3)", cursor: "pointer", color: "#B5784A", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, letterSpacing: "0.1em", padding: "8px 14px", borderRadius: 8, transition: "all 0.2s" }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(181,120,74,0.25)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(181,120,74,0.15)"; }}
+            style={{ background: "rgba(201,162,39,0.15)", border: "1px solid rgba(201,162,39,0.3)", cursor: "pointer", color: "#C9A227", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, letterSpacing: "0.1em", padding: "8px 14px", borderRadius: 8, transition: "all 0.2s" }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(201,162,39,0.25)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(201,162,39,0.15)"; }}
           >
             <LogOut size={13} /> LOGOUT
           </button>
@@ -1961,19 +1968,19 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
       </div>
 
       {/* ── Stats Bar ── */}
-      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(242,184,168,0.25)", padding: "20px 16px", width: "100%", boxSizing: "border-box" }}>
+      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(249,222,218,0.25)", padding: "20px 16px", width: "100%", boxSizing: "border-box" }}>
         <div style={{ maxWidth: 1060, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }} className="sm:grid-cols-5">
           {statsData.map(([label, value]) => (
-            <div key={label} style={{ background: "#fff", borderRadius: 16, padding: "16px 20px", textAlign: "center", boxShadow: "0 1px 6px rgba(181,120,74,0.08)", border: "1px solid rgba(242,184,168,0.2)" }}>
+            <div key={label} style={{ background: "#fff", borderRadius: 16, padding: "16px 20px", textAlign: "center", boxShadow: "0 1px 6px rgba(201,162,39,0.08)", border: "1px solid rgba(249,222,218,0.2)" }}>
               <div style={{ fontSize: 9, color: "#9A7A6E", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 6, fontWeight: 700 }}>{label}</div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: label === "Revenue" ? "#B5784A" : "#1A0F0A", fontSize: label === "Revenue" ? 18 : 26, lineHeight: 1 }}>{value}</div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: label === "Revenue" ? "#C9A227" : "#1A0F0A", fontSize: label === "Revenue" ? 18 : 26, lineHeight: 1 }}>{value}</div>
             </div>
           ))}
         </div>
       </div>
 
       {/* ── Tab Navigation ── */}
-      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(242,184,168,0.25)", width: "100%", boxSizing: "border-box", overflowX: "auto" }}>
+      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(249,222,218,0.25)", width: "100%", boxSizing: "border-box", overflowX: "auto" }}>
         <div style={{ maxWidth: 1060, margin: "0 auto", padding: "0 24px", display: "flex" }}>
           {([["orders", "Orders"], ["products", "Products"], ["categories", "Categories"], ["security", "Security"]] as const).map(([t, label]) => (
             <button
@@ -1985,9 +1992,9 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
                 fontWeight: 700,
                 letterSpacing: "0.1em",
                 border: "none",
-                borderBottom: tab === t ? "2px solid #B5784A" : "2px solid transparent",
+                borderBottom: tab === t ? "2px solid #C9A227" : "2px solid transparent",
                 background: "transparent",
-                color: tab === t ? "#B5784A" : "#9A7A6E",
+                color: tab === t ? "#C9A227" : "#9A7A6E",
                 cursor: "pointer",
                 transition: "all 0.2s",
                 display: "flex",
@@ -1998,7 +2005,7 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
             >
               {label.toUpperCase()}
               {t === "orders" && pendingCount > 0 && (
-                <span style={{ background: "#B5784A", color: "#fff", fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 999, lineHeight: 1.4 }}>{pendingCount}</span>
+                <span style={{ background: "#C9A227", color: "#fff", fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 999, lineHeight: 1.4 }}>{pendingCount}</span>
               )}
             </button>
           ))}
@@ -2073,7 +2080,7 @@ function AdminSecurity() {
               onChange={e => set(e.target.value)}
               placeholder={ph}
               required
-              style={{ width: "100%", border: "1px solid rgba(242,184,168,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 14, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }}
+              style={{ width: "100%", border: "1px solid rgba(249,222,218,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 14, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }}
             />
           </div>
         ))}
@@ -2092,7 +2099,7 @@ function AdminSecurity() {
         <button
           type="submit"
           disabled={loading}
-          style={{ background: loading ? "#d1b8a8" : "#B5784A", color: "#fff", border: "none", borderRadius: 999, padding: "14px 24px", fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", boxShadow: loading ? "none" : "0 6px 20px rgba(181,120,74,0.3)", transition: "all 0.2s" }}
+          style={{ background: loading ? "#d1b8a8" : "#C9A227", color: "#fff", border: "none", borderRadius: 999, padding: "14px 24px", fontSize: 11, letterSpacing: "0.2em", fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", boxShadow: loading ? "none" : "0 6px 20px rgba(201,162,39,0.3)", transition: "all 0.2s" }}
         >
           {loading ? "SAVING..." : "UPDATE PASSWORD"}
         </button>
@@ -2175,8 +2182,8 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
                 fontSize: 11,
                 fontWeight: 700,
                 letterSpacing: "0.08em",
-                border: `1px solid ${isActive ? "#B5784A" : "rgba(181,120,74,0.25)"}`,
-                background: isActive ? "#B5784A" : "#fff",
+                border: `1px solid ${isActive ? "#C9A227" : "rgba(201,162,39,0.25)"}`,
+                background: isActive ? "#C9A227" : "#fff",
                 color: isActive ? "#fff" : "#9A7A6E",
                 cursor: "pointer",
                 transition: "all 0.18s",
@@ -2186,7 +2193,7 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
               }}
             >
               {filterLabels[status]}
-              <span style={{ background: isActive ? "rgba(255,255,255,0.25)" : "rgba(181,120,74,0.12)", color: isActive ? "#fff" : "#B5784A", borderRadius: 999, padding: "1px 6px", fontSize: 10, fontWeight: 800 }}>{count}</span>
+              <span style={{ background: isActive ? "rgba(255,255,255,0.25)" : "rgba(201,162,39,0.12)", color: isActive ? "#fff" : "#C9A227", borderRadius: 999, padding: "1px 6px", fontSize: 10, fontWeight: 800 }}>{count}</span>
             </button>
           );
         })}
@@ -2203,13 +2210,13 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
             const cfg = STATUS_CFG[o.status];
             const btn = NEXT_LABEL[o.status];
             return (
-              <div key={o.id} style={{ backgroundColor: "#fff", borderRadius: 20, border: "1px solid rgba(242,184,168,0.2)", overflow: "hidden", boxShadow: "0 2px 16px rgba(181,120,74,0.07)" }}>
+              <div key={o.id} style={{ backgroundColor: "#fff", borderRadius: 20, border: "1px solid rgba(249,222,218,0.2)", overflow: "hidden", boxShadow: "0 2px 16px rgba(201,162,39,0.07)" }}>
                 <div style={{ padding: "20px 22px" }}>
 
                   {/* Top row: ID + status badge + date */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                      <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#B5784A", fontSize: 14, letterSpacing: "0.05em" }}>{o.id}</span>
+                      <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#C9A227", fontSize: 14, letterSpacing: "0.05em" }}>{o.id}</span>
                       <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: cfg.bg, color: cfg.color, padding: "4px 12px", borderRadius: 999, fontSize: 10, fontWeight: 700, letterSpacing: "0.05em" }}>
                         {cfg.icon} {cfg.label}
                       </span>
@@ -2229,7 +2236,7 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
                   {/* Items row */}
                   <div style={{ backgroundColor: "#FFF6F3", borderRadius: 12, padding: "12px 16px", marginBottom: 14 }}>
                     {o.items.map(({ product: p, quantity: q }) => (
-                      <div key={p.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "4px 0", borderBottom: "1px solid rgba(181,120,74,0.07)" }}>
+                      <div key={p.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "4px 0", borderBottom: "1px solid rgba(201,162,39,0.07)" }}>
                         <span style={{ color: "#5C3D2E", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: 16 }}>{p.name} <span style={{ color: "#9A7A6E" }}>×{q}</span></span>
                         <span style={{ color: "#1A0F0A", fontWeight: 600, flexShrink: 0 }}>{fmt(p.price * q)}</span>
                       </div>
@@ -2238,12 +2245,12 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
 
                   {/* Total + action buttons */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-                    <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 22, color: "#B5784A" }}>{fmt(o.total)}</div>
+                    <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 22, color: "#C9A227" }}>{fmt(o.total)}</div>
                     <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                       {btn && (
                         <button
                           onClick={() => advance(o.id)}
-                          style={{ background: "linear-gradient(135deg, #B5784A 0%, #8F5731 100%)", color: "#fff", border: "none", borderRadius: 999, padding: "11px 22px", fontSize: 12, fontWeight: 700, cursor: "pointer", minHeight: 44, letterSpacing: "0.04em", boxShadow: "0 4px 14px rgba(181,120,74,0.25)", transition: "opacity 0.2s" }}
+                          style={{ background: "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)", color: "#fff", border: "none", borderRadius: 999, padding: "11px 22px", fontSize: 12, fontWeight: 700, cursor: "pointer", minHeight: 44, letterSpacing: "0.04em", boxShadow: "0 4px 14px rgba(201,162,39,0.25)", transition: "opacity 0.2s" }}
                           onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
                           onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
                         >
@@ -2328,7 +2335,7 @@ function AdminCategories({ products, setProducts }: { products: Product[]; setPr
   }
 
   const labelStyle: React.CSSProperties = { display: "block", fontSize: 10, fontWeight: 700, color: "#5C3D2E", marginBottom: 6, letterSpacing: "0.15em", textTransform: "uppercase" };
-  const inputStyle: React.CSSProperties = { width: "100%", border: "1px solid rgba(242,184,168,0.6)", borderRadius: 10, padding: "10px 14px", fontSize: 13, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" };
+  const inputStyle: React.CSSProperties = { width: "100%", border: "1px solid rgba(249,222,218,0.6)", borderRadius: 10, padding: "10px 14px", fontSize: 13, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" };
 
   return (
     <div style={{ paddingBottom: 48, maxWidth: 600 }}>
@@ -2338,7 +2345,7 @@ function AdminCategories({ products, setProducts }: { products: Product[]; setPr
       </div>
 
       {/* Add new category */}
-      <div style={{ background: "#fff", borderRadius: 16, padding: 20, border: "1px solid rgba(242,184,168,0.2)", marginBottom: 24, boxShadow: "0 2px 12px rgba(181,120,74,0.06)" }}>
+      <div style={{ background: "#fff", borderRadius: 16, padding: 20, border: "1px solid rgba(249,222,218,0.2)", marginBottom: 24, boxShadow: "0 2px 12px rgba(201,162,39,0.06)" }}>
         <label style={labelStyle}>Add New Category</label>
         <div style={{ display: "flex", gap: 10 }}>
           <input
@@ -2350,7 +2357,7 @@ function AdminCategories({ products, setProducts }: { products: Product[]; setPr
           />
           <button
             onClick={handleAdd}
-            style={{ padding: "10px 20px", background: "linear-gradient(135deg, #B5784A, #8F5731)", color: "#fff", border: "none", borderRadius: 10, fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap", boxShadow: "0 4px 12px rgba(181,120,74,0.25)" }}
+            style={{ padding: "10px 20px", background: "linear-gradient(135deg, #C9A227, #A8841A)", color: "#fff", border: "none", borderRadius: 10, fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap", boxShadow: "0 4px 12px rgba(201,162,39,0.25)" }}
           >
             + ADD
           </button>
@@ -2373,7 +2380,7 @@ function AdminCategories({ products, setProducts }: { products: Product[]; setPr
             const count = products.filter(p => p.category === cat).length;
             const isRenaming = renamingCat === cat;
             return (
-              <div key={cat} style={{ background: "#fff", borderRadius: 14, padding: "14px 18px", border: "1px solid rgba(242,184,168,0.2)", display: "flex", alignItems: "center", gap: 12, boxShadow: "0 1px 6px rgba(181,120,74,0.06)" }}>
+              <div key={cat} style={{ background: "#fff", borderRadius: 14, padding: "14px 18px", border: "1px solid rgba(249,222,218,0.2)", display: "flex", alignItems: "center", gap: 12, boxShadow: "0 1px 6px rgba(201,162,39,0.06)" }}>
                 <div style={{ flex: 1 }}>
                   {isRenaming ? (
                     <input
@@ -2386,19 +2393,19 @@ function AdminCategories({ products, setProducts }: { products: Product[]; setPr
                   ) : (
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", fontSize: 15 }}>{cat}</span>
-                      <span style={{ background: "#FFF0EB", color: "#B5784A", fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", padding: "3px 10px", borderRadius: 999 }}>{count} PRODUCT{count !== 1 ? "S" : ""}</span>
+                      <span style={{ background: "#FFF0EB", color: "#C9A227", fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", padding: "3px 10px", borderRadius: 999 }}>{count} PRODUCT{count !== 1 ? "S" : ""}</span>
                     </div>
                   )}
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
                   {isRenaming ? (
                     <>
-                      <button onClick={() => commitRename(cat)} style={{ padding: "7px 14px", background: "#B5784A", color: "#fff", border: "none", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer" }}>SAVE</button>
-                      <button onClick={() => setRenamingCat(null)} style={{ padding: "7px 12px", background: "#FFF6F3", border: "1px solid rgba(181,120,74,0.3)", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer", color: "#5C3D2E" }}>CANCEL</button>
+                      <button onClick={() => commitRename(cat)} style={{ padding: "7px 14px", background: "#C9A227", color: "#fff", border: "none", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer" }}>SAVE</button>
+                      <button onClick={() => setRenamingCat(null)} style={{ padding: "7px 12px", background: "#FFF6F3", border: "1px solid rgba(201,162,39,0.3)", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer", color: "#5C3D2E" }}>CANCEL</button>
                     </>
                   ) : (
                     <>
-                      <button onClick={() => startRename(cat)} style={{ padding: "7px 12px", background: "#FFF6F3", border: "1px solid rgba(181,120,74,0.2)", borderRadius: 8, cursor: "pointer", color: "#5C3D2E", display: "flex", alignItems: "center", justifyContent: "center" }} title="Rename">
+                      <button onClick={() => startRename(cat)} style={{ padding: "7px 12px", background: "#FFF6F3", border: "1px solid rgba(201,162,39,0.2)", borderRadius: 8, cursor: "pointer", color: "#5C3D2E", display: "flex", alignItems: "center", justifyContent: "center" }} title="Rename">
                         <Pencil size={13} />
                       </button>
                       <button onClick={() => handleDelete(cat)} style={{ padding: "7px 12px", background: "#fff1f2", border: "1px solid #fecaca", borderRadius: 8, cursor: "pointer", color: "#dc2626", display: "flex", alignItems: "center", justifyContent: "center" }} title="Delete">
@@ -2540,7 +2547,7 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
 
   function sf(k: keyof PForm) { return (v: string | boolean) => setForm(f => ({ ...f, [k]: v })); }
 
-  const inputStyle: React.CSSProperties = { width: "100%", border: "1px solid rgba(242,184,168,0.6)", borderRadius: 10, padding: "10px 14px", fontSize: 13, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" };
+  const inputStyle: React.CSSProperties = { width: "100%", border: "1px solid rgba(249,222,218,0.6)", borderRadius: 10, padding: "10px 14px", fontSize: 13, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" };
   const labelStyle: React.CSSProperties = { display: "block", fontSize: 10, fontWeight: 700, color: "#5C3D2E", marginBottom: 6, letterSpacing: "0.15em", textTransform: "uppercase" };
 
   return (
@@ -2550,7 +2557,7 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#1A0F0A", margin: 0 }}>{products.length} Products</h2>
           <p style={{ color: "#9A7A6E", fontSize: 12, margin: "4px 0 0" }}>Manage your store inventory</p>
         </div>
-        <button onClick={openAdd} style={{ display: "flex", alignItems: "center", gap: 8, background: "linear-gradient(135deg, #B5784A, #8F5731)", color: "#fff", border: "none", borderRadius: 12, padding: "12px 22px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 14px rgba(181,120,74,0.3)", letterSpacing: "0.05em" }}>
+        <button onClick={openAdd} style={{ display: "flex", alignItems: "center", gap: 8, background: "linear-gradient(135deg, #C9A227, #A8841A)", color: "#fff", border: "none", borderRadius: 12, padding: "12px 22px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 14px rgba(201,162,39,0.3)", letterSpacing: "0.05em" }}>
           <Plus size={15} /> ADD PRODUCT
         </button>
       </div>
@@ -2564,7 +2571,7 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
             <div style={{ background: "#1A0F0A", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, borderRadius: "24px 24px 0 0" }}>
               <div>
                 <h3 style={{ fontFamily: "'Playfair Display', serif", color: "#fff", fontSize: 18, fontWeight: 700, margin: 0 }}>{editId ? "Edit Product" : "Add New Product"}</h3>
-                <p style={{ color: "#B5784A", fontSize: 11, margin: "4px 0 0", letterSpacing: "0.1em" }}>SPLENDID EMPIRE COSMETICS</p>
+                <p style={{ color: "#C9A227", fontSize: 11, margin: "4px 0 0", letterSpacing: "0.1em" }}>SPLENDID EMPIRE COSMETICS</p>
               </div>
               <button onClick={() => setShowForm(false)} style={{ background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%", width: 36, height: 36, cursor: "pointer", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <X size={18} />
@@ -2600,13 +2607,13 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
                         const trimmed = customCatInput.trim();
                         if (trimmed) { sf("category")(trimmed); setCustomCatInput(""); }
                       }}
-                      style={{ padding: "10px 14px", background: "#B5784A", color: "#fff", border: "none", borderRadius: 10, fontSize: 11, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}
+                      style={{ padding: "10px 14px", background: "#C9A227", color: "#fff", border: "none", borderRadius: 10, fontSize: 11, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}
                     >
                       USE
                     </button>
                   </div>
                   {form.category && !existingCategories.includes(form.category) && (
-                    <p style={{ fontSize: 11, color: "#B5784A", marginTop: 6, fontWeight: 600 }}>✦ New category: "{form.category}"</p>
+                    <p style={{ fontSize: 11, color: "#C9A227", marginTop: 6, fontWeight: 600 }}>✦ New category: "{form.category}"</p>
                   )}
                 </div>
                 <div>
@@ -2615,7 +2622,7 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                   <label style={{ fontSize: 13, fontWeight: 700, color: "#1A0F0A" }}>In Stock</label>
-                  <button type="button" onClick={() => sf("inStock")(!form.inStock)} style={{ width: 52, height: 28, borderRadius: 999, background: form.inStock ? "#B5784A" : "#d1d5db", border: "none", cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
+                  <button type="button" onClick={() => sf("inStock")(!form.inStock)} style={{ width: 52, height: 28, borderRadius: 999, background: form.inStock ? "#C9A227" : "#d1d5db", border: "none", cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
                     <div style={{ position: "absolute", top: 3, width: 22, height: 22, background: "#fff", borderRadius: "50%", boxShadow: "0 1px 4px rgba(0,0,0,0.2)", transition: "left 0.2s", left: form.inStock ? 27 : 3 }} />
                   </button>
                   <span style={{ fontSize: 12, color: form.inStock ? "#15803d" : "#dc2626", fontWeight: 700 }}>{form.inStock ? "In Stock" : "Out of Stock"}</span>
@@ -2627,17 +2634,17 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   <div style={{ position: "relative" }}>
                     <input type="file" accept="image/*" onChange={uploadImage} disabled={isUploading} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%", height: "100%" }} />
-                    <div style={{ border: "2px dashed rgba(181,120,74,0.4)", borderRadius: 12, padding: "20px", textAlign: "center", background: "#FFF6F3", cursor: "pointer" }}>
-                      <Plus size={20} color="#B5784A" style={{ margin: "0 auto 8px" }} />
-                      <p style={{ color: isUploading ? "#B5784A" : "#9A7A6E", fontSize: 13, fontWeight: 600, margin: 0 }}>
+                    <div style={{ border: "2px dashed rgba(201,162,39,0.4)", borderRadius: 12, padding: "20px", textAlign: "center", background: "#FFF6F3", cursor: "pointer" }}>
+                      <Plus size={20} color="#C9A227" style={{ margin: "0 auto 8px" }} />
+                      <p style={{ color: isUploading ? "#C9A227" : "#9A7A6E", fontSize: 13, fontWeight: 600, margin: 0 }}>
                         {isUploading ? "Uploading..." : "Tap to upload from your phone"}
                       </p>
                     </div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ height: 1, flex: 1, background: "rgba(181,120,74,0.2)" }} />
+                    <div style={{ height: 1, flex: 1, background: "rgba(201,162,39,0.2)" }} />
                     <span style={{ fontSize: 11, color: "#9A7A6E", fontWeight: 700 }}>OR PASTE URL</span>
-                    <div style={{ height: 1, flex: 1, background: "rgba(181,120,74,0.2)" }} />
+                    <div style={{ height: 1, flex: 1, background: "rgba(201,162,39,0.2)" }} />
                   </div>
                   <input value={form.image} onChange={e => sf("image")(e.target.value)} placeholder="https://..." style={inputStyle} />
                   {form.image && (
@@ -2658,11 +2665,11 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
             </div>
 
             {/* Modal Footer */}
-            <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(242,184,168,0.2)", display: "flex", gap: 12, flexShrink: 0 }}>
-              <button onClick={save} style={{ flex: 1, background: "linear-gradient(135deg, #B5784A, #8F5731)", color: "#fff", border: "none", borderRadius: 12, padding: "14px", fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 14px rgba(181,120,74,0.3)" }}>
+            <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(249,222,218,0.2)", display: "flex", gap: 12, flexShrink: 0 }}>
+              <button onClick={save} style={{ flex: 1, background: "linear-gradient(135deg, #C9A227, #A8841A)", color: "#fff", border: "none", borderRadius: 12, padding: "14px", fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 14px rgba(201,162,39,0.3)" }}>
                 {editId ? "SAVE CHANGES" : "ADD PRODUCT"}
               </button>
-              <button onClick={() => setShowForm(false)} style={{ padding: "14px 20px", background: "#FFF6F3", border: "1px solid rgba(181,120,74,0.3)", borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: "pointer", color: "#5C3D2E" }}>
+              <button onClick={() => setShowForm(false)} style={{ padding: "14px 20px", background: "#FFF6F3", border: "1px solid rgba(201,162,39,0.3)", borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: "pointer", color: "#5C3D2E" }}>
                 CANCEL
               </button>
             </div>
@@ -2673,12 +2680,12 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
       {/* Products Grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16 }}>
         {products.map(p => (
-          <div key={p.id} style={{ backgroundColor: "#fff", borderRadius: 20, border: "1px solid rgba(242,184,168,0.2)", overflow: "hidden", boxShadow: "0 2px 16px rgba(181,120,74,0.07)", display: "flex", flexDirection: "column" }}>
+          <div key={p.id} style={{ backgroundColor: "#fff", borderRadius: 20, border: "1px solid rgba(249,222,218,0.2)", overflow: "hidden", boxShadow: "0 2px 16px rgba(201,162,39,0.07)", display: "flex", flexDirection: "column" }}>
             {/* Image */}
             <div style={{ position: "relative", aspectRatio: "1", overflow: "hidden", backgroundColor: "#FFF0EB" }}>
               <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               {p.badge && (
-                <span style={{ position: "absolute", top: 10, left: 10, background: "#B5784A", color: "#fff", fontSize: 9, fontWeight: 700, letterSpacing: "0.15em", padding: "4px 10px", borderRadius: 999 }}>{p.badge}</span>
+                <span style={{ position: "absolute", top: 10, left: 10, background: "#C9A227", color: "#fff", fontSize: 9, fontWeight: 700, letterSpacing: "0.15em", padding: "4px 10px", borderRadius: 999 }}>{p.badge}</span>
               )}
               <span style={{ position: "absolute", top: 10, right: 10, background: p.inStock ? "rgba(21,128,61,0.9)" : "rgba(220,38,38,0.9)", color: "#fff", fontSize: 9, fontWeight: 700, padding: "4px 8px", borderRadius: 999 }}>
                 {p.inStock ? "IN STOCK" : "OUT"}
@@ -2687,13 +2694,13 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
 
             {/* Info */}
             <div style={{ padding: "14px 16px", flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
-              <span style={{ background: "#FFF0EB", color: "#B5784A", fontSize: 9, fontWeight: 700, letterSpacing: "0.15em", padding: "3px 10px", borderRadius: 999, alignSelf: "flex-start" }}>{p.category.toUpperCase()}</span>
+              <span style={{ background: "#FFF0EB", color: "#C9A227", fontSize: 9, fontWeight: 700, letterSpacing: "0.15em", padding: "3px 10px", borderRadius: 999, alignSelf: "flex-start" }}>{p.category.toUpperCase()}</span>
               <h4 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#1A0F0A", fontSize: 14, lineHeight: 1.3, margin: 0 }}>{p.name}</h4>
-              <div style={{ fontFamily: "'Playfair Display', serif", color: "#B5784A", fontWeight: 700, fontSize: 16 }}>{fmt(p.price)}</div>
+              <div style={{ fontFamily: "'Playfair Display', serif", color: "#C9A227", fontWeight: 700, fontSize: 16 }}>{fmt(p.price)}</div>
             </div>
 
             {/* Actions */}
-            <div style={{ padding: "12px 16px", borderTop: "1px solid rgba(242,184,168,0.15)", display: "flex", gap: 8 }}>
+            <div style={{ padding: "12px 16px", borderTop: "1px solid rgba(249,222,218,0.15)", display: "flex", gap: 8 }}>
               <button
                 onClick={() => toggle(p.id)}
                 style={{ flex: 1, padding: "8px 6px", borderRadius: 8, border: `1px solid ${p.inStock ? "#bbf7d0" : "#fecaca"}`, background: p.inStock ? "#f0fdf4" : "#fff1f2", color: p.inStock ? "#15803d" : "#dc2626", fontSize: 10, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}
@@ -2702,7 +2709,7 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
               </button>
               <button
                 onClick={() => openEdit(p)}
-                style={{ padding: "8px 12px", borderRadius: 8, background: "#FFF6F3", border: "1px solid rgba(181,120,74,0.2)", cursor: "pointer", color: "#5C3D2E", display: "flex", alignItems: "center", justifyContent: "center" }}
+                style={{ padding: "8px 12px", borderRadius: 8, background: "#FFF6F3", border: "1px solid rgba(201,162,39,0.2)", cursor: "pointer", color: "#5C3D2E", display: "flex", alignItems: "center", justifyContent: "center" }}
               >
                 <Pencil size={13} />
               </button>
