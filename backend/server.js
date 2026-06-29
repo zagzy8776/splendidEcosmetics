@@ -220,10 +220,22 @@ async function sendEmail(to, subject, html) {
 // ─── CORS + MIDDLEWARE ────────────────────────────────────────────────────────
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const ALLOWED_ORIGINS = [
+  FRONTEND_URL,
+  "https://splendidcosmetics.com.ng",
+  "https://www.splendidcosmetics.com.ng",
+  "https://splendid-ecosmetics.vercel.app",
+];
 app.use(cors({
-  origin: [FRONTEND_URL],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Render health checks)
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS blocked: ${origin}`));
+  },
   methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
 }));
 app.use(express.json());
 
