@@ -3173,22 +3173,24 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
             if (window.confirm("Discard unsaved changes?")) setShowForm(false);
           }} />
           <div
-            style={{ position: "relative", background: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 640, maxHeight: "92vh", display: "flex", flexDirection: "column", boxShadow: "0 -20px 60px rgba(0,0,0,0.3)", overflowY: "auto", WebkitOverflowScrolling: "touch", paddingBottom: "calc(20px + env(safe-area-inset-bottom, 0px))" }}
+            style={{ position: "relative", background: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 640, maxHeight: "92dvh", display: "flex", flexDirection: "column", boxShadow: "0 -20px 60px rgba(0,0,0,0.3)", overflow: "hidden" }}
             className="sm:rounded-3xl"
           >
-            {/* Modal Header */}
-            <div style={{ background: "#1A0F0A", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, borderRadius: "24px 24px 0 0" }}>
+            {/* Modal Header — sticky so it never scrolls away */}
+            <div style={{ background: "#1A0F0A", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, borderRadius: "24px 24px 0 0", position: "sticky", top: 0, zIndex: 10 }}>
               <div>
                 <h3 style={{ fontFamily: "'Playfair Display', serif", color: "#fff", fontSize: 18, fontWeight: 700, margin: 0 }}>{editId ? "Edit Product" : "Add New Product"}</h3>
                 <p style={{ color: "#C9A227", fontSize: 11, margin: "4px 0 0", letterSpacing: "0.1em" }}>SPLENDID EMPIRE COSMETICS</p>
               </div>
-              <button onClick={() => setShowForm(false)} style={{ background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%", width: 36, height: 36, cursor: "pointer", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <X size={18} />
+              <button onClick={() => setShowForm(false)} style={{ background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%", width: 40, height: 40, cursor: "pointer", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <X size={20} />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 18 }} className="sm:padding-24">
+            {/* Modal Body — this scrolls, header stays fixed */}
+            <div style={{ overflowY: "auto", WebkitOverflowScrolling: "touch", flex: 1 } as React.CSSProperties}>
+              <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 18 }}>
+
               <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }} className="sm:grid-cols-2">
                 <div style={{ gridColumn: "1 / -1" }}>
                   <label style={labelStyle}>Product Name *</label>
@@ -3320,10 +3322,12 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
               </div>
 
               {fErr && <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: 10, padding: "12px 16px", color: "#dc2626", fontSize: 13, fontWeight: 600 }}>{fErr}</div>}
-            </div>
 
-            {/* Modal Footer */}
-            <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(249,222,218,0.2)", display: "flex", gap: 12, flexShrink: 0, paddingBottom: "calc(16px + env(safe-area-inset-bottom, 0px))" }}>
+              </div>{/* end padding wrapper */}
+            </div>{/* end scrollable body */}
+
+            {/* Modal Footer — pinned at bottom, always visible */}
+            <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(249,222,218,0.2)", display: "flex", gap: 12, flexShrink: 0, backgroundColor: "#fff", paddingBottom: "calc(16px + env(safe-area-inset-bottom, 0px))" }}>
               <button onClick={save} disabled={uploadingSlot !== null} style={{ flex: 1, background: uploadingSlot !== null ? "rgba(201,162,39,0.5)" : "linear-gradient(135deg, #C9A227, #A8841A)", color: "#fff", border: "none", borderRadius: 12, padding: "14px", fontSize: 13, fontWeight: 700, cursor: uploadingSlot !== null ? "not-allowed" : "pointer", boxShadow: "0 4px 14px rgba(201,162,39,0.3)" }}>
                 {editId ? "SAVE CHANGES" : "ADD PRODUCT"}
               </button>
