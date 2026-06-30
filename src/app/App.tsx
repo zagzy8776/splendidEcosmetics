@@ -2417,21 +2417,24 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
 
       {/* ── Header ── */}
       <div style={{ backgroundColor: "#1A0F0A", padding: "0 16px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, boxShadow: "0 2px 16px rgba(0,0,0,0.35)", height: 60, width: "100%", boxSizing: "border-box", zIndex: 30, position: "relative" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <img src="/logo.jpg" alt="Splendid Empire Cosmetics" style={{ height: 36, width: 36, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(201,162,39,0.5)", background: "#F9DEDA" }} />
-          <div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 700, color: "#fff", letterSpacing: "0.04em", lineHeight: 1 }}>SPLENDID EMPIRE</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, flex: 1 }}>
+          <img src="/logo.jpg" alt="Splendid Empire Cosmetics" style={{ height: 36, width: 36, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(201,162,39,0.5)", background: "#F9DEDA", flexShrink: 0 }} />
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 15, fontWeight: 700, color: "#fff", letterSpacing: "0.04em", lineHeight: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>SPLENDID EMPIRE</div>
             <div style={{ color: "#C9A227", fontSize: 8, letterSpacing: "0.4em", fontWeight: 700, marginTop: 2 }}>ADMIN</div>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0, marginLeft: 8 }}>
+          {/* On mobile: icon-only buttons to save space */}
           <button
             onClick={onExit}
-            style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", cursor: "pointer", color: "rgba(255,255,255,0.7)", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, letterSpacing: "0.1em", padding: "8px 14px", borderRadius: 8, transition: "all 0.2s" }}
+            title="View Store"
+            style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", cursor: "pointer", color: "rgba(255,255,255,0.7)", fontWeight: 700, display: "flex", alignItems: "center", gap: 6, padding: "9px 12px", borderRadius: 8, transition: "all 0.2s", minWidth: 40, minHeight: 40, justifyContent: "center" }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.12)"; (e.currentTarget as HTMLElement).style.color = "#fff"; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.07)"; (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.7)"; }}
           >
-            <Eye size={13} /> VIEW STORE
+            <Eye size={15} />
+            <span className="hidden sm:inline" style={{ fontSize: 11, letterSpacing: "0.1em" }}>VIEW STORE</span>
           </button>
           <button
             onClick={() => {
@@ -2439,17 +2442,19 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
                 adminLogout(); setAuthed(false); setPw(""); onExit();
               }
             }}
-            style={{ background: "rgba(201,162,39,0.15)", border: "1px solid rgba(201,162,39,0.3)", cursor: "pointer", color: "#C9A227", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, letterSpacing: "0.1em", padding: "8px 14px", borderRadius: 8, transition: "all 0.2s" }}
+            title="Logout"
+            style={{ background: "rgba(201,162,39,0.15)", border: "1px solid rgba(201,162,39,0.3)", cursor: "pointer", color: "#C9A227", fontWeight: 700, display: "flex", alignItems: "center", gap: 6, padding: "9px 12px", borderRadius: 8, transition: "all 0.2s", minWidth: 40, minHeight: 40, justifyContent: "center" }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(201,162,39,0.25)"; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(201,162,39,0.15)"; }}
           >
-            <LogOut size={13} /> LOGOUT
+            <LogOut size={15} />
+            <span className="hidden sm:inline" style={{ fontSize: 11, letterSpacing: "0.1em" }}>LOGOUT</span>
           </button>
         </div>
       </div>
 
       {/* ── Tab Navigation ── */}
-      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(249,222,218,0.25)", width: "100%", boxSizing: "border-box", overflowX: "auto", flexShrink: 0, position: "sticky", top: 0, zIndex: 20 }}>
+      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(249,222,218,0.25)", width: "100%", boxSizing: "border-box", overflowX: "auto", flexShrink: 0, position: "sticky", top: 0, zIndex: 20, WebkitMaskImage: "linear-gradient(to right, black 80%, transparent 100%)", maskImage: "linear-gradient(to right, black 80%, transparent 100%)" }} className="sm:[mask-image:none] sm:[-webkit-mask-image:none]">
         <div style={{ maxWidth: 1060, margin: "0 auto", padding: "0 16px", display: "flex" }}>
           {([["orders", "Orders"], ["products", "Products"], ["categories", "Categories"], ["security", "Security"]] as const).map(([t, label]) => (
             <button
@@ -2642,13 +2647,13 @@ const OrderCard = React.memo(({ order, onAdvance, onWhatsApp }: { order: Order; 
         </div>
 
         {/* Total + action buttons */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 12 }}>
           <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 22, color: "#C9A227" }}>{fmt(order.total)}</div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }} className="flex-col sm:flex-row">
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }} className="sm:flex-row">
             {btn && (
               <button
                 onClick={() => onAdvance(order.id)}
-                style={{ background: "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)", color: "#fff", border: "none", borderRadius: 999, padding: "11px 22px", fontSize: 12, fontWeight: 700, cursor: "pointer", minHeight: 44, letterSpacing: "0.04em", boxShadow: "0 4px 14px rgba(201,162,39,0.25)", transition: "opacity 0.2s" }}
+                style={{ background: "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)", color: "#fff", border: "none", borderRadius: 999, padding: "11px 22px", fontSize: 12, fontWeight: 700, cursor: "pointer", minHeight: 44, letterSpacing: "0.04em", boxShadow: "0 4px 14px rgba(201,162,39,0.25)", transition: "opacity 0.2s", width: "100%" }}
                 onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
                 onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
               >
@@ -2658,7 +2663,7 @@ const OrderCard = React.memo(({ order, onAdvance, onWhatsApp }: { order: Order; 
             {order.status !== "delivered" && (
               <button
                 onClick={() => onWhatsApp(order)}
-                style={{ display: "flex", alignItems: "center", gap: 8, background: "#25D366", color: "#fff", border: "none", borderRadius: 999, padding: "11px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", minHeight: 44, boxShadow: "0 4px 14px rgba(37,211,102,0.2)", transition: "opacity 0.2s" }}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "#25D366", color: "#fff", border: "none", borderRadius: 999, padding: "11px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", minHeight: 44, boxShadow: "0 4px 14px rgba(37,211,102,0.2)", transition: "opacity 0.2s", width: "100%" }}
                 onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
                 onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
               >
@@ -2793,7 +2798,7 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="Search by name, phone or order ID…"
-            style={{ width: "100%", border: "1px solid rgba(201,162,39,0.25)", borderRadius: 10, padding: "10px 12px 10px 34px", fontSize: 13, outline: "none", backgroundColor: "#fff", boxSizing: "border-box", color: "#1A0F0A" }}
+            style={{ width: "100%", border: "1px solid rgba(201,162,39,0.25)", borderRadius: 10, padding: "10px 12px 10px 34px", fontSize: 16, outline: "none", backgroundColor: "#fff", boxSizing: "border-box", color: "#1A0F0A" }}
           />
         </div>
         <button
