@@ -113,6 +113,33 @@ export async function updateOrderStatus(id: string, status: string) {
   };
 }
 
+export async function deleteOrder(id: string) {
+  const res = await fetch(`${API_BASE}/api/orders/${id}`, {
+    method: "DELETE",
+    headers: adminHeaders(),
+  });
+  if (!res.ok) throw new Error("Failed to delete order");
+  return res.json();
+}
+
+export async function updateOrder(id: string, data: { customerName?: string; phone?: string; email?: string; notes?: string; status?: string }) {
+  const res = await fetch(`${API_BASE}/api/orders/${id}`, {
+    method: "PATCH",
+    headers: adminHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to update order");
+  const updated = await res.json();
+  return {
+    ...updated,
+    createdAt: new Date(updated.createdAt),
+    items: updated.items.map((i: any) => ({
+      product: { id: i.productId, name: i.name, price: Number(i.price) },
+      quantity: i.quantity,
+    })),
+  };
+}
+
 export async function createProduct(data: ProductData) {
   const res = await fetch(`${API_BASE}/api/products`, {
     method: "POST",

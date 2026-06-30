@@ -548,7 +548,41 @@ app.patch("/api/orders/:id/status", requireAdminAuth, async (req, res) => {
   }
 });
 
-// ─── ADMIN AUTH ───────────────────────────────────────────────────────────────
+// ─── DELETE ORDER (admin only) ─────────────────────────────────────────────────
+app.delete("/api/orders/:id", requireAdminAuth, async (req, res) => {
+  try {
+    await prisma.orderItem.deleteMany({ where: { orderId: req.params.id } });
+    await prisma.order.delete({ where: { id: req.params.id } });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete order" });
+  }
+});
+
+// ─── EDIT ORDER (admin only) ───────────────────────────────────────────────────
+app.patch("/api/orders/:id", requireAdminAuth, async (req, res) => {
+  try {
+    const { customerName, phone, email, status } = req.body;
+    const data = {};
+    if (customerName !== undefined) data.customerName = sanitiseString(customerName, 100);
+    if (phone !== undefined) data.phone = sanitiseString(phone, 20);
+    if (email !== undefined) data.email = email.trim().toLowerCase().slice(0, 254);
+    if (status !== undefined && ALLOWED_STATUSES.includes(status)) data.status = status;
+
+    const order = await prisma.order.update({
+      where: { id: req.params.id },
+      data,
+      include: { items: true },
+    });
+    res.json(order);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update order" });
+  }
+});
+
+
 
 // Create table if needed, then ALWAYS sync password from ADMIN_PASSWORD env var.
 // This means whatever is set in Render env is always what works — no stale hash issues.

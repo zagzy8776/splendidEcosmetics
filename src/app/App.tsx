@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { fetchProducts, createOrder, fetchOrders, updateOrderStatus, createProduct, updateProduct, deleteProduct, adminLogin, adminLogout, getAdminToken, clearAdminToken, changeAdminPassword, cloudinaryUpload } from "../api";
+import { fetchProducts, createOrder, fetchOrders, updateOrderStatus, deleteOrder, updateOrder, createProduct, updateProduct, deleteProduct, adminLogin, adminLogout, getAdminToken, clearAdminToken, changeAdminPassword, cloudinaryUpload } from "../api";
 import {
   ShoppingBag, X, Menu, Instagram, Facebook, Phone, MapPin,
   Star, Plus, Minus, Trash2, Package, Settings, LogOut, Check,
@@ -2609,14 +2609,14 @@ const NEXT: Record<OrderStatus, OrderStatus | null> = { pending: "verifying", ve
 const NEXT_LABEL: Record<OrderStatus, string | null> = { pending: "Mark Verifying", verifying: "Approve Payment ✓", confirmed: "Mark Dispatched", dispatched: "Mark Delivered 📦", delivered: null };
 
 // Memoized order card component for performance
-const OrderCard = React.memo(({ order, onAdvance, onWhatsApp }: { order: Order; onAdvance: (id: string) => void; onWhatsApp: (order: Order) => void }) => {
+const OrderCard = React.memo(({ order, onAdvance, onWhatsApp, onEdit, onDelete }: { order: Order; onAdvance: (id: string) => void; onWhatsApp: (order: Order) => void; onEdit: (order: Order) => void; onDelete: (id: string) => void }) => {
   const cfg = STATUS_CFG[order.status];
   const btn = NEXT_LABEL[order.status];
   return (
     <div style={{ backgroundColor: "#fff", borderRadius: 20, border: "1px solid rgba(249,222,218,0.2)", overflow: "hidden", boxShadow: "0 2px 16px rgba(201,162,39,0.07)" }}>
       <div style={{ padding: "20px 22px" }}>
 
-        {/* Top row: ID + status badge + date */}
+        {/* Top row: ID + status badge + date + actions */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#C9A227", fontSize: 14, letterSpacing: "0.05em" }}>{order.id}</span>
@@ -2624,7 +2624,23 @@ const OrderCard = React.memo(({ order, onAdvance, onWhatsApp }: { order: Order; 
               {cfg.icon} {cfg.label}
             </span>
           </div>
-          <span style={{ color: "#9A7A6E", fontSize: 11, fontWeight: 600 }}>{order.createdAt.toLocaleString("en-NG")}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <span style={{ color: "#9A7A6E", fontSize: 11, fontWeight: 600 }}>{order.createdAt.toLocaleString("en-NG")}</span>
+            <button
+              onClick={() => onEdit(order)}
+              style={{ background: "none", border: "none", cursor: "pointer", color: "#C9A227", padding: 4, display: "flex", alignItems: "center", justifyContent: "center", minWidth: 32, minHeight: 32 }}
+              title="Edit Details"
+            >
+              <Pencil size={14} />
+            </button>
+            <button
+              onClick={() => onDelete(order.id)}
+              style={{ background: "none", border: "none", cursor: "pointer", color: "#dc2626", padding: 4, display: "flex", alignItems: "center", justifyContent: "center", minWidth: 32, minHeight: 32 }}
+              title="Delete Order"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
         </div>
 
         {/* Middle row: customer info */}
@@ -2690,6 +2706,68 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [refreshing, setRefreshing] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+
+  // Edit / Delete states
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [editCustName, setEditCustName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editStatus, setEditStatus] = useState<OrderStatus>("pending");
+  const [editLoading, setEditLoading] = useState(false);
+  const [editErr, setEditErr] = useState("");
+
+  const labelStyle: React.CSSProperties = { display: "block", fontSize: 10, fontWeight: 700, color: "#5C3D2E", marginBottom: 6, letterSpacing: "0.15em", textTransform: "uppercase" };
+  const inputStyle: React.CSSProperties = { width: "100%", border: "1px solid rgba(249,222,218,0.6)", borderRadius: 10, padding: "10px 14px", fontSize: 16, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" };
+
+  function startEdit(order: Order) {
+    setEditingOrder(order);
+    setEditCustName(order.customerName);
+    setEditPhone(order.phone);
+    setEditEmail(order.email || "");
+    setEditStatus(order.status);
+    setEditErr("");
+  }
+
+  function handleSaveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingOrder) return;
+    if (!editCustName.trim() || !editPhone.trim()) {
+      setEditErr("Customer Name and Phone are required.");
+      return;
+    }
+    setEditLoading(true);
+    setEditErr("");
+    updateOrder(editingOrder.id, {
+      customerName: editCustName.trim(),
+      phone: editPhone.trim(),
+      email: editEmail.trim().toLowerCase(),
+      status: editStatus
+    })
+      .then(updated => {
+        setOrders(prev => prev.map(o => o.id === editingOrder.id ? { ...o, ...updated } : o));
+        setEditingOrder(null);
+        showToast("✔ Order updated successfully");
+      })
+      .catch(err => {
+        console.error(err);
+        setEditErr("Failed to save changes. Please try again.");
+      })
+      .finally(() => setEditLoading(false));
+  }
+
+  function handleDeleteOrder(id: string) {
+    if (window.confirm(`Are you sure you want to delete order ${id}? This action cannot be undone.`)) {
+      deleteOrder(id)
+        .then(() => {
+          setOrders(prev => prev.filter(o => o.id !== id));
+          showToast(`✔ Order ${id} deleted`);
+        })
+        .catch(err => {
+          console.error(err);
+          showToast("⚠ Failed to delete order");
+        });
+    }
+  }
 
   // Initial load
   useEffect(() => {
@@ -2855,8 +2933,99 @@ function AdminOrders({ orders, setOrders }: { orders: Order[]; setOrders: React.
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {displayOrders.map(o => (
-            <OrderCard key={o.id} order={o} onAdvance={advance} onWhatsApp={waCustomer} />
+            <OrderCard key={o.id} order={o} onAdvance={advance} onWhatsApp={waCustomer} onEdit={startEdit} onDelete={handleDeleteOrder} />
           ))}
+        </div>
+      )}
+
+      {/* Edit Order Modal */}
+      {editingOrder && (
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+          className="sm:items-center sm:p-4"
+        >
+          <div style={{ position: "absolute", inset: 0, background: "rgba(26,15,10,0.7)", backdropFilter: "blur(6px)" }} onClick={() => setEditingOrder(null)} />
+          <div
+            style={{ position: "relative", background: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 500, maxHeight: "92dvh", display: "flex", flexDirection: "column", boxShadow: "0 -20px 60px rgba(0,0,0,0.3)", overflow: "hidden" }}
+            className="sm:rounded-3xl"
+          >
+            {/* Sticky Header */}
+            <div style={{ background: "#1A0F0A", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, borderRadius: "24px 24px 0 0", position: "sticky", top: 0, zIndex: 10 }}>
+              <div>
+                <h3 style={{ fontFamily: "'Playfair Display', serif", color: "#fff", fontSize: 18, fontWeight: 700, margin: 0 }}>Edit Order Details</h3>
+                <p style={{ color: "#C9A227", fontSize: 11, margin: "4px 0 0", letterSpacing: "0.1em" }}>ORDER ID: {editingOrder.id}</p>
+              </div>
+              <button onClick={() => setEditingOrder(null)} style={{ background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%", width: 40, height: 40, cursor: "pointer", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Scrollable Form Body */}
+            <form onSubmit={handleSaveEdit} style={{ overflowY: "auto", WebkitOverflowScrolling: "touch", flex: 1 } as React.CSSProperties}>
+              <div style={{ padding: "24px 20px", display: "flex", flexDirection: "column", gap: 18 }}>
+                <div>
+                  <label style={labelStyle}>Customer Name *</label>
+                  <input
+                    value={editCustName}
+                    onChange={e => setEditCustName(e.target.value)}
+                    placeholder="Customer Name"
+                    style={inputStyle}
+                    required
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Phone Number *</label>
+                  <input
+                    value={editPhone}
+                    onChange={e => setEditPhone(e.target.value)}
+                    placeholder="Phone Number"
+                    style={inputStyle}
+                    required
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Email Address</label>
+                  <input
+                    value={editEmail}
+                    onChange={e => setEditEmail(e.target.value)}
+                    placeholder="Email Address"
+                    style={inputStyle}
+                    type="email"
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Order Status</label>
+                  <select
+                    value={editStatus}
+                    onChange={e => setEditStatus(e.target.value as OrderStatus)}
+                    style={inputStyle}
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="verifying">Verifying</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="dispatched">Dispatched</option>
+                    <option value="delivered">Delivered</option>
+                  </select>
+                </div>
+
+                {editErr && (
+                  <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: 10, padding: "12px 16px", color: "#dc2626", fontSize: 13, fontWeight: 600 }}>
+                    {editErr}
+                  </div>
+                )}
+              </div>
+
+              {/* Pinned Footer */}
+              <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(249,222,218,0.2)", display: "flex", gap: 12, flexShrink: 0, backgroundColor: "#fff", paddingBottom: "calc(16px + env(safe-area-inset-bottom, 0px))" }}>
+                <button type="submit" disabled={editLoading} style={{ flex: 1, background: editLoading ? "rgba(201,162,39,0.5)" : "linear-gradient(135deg, #C9A227, #A8841A)", color: "#fff", border: "none", borderRadius: 12, padding: "14px", fontSize: 13, fontWeight: 700, cursor: editLoading ? "not-allowed" : "pointer", boxShadow: "0 4px 14px rgba(201,162,39,0.3)" }}>
+                  {editLoading ? "SAVING CHANGES..." : "SAVE CHANGES"}
+                </button>
+                <button type="button" onClick={() => setEditingOrder(null)} style={{ padding: "14px 20px", background: "#FFF6F3", border: "1px solid rgba(201,162,39,0.3)", borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: "pointer", color: "#5C3D2E" }}>
+                  CANCEL
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
