@@ -149,11 +149,14 @@ export default function App() {
     const isModalOpen = cartOpen || !!checkoutStep || !!quickViewProduct || quizOpen || adminPromptOpen;
     if (isModalOpen) {
       document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
     }
     return () => {
       document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
     };
   }, [cartOpen, checkoutStep, quickViewProduct, quizOpen, adminPromptOpen]);
 
@@ -470,7 +473,7 @@ function PasscodeModal({ onClose, onSuccess }: PasscodeModalProps) {
             placeholder="Enter Admin Passcode"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            style={{ width: "100%", padding: "12px 16px", borderRadius: 12, border: error ? "1.5px solid #ef4444" : "1px solid rgba(201,162,39,0.3)", outline: "none", fontSize: 14, marginBottom: 16, transition: "border-color 0.2s" }}
+            style={{ width: "100%", padding: "12px 16px", borderRadius: 12, border: error ? "1.5px solid #ef4444" : "1px solid rgba(201,162,39,0.3)", outline: "none", fontSize: 16, marginBottom: 16, transition: "border-color 0.2s" }}
           />
           {error && <p style={{ color: "#ef4444", fontSize: 12, marginTop: -8, marginBottom: 16, fontWeight: 600 }}>Invalid passcode. Please try again.</p>}
           <button type="submit" style={{ width: "100%", background: "linear-gradient(135deg, #C9A227 0%, #A8841A 100%)", color: "#fff", border: "none", padding: "14px", borderRadius: 12, fontWeight: 700, fontSize: 12, letterSpacing: "0.15em", cursor: "pointer", boxShadow: "0 10px 20px rgba(201,162,39,0.2)" }}>
@@ -885,27 +888,18 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest, onSearch }: { cartCount
     }, 400);
   };
 
-  const menuScrollY = useRef(0);
-  // Lock body scroll when mobile menu is open (saves + restores scroll position)
+  // Lock body scroll when mobile menu is open
   useEffect(() => {
     if (open) {
-      menuScrollY.current = window.scrollY;
       document.body.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.width = "100%";
-      document.body.style.top = `-${menuScrollY.current}px`;
+      document.documentElement.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
-      document.body.style.top = "";
-      window.scrollTo(0, menuScrollY.current);
+      document.documentElement.style.overflow = "";
     }
     return () => {
       document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
-      document.body.style.top = "";
+      document.documentElement.style.overflow = "";
     };
   }, [open]);
 
@@ -1059,7 +1053,7 @@ function Navbar({ cartCount, onCartOpen, onAdminRequest, onSearch }: { cartCount
       <div
         style={{
           position: "fixed",
-          top: "calc((scrolled ? 60 : 72) + env(safe-area-inset-top, 0px))",
+          top: `calc(${scrolled ? 60 : 72}px + env(safe-area-inset-top, 0px))`,
           left: 0,
           right: 0,
           zIndex: 9997,
@@ -2310,22 +2304,14 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
   // Lock body scroll while admin panel is mounted (works on iOS too)
   useEffect(() => {
     const prevOverflow = document.body.style.overflow;
-    const prevPosition = document.body.style.position;
-    const prevWidth = document.body.style.width;
-    const prevTop = document.body.style.top;
-    const scrollY = window.scrollY;
+    const prevHtmlOverflow = document.documentElement.style.overflow;
 
     document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.width = "100%";
-    document.body.style.top = `-${scrollY}px`;
+    document.documentElement.style.overflow = "hidden";
 
     return () => {
       document.body.style.overflow = prevOverflow;
-      document.body.style.position = prevPosition;
-      document.body.style.width = prevWidth;
-      document.body.style.top = prevTop;
-      window.scrollTo(0, scrollY);
+      document.documentElement.style.overflow = prevHtmlOverflow;
     };
   }, []);
 
@@ -2352,7 +2338,7 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
 
   if (!authed) {
     return (
-      <div style={{ minHeight: "100vh", backgroundColor: "#1A0F0A", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'Raleway', sans-serif", position: "relative", overflow: "hidden" }}>
+      <div style={{ minHeight: "100dvh", backgroundColor: "#1A0F0A", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'Raleway', sans-serif", position: "relative", overflow: "hidden" }}>
         {/* Decorative blobs */}
         <div style={{ position: "absolute", top: -120, right: -80, width: 400, height: 400, background: "radial-gradient(circle, rgba(201,162,39,0.12) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
         <div style={{ position: "absolute", bottom: -100, left: -60, width: 350, height: 350, background: "radial-gradient(circle, rgba(249,222,218,0.07) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
@@ -2377,7 +2363,7 @@ function AdminPanel({ products, setProducts, orders, setOrders, onExit }: { prod
                   onChange={e => setPw(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && !loginLoading && login()}
                   placeholder="Enter admin password"
-                  style={{ width: "100%", border: "1px solid rgba(201,162,39,0.3)", borderRadius: 12, padding: "13px 48px 13px 16px", fontSize: 14, outline: "none", backgroundColor: "rgba(255,255,255,0.06)", color: "#fff", boxSizing: "border-box", transition: "border-color 0.2s" }}
+                  style={{ width: "100%", border: "1px solid rgba(201,162,39,0.3)", borderRadius: 12, padding: "13px 48px 13px 16px", fontSize: 16, outline: "none", backgroundColor: "rgba(255,255,255,0.06)", color: "#fff", boxSizing: "border-box", transition: "border-color 0.2s" }}
                   onFocus={e => (e.currentTarget.style.borderColor = "#C9A227")}
                   onBlur={e => (e.currentTarget.style.borderColor = "rgba(201,162,39,0.3)")}
                 />
@@ -2577,7 +2563,7 @@ function AdminSecurity() {
               onChange={e => set(e.target.value)}
               placeholder={ph}
               required
-              style={{ width: "100%", border: "1px solid rgba(249,222,218,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 14, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }}
+              style={{ width: "100%", border: "1px solid rgba(249,222,218,0.6)", borderRadius: 12, padding: "12px 16px", fontSize: 16, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }}
             />
           </div>
         ))}
@@ -2927,7 +2913,7 @@ function AdminCategories({ products, setProducts }: { products: Product[]; setPr
   }
 
   const labelStyle: React.CSSProperties = { display: "block", fontSize: 10, fontWeight: 700, color: "#5C3D2E", marginBottom: 6, letterSpacing: "0.15em", textTransform: "uppercase" };
-  const inputStyle: React.CSSProperties = { width: "100%", border: "1px solid rgba(249,222,218,0.6)", borderRadius: 10, padding: "10px 14px", fontSize: 13, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" };
+  const inputStyle: React.CSSProperties = { width: "100%", border: "1px solid rgba(249,222,218,0.6)", borderRadius: 10, padding: "10px 14px", fontSize: 16, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" };
 
   return (
     <div style={{ paddingBottom: 48, maxWidth: 600 }}>
@@ -2946,7 +2932,7 @@ function AdminCategories({ products, setProducts }: { products: Product[]; setPr
               onChange={e => setNewCat(e.target.value)}
               onKeyDown={e => e.key === "Enter" && handleAdd()}
               placeholder="Type new category name..."
-              style={{ width: "100%", border: "1px solid rgba(249,222,218,0.6)", borderRadius: 10, padding: "10px 14px", fontSize: 13, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }}
+              style={{ width: "100%", border: "1px solid rgba(249,222,218,0.6)", borderRadius: 10, padding: "10px 14px", fontSize: 16, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" }}
             />
           </div>
           <button
@@ -3149,7 +3135,7 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
 
   function sf(k: keyof PForm) { return (v: string | boolean) => setForm(f => ({ ...f, [k]: v })); }
 
-  const inputStyle: React.CSSProperties = { width: "100%", border: "1px solid rgba(249,222,218,0.6)", borderRadius: 10, padding: "10px 14px", fontSize: 13, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" };
+  const inputStyle: React.CSSProperties = { width: "100%", border: "1px solid rgba(249,222,218,0.6)", borderRadius: 10, padding: "10px 14px", fontSize: 16, outline: "none", backgroundColor: "#FFF6F3", boxSizing: "border-box" };
   const labelStyle: React.CSSProperties = { display: "block", fontSize: 10, fontWeight: 700, color: "#5C3D2E", marginBottom: 6, letterSpacing: "0.15em", textTransform: "uppercase" };
 
   // Build slot data: [main, extra0, extra1, extra2]
@@ -3177,15 +3163,13 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
         <div
           style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "flex-end", justifyContent: "center" }}
           className="sm:items-center sm:p-4"
-          onTouchMove={e => e.preventDefault()} // prevent background scroll on mobile
         >
           <div style={{ position: "absolute", inset: 0, background: "rgba(26,15,10,0.7)", backdropFilter: "blur(6px)" }} onClick={() => {
             if (window.confirm("Discard unsaved changes?")) setShowForm(false);
-          }} onTouchMove={e => e.preventDefault()} />
+          }} />
           <div
             style={{ position: "relative", background: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 640, maxHeight: "92vh", display: "flex", flexDirection: "column", boxShadow: "0 -20px 60px rgba(0,0,0,0.3)", overflowY: "auto", WebkitOverflowScrolling: "touch", paddingBottom: "calc(20px + env(safe-area-inset-bottom, 0px))" }}
             className="sm:rounded-3xl"
-            onTouchMove={e => e.stopPropagation()} // allow scroll inside modal
           >
             {/* Modal Header */}
             <div style={{ background: "#1A0F0A", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, borderRadius: "24px 24px 0 0" }}>
@@ -3356,7 +3340,7 @@ function AdminProducts({ products, setProducts }: { products: Product[]; setProd
           style={{ width: "100%", border: "1px solid rgba(201,162,39,0.25)", borderRadius: 10, padding: "10px 12px 10px 34px", fontSize: 13, outline: "none", backgroundColor: "#fff", boxSizing: "border-box", color: "#1A0F0A" }}
         />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 16 }}>
         {products.filter(p => !productSearch || p.name.toLowerCase().includes(productSearch.toLowerCase()) || p.category.toLowerCase().includes(productSearch.toLowerCase())).map(p => (
           <div key={p.id} style={{ backgroundColor: "#fff", borderRadius: 20, border: "1px solid rgba(249,222,218,0.2)", overflow: "hidden", boxShadow: "0 2px 16px rgba(201,162,39,0.07)", display: "flex", flexDirection: "column" }}>
             {/* Image */}
