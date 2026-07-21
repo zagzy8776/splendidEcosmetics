@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Primary sitemap
+Sitemap: https://splendidcosmetics.com.ng/sitemap.xml
