@@ -609,7 +609,11 @@ async function ensureAdminPassword() {
 }
 
 async function getAdminPasswordHash() {
-  const row = await prisma.adminSetting.findUnique({ where: { key: "admin_password" } });
+  let row = await prisma.adminSetting.findUnique({ where: { key: "admin_password" } }).catch(() => null);
+  if (!row) {
+    await ensureAdminPassword().catch(err => console.error("[Auth Sync Error]", err));
+    row = await prisma.adminSetting.findUnique({ where: { key: "admin_password" } }).catch(() => null);
+  }
   return row?.value ?? null;
 }
 
@@ -790,7 +794,11 @@ app.get("/api/health", (req, res) => {
 // ─── TEMP DEBUG (REMOVE BEFORE PRODUCTION) ───────────────────────────────────
 // This endpoint is intentionally removed for security.
 
-app.listen(PORT, async () => {
-  await ensureAdminPassword();
-  console.log(`Splendid Empire API running on port ${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, async () => {
+    await ensureAdminPassword();
+    console.log(`Splendid Empire API running on port ${PORT}`);
+  });
+}
+
+export default app;

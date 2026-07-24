@@ -1,7 +1,7 @@
 // API configuration with safe fallback for production & local development
 const API_BASE: string = (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL.trim() !== "")
   ? import.meta.env.VITE_API_URL.trim().replace(/\/$/, "")
-  : "https://splendidecosmetics.onrender.com";
+  : "";
 
 // Helper function to auto-retry GET requests when server is waking up from sleep
 async function fetchWithRetry(url: string, options?: RequestInit, retries = 3, delayMs = 1500): Promise<Response> {
