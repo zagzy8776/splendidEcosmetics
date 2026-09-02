@@ -117,6 +117,22 @@ async function ensureServiceWorker(): Promise<ServiceWorkerRegistration | null> 
  * getToken is required for reliable web delivery with Admin SDK.
  */
 export async function enablePushNotifications(): Promise<{ ok: boolean; error?: string }> {
+  const ua = navigator.userAgent || "";
+  const isIOS =
+    /iPad|iPhone|iPod/.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isStandalone =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    // @ts-expect-error iOS
+    (window.navigator as any).standalone === true;
+  if (isIOS && !isStandalone) {
+    return {
+      ok: false,
+      error:
+        "On iPhone: open in Safari → Share → Add to Home Screen → open the app icon → then enable notifications.",
+    };
+  }
+
   const supported = await messagingSupported();
   if (!supported) {
     return { ok: false, error: "Notifications are not supported in this browser." };

@@ -16,6 +16,19 @@ export default function NotificationPrompt() {
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
   const [blocked, setBlocked] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    const ua = navigator.userAgent || "";
+    const ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    setIsIOS(ios);
+    const standalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      // @ts-expect-error iOS Safari
+      (window.navigator as any).standalone === true;
+    setIsStandalone(!!standalone);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -124,6 +137,20 @@ export default function NotificationPrompt() {
                   Or: Chrome menu → Settings → Site settings → Notifications → allowed/blocked list →
                   remove splendidcosmetics.com.ng from blocked.
                 </p>
+              </div>
+            ) : isIOS && !isStandalone ? (
+              <div className="text-xs text-[#5C3D2E]/90 mt-2 space-y-2 leading-relaxed">
+                <p>
+                  On iPhone, browser notifications only work after you add Splendid to your{" "}
+                  <strong>Home Screen</strong> (Apple rule — not a site bug).
+                </p>
+                <ol className="list-decimal pl-4 space-y-1">
+                  <li>Open this site in <strong>Safari</strong> (not Chrome)</li>
+                  <li>Tap the <strong>Share</strong> button</li>
+                  <li>Tap <strong>Add to Home Screen</strong> → Add</li>
+                  <li>Open the new <strong>Splendid</strong> icon from your Home Screen</li>
+                  <li>Then tap <strong>Enable notifications</strong> and Allow</li>
+                </ol>
               </div>
             ) : (
               <p className="text-xs text-[#5C3D2E]/80 mt-1 leading-relaxed">
