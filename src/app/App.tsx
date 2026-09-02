@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router";
 import { fetchProducts, createOrder, fetchOrders, updateOrderStatus, deleteOrder, updateOrder, createProduct, updateProduct, deleteProduct, adminLogin, adminLogout, getAdminToken, clearAdminToken, changeAdminPassword, cloudinaryUpload, fetchCategories, saveCategoryPhoto, deleteCategoryPhoto } from "../api";
 import {
   ShoppingBag, X, Menu, Instagram, Facebook, Phone, MapPin,
@@ -110,7 +111,8 @@ function TikTokIcon({ size = 16 }: { size?: number }) {
 // ─── APP ROOT ─────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [view, setView] = useState<AppView>("store");
+  const navigate = useNavigate();
+  // Admin portal lives at /admin
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [categoryImages, setCategoryImages] = useState<CategoryImages>({});
@@ -271,9 +273,6 @@ export default function App() {
   // Derive unique categories dynamically from products
   const allCategories: Category[] = ["All", ...Array.from(new Set(products.map(p => p.category))).sort()];
 
-  if (view === "admin") {
-    return <AdminPanel products={products} setProducts={setProducts} orders={orders} setOrders={setOrders} onExit={() => setView("store")} categoryImages={categoryImages} onSaveCategoryImages={saveCategoryImages} />;
-  }
 
   if (loading) {
     return (
@@ -291,7 +290,7 @@ export default function App() {
       <Navbar
         cartCount={cartCount}
         onCartOpen={() => setCartOpen(true)}
-        onAdminRequest={() => setAdminPromptOpen(true)}
+        onAdminRequest={() => navigate("/admin/login")}
         onSearch={(q) => {
           setSearchQuery(q);
           if (q) setTimeout(() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth" }), 100);
@@ -382,9 +381,7 @@ export default function App() {
 
 
       {/* Hidden Admin Passcode Modal */}
-      {adminPromptOpen && (
-        <PasscodeModal onClose={() => setAdminPromptOpen(false)} onSuccess={() => setView("admin")} />
-      )}
+      
 
       {/* Product Quick View Modal */}
       {quickViewProduct && (
