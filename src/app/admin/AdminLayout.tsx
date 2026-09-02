@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router";
 import {
-  LayoutDashboard, Package, ShoppingBag, Tags, Settings, LogOut, Menu, X, ChevronLeft,
+  LayoutDashboard, BarChart3, Package, ShoppingBag, Tags, Settings, LogOut, Menu, X, ChevronLeft,
 } from "lucide-react";
 import { adminLogout, clearAdminToken, getAdminToken } from "../../api";
 
 const NAV = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard, end: true },
+  { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { label: "Products", href: "/admin/products", icon: Package },
   { label: "Orders", href: "/admin/orders", icon: ShoppingBag },
   { label: "Categories", href: "/admin/categories", icon: Tags },

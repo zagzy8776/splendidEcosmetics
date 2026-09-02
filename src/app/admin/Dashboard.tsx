@@ -78,6 +78,7 @@ export default function Dashboard() {
         <div className="lg:col-span-1 space-y-3">
           <h2 className="text-sm font-bold text-[#1A0F0A] uppercase tracking-wider mb-3">Quick Actions</h2>
           {[
+            { to: "/admin/analytics", label: "View Analytics" },
             { to: "/admin/products", label: "Manage Products" },
             { to: "/admin/orders", label: "View Orders" },
             { to: "/admin/categories", label: "Categories" },

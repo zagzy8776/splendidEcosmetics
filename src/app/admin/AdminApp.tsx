@@ -7,6 +7,7 @@ import ProductsPage from "./ProductsPage";
 import OrdersPage from "./OrdersPage";
 import CategoriesPage from "./CategoriesPage";
 import SettingsPage from "./SettingsPage";
+import AnalyticsPage from "./AnalyticsPage";
 import { getAdminToken } from "../../api";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -28,6 +29,7 @@ export default function AdminApp() {
         }
       >
         <Route index element={<Dashboard />} />
+        <Route path="analytics" element={<AnalyticsPage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="orders" element={<OrdersPage />} />
         <Route path="categories" element={<CategoriesPage />} />
