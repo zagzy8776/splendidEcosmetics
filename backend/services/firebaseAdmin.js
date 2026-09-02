@@ -190,73 +190,40 @@ export async function sendToFid(fid, { title, body, data = {}, link = "/", token
     return { success: false, errorCode: "admin-not-configured" };
   }
 
+  // Web push requires a real FCM registration TOKEN (from client getToken()).
+  // Do NOT use fid here — invalid/unknown fields cause messaging/invalid-payload.
+  let fcmToken = token && String(token).length > 80 ? String(token).trim() : null;
+  if (!fcmToken && fid && String(fid).length > 80) {
+    fcmToken = String(fid).trim();
+  }
+  if (!fcmToken) {
+    return {
+      success: false,
+      errorCode: "messaging/invalid-registration-token (missing web token — user must re-enable notifications)",
+    };
+  }
+
   const safeTitle = String(title || "Splendid Empire").slice(0, 100);
   const safeBody = String(body || "").slice(0, 500);
-  const site = (process.env.FRONTEND_URL || "https://www.splendidcosmetics.com.ng").replace(/\/$/, "");
-  const clickLink = link && link.startsWith("http") ? link : `${site}${link?.startsWith("/") ? link : "/" + (link || "")}`;
 
-  // Build absolute icon URLs (relative paths cause invalid-payload on some FCM paths)
-  const icon = `${site}/logo.jpg`;
+  // Absolute minimal payload — this is the documented working shape
+  const message = {
+    token: fcmToken,
+    notification: {
+      title: safeTitle,
+      body: safeBody,
+    },
+  };
 
-  // Only string data values allowed
-  const dataPayload = {};
-  for (const [k, v] of Object.entries({ ...(data || {}), click_url: clickLink })) {
-    if (v !== undefined && v !== null) dataPayload[String(k)] = String(v);
+  try {
+    await messaging.send(message);
+    return { success: true };
+  } catch (err) {
+    const code = err?.code || err?.errorInfo?.code || "unknown";
+    const detail = err?.message || err?.errorInfo?.message || "";
+    console.error("[FCM send error]", code, detail);
+    return { success: false, errorCode: `${code}${detail ? ": " + detail : ""}` };
   }
-
-  // Prefer real FCM registration tokens (long). Skip obvious junk targets.
-  const candidates = [];
-  if (token && String(token).length > 80) {
-    candidates.push({ type: "token", value: String(token) });
-  }
-  // FID targeting (newer API) — only if it looks non-trivial
-  if (fid && String(fid).length >= 16 && String(fid) !== String(token)) {
-    candidates.push({ type: "fid", value: String(fid) });
-  }
-  // Last resort: installationId used as token if it looks like a token
-  if (!candidates.length && fid && String(fid).length > 80) {
-    candidates.push({ type: "token", value: String(fid) });
-  }
-
-  if (!candidates.length) {
-    return { success: false, errorCode: "messaging/invalid-registration (no usable token/fid)" };
-  }
-
-  let lastCode = "unknown";
-  for (const c of candidates) {
-    // Minimal valid message — avoid duplicate webpush.notification + top-level issues
-    const message = {
-      [c.type]: c.value,
-      notification: {
-        title: safeTitle,
-        body: safeBody,
-      },
-      webpush: {
-        headers: {
-          Urgency: "high",
-        },
-        notification: {
-          title: safeTitle,
-          body: safeBody,
-          icon,
-        },
-        fcmOptions: {
-          link: clickLink,
-        },
-      },
-      data: dataPayload,
-    };
-
-    try {
-      await messaging.send(message);
-      return { success: true };
-    } catch (err) {
-      lastCode = err?.code || err?.errorInfo?.code || err?.message || "unknown";
-      console.error("[FCM send error]", c.type, lastCode, err?.message);
-      // Try next candidate
-    }
-  }
-  return { success: false, errorCode: lastCode };
 }
 
 export function isUnregisteredError(code) {

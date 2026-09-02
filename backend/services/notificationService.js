@@ -17,6 +17,24 @@ export async function sendToAllActive(prisma, { title, body, data, link }) {
     return { sent: 0, failed: 0, error: "Notification database table not ready yet." };
   }
 
+  // Disable rows that have no real web token (old FID-only junk)
+  const junk = subs.filter((s) => !(s.token && String(s.token).length > 80) && !(s.installationId && String(s.installationId).length > 80));
+  if (junk.length) {
+    await prisma.pushSubscription
+      .updateMany({ where: { id: { in: junk.map((j) => j.id) } }, data: { enabled: false } })
+      .catch(() => {});
+  }
+  subs = subs.filter((s) => (s.token && String(s.token).length > 80) || (s.installationId && String(s.installationId).length > 80));
+
+  if (!subs.length) {
+    return {
+      sent: 0,
+      failed: 0,
+      errors: ["No subscribers with a valid web push token. Customers must enable notifications again on the live site."],
+      totalTargets: 0,
+    };
+  }
+
   let sent = 0;
   let failed = 0;
   const toDisable = [];

@@ -2,20 +2,16 @@ import {
   getMessaging,
   isSupported,
   onMessage,
-  onRegistered,
-  register,
   getToken,
-  unregister,
+  deleteToken,
 } from "firebase/messaging";
 import type { Messaging } from "firebase/messaging";
 import { getFirebaseApp, getVapidKey, isFirebaseConfigured } from "./config";
 
 const DISMISS_KEY = "splendid_push_dismissed_at";
-const FID_KEY = "splendid_push_fid";
 const TOKEN_KEY = "splendid_push_token";
 
 let messagingInstance: Messaging | null = null;
-let registeredCallbackBound = false;
 
 export async function messagingSupported(): Promise<boolean> {
   if (typeof window === "undefined") return false;
@@ -39,32 +35,25 @@ function getMessagingSafe(): Messaging | null {
   }
 }
 
-export function getStoredFid(): string | null {
-  try {
-    return localStorage.getItem(FID_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function storeFid(fid: string) {
-  try {
-    localStorage.setItem(FID_KEY, fid);
-  } catch { /* ignore */ }
-}
-
 function storeToken(token: string) {
   try {
     localStorage.setItem(TOKEN_KEY, token);
   } catch { /* ignore */ }
 }
 
+export function getStoredToken(): string | null {
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
 export function wasPromptDismissed(): boolean {
   try {
     const raw = localStorage.getItem(DISMISS_KEY);
     if (!raw) return false;
-    const ts = Number(raw);
-    return Date.now() - ts < 14 * 24 * 60 * 60 * 1000;
+    return Date.now() - Number(raw) < 14 * 24 * 60 * 60 * 1000;
   } catch {
     return false;
   }
@@ -81,17 +70,15 @@ export function permissionState(): NotificationPermission | "unsupported" {
   return Notification.permission;
 }
 
-async function postRegister(payload: {
-  installationId: string;
-  token?: string;
-}) {
+async function postRegister(token: string) {
   const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
   const res = await fetch(`${API_BASE}/api/notifications/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      installationId: payload.installationId,
-      token: payload.token || undefined,
+      // Backend unique key — use token as installationId for web
+      installationId: token,
+      token,
       userAgent: navigator.userAgent,
       platform: navigator.platform || undefined,
     }),
@@ -102,34 +89,32 @@ async function postRegister(payload: {
   }
 }
 
-async function postUnregister(installationId: string) {
+async function postUnregister(token: string) {
   const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
   await fetch(`${API_BASE}/api/notifications/unregister`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ installationId }),
+    body: JSON.stringify({ installationId: token }),
   }).catch(() => {});
 }
 
-function ensureOnRegistered(messaging: Messaging) {
-  if (registeredCallbackBound) return;
-  registeredCallbackBound = true;
+async function ensureServiceWorker(): Promise<ServiceWorkerRegistration | null> {
+  if (!("serviceWorker" in navigator)) return null;
   try {
-    onRegistered(messaging, (installationId) => {
-      if (!installationId) return;
-      storeFid(installationId);
-      const token = localStorage.getItem(TOKEN_KEY) || undefined;
-      postRegister({ installationId, token }).catch((err) =>
-        console.warn("[FCM] failed to sync FID", err)
-      );
+    const reg = await navigator.serviceWorker.register("/firebase-messaging-sw.js", {
+      scope: "/",
     });
+    await navigator.serviceWorker.ready;
+    return reg;
   } catch (err) {
-    console.warn("[FCM] onRegistered not available", err);
+    console.warn("[FCM] SW register failed", err);
+    return null;
   }
 }
 
 /**
- * Request permission, register with FCM (FID + web token), store on backend.
+ * Enable push: permission → SW → getToken → save on server.
+ * getToken is required for reliable web delivery with Admin SDK.
  */
 export async function enablePushNotifications(): Promise<{ ok: boolean; error?: string }> {
   const supported = await messagingSupported();
@@ -139,7 +124,7 @@ export async function enablePushNotifications(): Promise<{ ok: boolean; error?: 
 
   const messaging = getMessagingSafe();
   if (!messaging) {
-    return { ok: false, error: "Push is not configured." };
+    return { ok: false, error: "Push is not configured on this site." };
   }
 
   const permission = await Notification.requestPermission();
@@ -148,59 +133,46 @@ export async function enablePushNotifications(): Promise<{ ok: boolean; error?: 
       ok: false,
       error:
         permission === "denied"
-          ? "Notifications are blocked. Enable them in your browser settings for this site."
+          ? "Notifications are blocked. Enable them in browser settings for this site."
           : "Permission was not granted.",
     };
   }
 
   const vapidKey = getVapidKey();
   if (!vapidKey) {
-    return { ok: false, error: "Missing VAPID key configuration." };
+    return { ok: false, error: "Missing VAPID key (VITE_FIREBASE_VAPID_KEY)." };
   }
 
-  // Ensure SW is ready (helps getToken on some browsers)
-  try {
-    if ("serviceWorker" in navigator) {
-      await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-      await navigator.serviceWorker.ready;
-    }
-  } catch (err) {
-    console.warn("[FCM] service worker register", err);
+  const swReg = await ensureServiceWorker();
+  if (!swReg) {
+    return { ok: false, error: "Could not register notification service worker." };
   }
-
-  ensureOnRegistered(messaging);
 
   let token = "";
-  let fid = "";
-
-  // Web delivery still works most reliably with the registration token
   try {
-    token = await getToken(messaging, { vapidKey });
-    if (token) storeToken(token);
+    token = await getToken(messaging, {
+      vapidKey,
+      serviceWorkerRegistration: swReg,
+    });
   } catch (err: any) {
-    console.warn("[FCM] getToken failed", err);
-  }
-
-  // Prefer FID registration when supported
-  try {
-    await register(messaging, { vapidKey });
-    await new Promise((r) => setTimeout(r, 1000));
-    fid = getStoredFid() || "";
-  } catch (err: any) {
-    console.warn("[FCM] register(FID) failed", err);
-  }
-
-  // installationId is required by backend — use FID, else token as id
-  const installationId = fid || token;
-  if (!installationId) {
+    console.error("[FCM] getToken error", err);
     return {
       ok: false,
-      error: "Could not get a push registration from Firebase. Try Chrome/Safari on HTTPS.",
+      error: err?.message || "Could not get push token from Firebase.",
     };
   }
 
+  if (!token || token.length < 80) {
+    return {
+      ok: false,
+      error: "Firebase returned an empty push token. Check VAPID key and Firebase web config.",
+    };
+  }
+
+  storeToken(token);
+
   try {
-    await postRegister({ installationId, token: token || undefined });
+    await postRegister(token);
     return { ok: true };
   } catch (err: any) {
     return { ok: false, error: err?.message || "Failed to save subscription." };
@@ -209,15 +181,14 @@ export async function enablePushNotifications(): Promise<{ ok: boolean; error?: 
 
 export async function disablePushNotifications(): Promise<void> {
   const messaging = getMessagingSafe();
-  const fid = getStoredFid();
-  if (fid) await postUnregister(fid);
+  const token = getStoredToken();
+  if (token) await postUnregister(token);
   if (messaging) {
     try {
-      await unregister(messaging);
+      await deleteToken(messaging);
     } catch { /* ignore */ }
   }
   try {
-    localStorage.removeItem(FID_KEY);
     localStorage.removeItem(TOKEN_KEY);
   } catch { /* ignore */ }
 }
@@ -241,23 +212,16 @@ export async function syncExistingRegistration() {
   const vapidKey = getVapidKey();
   if (!vapidKey) return;
 
-  ensureOnRegistered(messaging);
   try {
-    if ("serviceWorker" in navigator) {
-      await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-      await navigator.serviceWorker.ready;
+    const swReg = await ensureServiceWorker();
+    const token = await getToken(messaging, {
+      vapidKey,
+      serviceWorkerRegistration: swReg || undefined,
+    });
+    if (token && token.length > 80) {
+      storeToken(token);
+      await postRegister(token);
     }
-  } catch { /* ignore */ }
-
-  try {
-    const token = await getToken(messaging, { vapidKey });
-    if (token) storeToken(token);
-    try {
-      await register(messaging, { vapidKey });
-    } catch { /* ignore */ }
-    await new Promise((r) => setTimeout(r, 600));
-    const fid = getStoredFid() || token;
-    if (fid) await postRegister({ installationId: fid, token: token || undefined });
   } catch (err) {
     console.warn("[FCM] sync failed", err);
   }
