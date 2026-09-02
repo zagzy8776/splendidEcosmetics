@@ -1,18 +1,31 @@
 /**
- * Firebase Admin singleton for Vercel serverless + local Node.
- * Credentials come ONLY from env vars — never from the client.
+ * Firebase Admin — does not crash the server if package/env is missing.
  */
-import admin from "firebase-admin";
+import { createRequire } from "module";
 
-let initialized = false;
+const require = createRequire(import.meta.url);
+
+let admin = null;
+let initTried = false;
+
+function tryLoadAdmin() {
+  if (initTried) return admin;
+  initTried = true;
+  try {
+    admin = require("firebase-admin");
+  } catch (err) {
+    console.error("[Firebase Admin] not installed:", err?.message || err);
+    admin = null;
+  }
+  return admin;
+}
 
 export function getFirebaseAdmin() {
-  if (initialized) {
-    try {
-      return admin.app();
-    } catch {
-      initialized = false;
-    }
+  const mod = tryLoadAdmin();
+  if (!mod) return null;
+
+  if (mod.apps && mod.apps.length) {
+    return mod.app();
   }
 
   const projectId = process.env.FIREBASE_PROJECT_ID;
@@ -23,33 +36,35 @@ export function getFirebaseAdmin() {
     return null;
   }
 
-  // Vercel/env often stores newlines as \n
   privateKey = privateKey.replace(/\\n/g, "\n");
 
-  if (!admin.apps.length) {
-    admin.initializeApp({
-      credential: admin.credential.cert({
+  try {
+    mod.initializeApp({
+      credential: mod.credential.cert({
         projectId,
         clientEmail,
         privateKey,
       }),
     });
+    return mod.app();
+  } catch (err) {
+    console.error("[Firebase Admin] init failed:", err?.message || err);
+    return null;
   }
-
-  initialized = true;
-  return admin.app();
 }
 
 export function getMessaging() {
+  const mod = tryLoadAdmin();
   const app = getFirebaseAdmin();
-  if (!app) return null;
-  return admin.messaging();
+  if (!mod || !app) return null;
+  try {
+    return mod.messaging();
+  } catch (err) {
+    console.error("[Firebase Admin] messaging failed:", err?.message || err);
+    return null;
+  }
 }
 
-/**
- * Send a web push notification to a single FID.
- * Returns { success, errorCode? }
- */
 export async function sendToFid(fid, { title, body, data = {}, link = "/" }) {
   const messaging = getMessaging();
   if (!messaging) {
@@ -63,9 +78,6 @@ export async function sendToFid(fid, { title, body, data = {}, link = "/" }) {
       body: String(body).slice(0, 500),
     },
     webpush: {
-      fcmOptions: {
-        link: link.startsWith("http") ? link : undefined,
-      },
       notification: {
         title: String(title).slice(0, 100),
         body: String(body).slice(0, 500),
@@ -91,7 +103,6 @@ export async function sendToFid(fid, { title, body, data = {}, link = "/" }) {
   }
 }
 
-/** Codes that mean the subscription is permanently invalid */
 export function isUnregisteredError(code) {
   if (!code) return false;
   const c = String(code).toLowerCase();
