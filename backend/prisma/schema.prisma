@@ -71,3 +71,35 @@ model Category {
 
   @@map("categories")
 }
+model PushSubscription {
+  id           String    @id @default(cuid())
+  /// Firebase Installation ID (FID) — primary targeting key for FCM
+  installationId String  @unique @map("installation_id")
+  /// Optional legacy FCM registration token if ever provided
+  token        String?   @unique
+  userAgent    String?   @map("user_agent") @db.Text
+  platform     String?
+  enabled      Boolean   @default(true)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  lastSeenAt   DateTime  @default(now()) @map("last_seen_at")
+  lastSentAt   DateTime? @map("last_sent_at")
+  failCount    Int       @default(0) @map("fail_count")
+
+  @@index([enabled])
+  @@map("push_subscriptions")
+}
+
+model NotificationLog {
+  id          String   @id @default(cuid())
+  title       String
+  body        String   @db.Text
+  audience    String   @default("all")
+  sentCount   Int      @default(0) @map("sent_count")
+  failedCount Int      @default(0) @map("failed_count")
+  createdBy   String?  @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("notification_logs")
+}

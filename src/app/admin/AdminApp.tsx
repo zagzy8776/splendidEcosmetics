@@ -7,6 +7,7 @@ import ProductsPage from "./ProductsPage";
 import OrdersPage from "./OrdersPage";
 import CategoriesPage from "./CategoriesPage";
 import SettingsPage from "./SettingsPage";
+import NotificationsPage from "./NotificationsPage";
 import AnalyticsPage from "./AnalyticsPage";
 import { getAdminToken } from "../../api";
 
@@ -33,6 +34,7 @@ export default function AdminApp() {
         <Route path="products" element={<ProductsPage />} />
         <Route path="orders" element={<OrdersPage />} />
         <Route path="categories" element={<CategoriesPage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/admin" replace />} />

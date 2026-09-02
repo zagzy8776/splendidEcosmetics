@@ -5,6 +5,8 @@ import bcrypt from "bcrypt";
 import rateLimit from "express-rate-limit";
 import { PrismaClient } from "@prisma/client";
 import { Resend } from "resend";
+import { getMessaging } from "./services/firebaseAdmin.js";
+import { sendToAllActive, notifyAllSafe } from "./services/notificationService.js";
 
 const prisma = new PrismaClient();
 const app = express();
@@ -253,6 +255,22 @@ const orderLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 20,
   message: { error: "Too many requests. Please try again shortly." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const notifyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: "Too many notification sends. Please wait and try again." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const registerLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  message: { error: "Too many registration attempts." },
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -518,6 +536,13 @@ app.post("/api/orders", orderLimiter, async (req, res) => {
       include: { items: true },
     });
     sendEmail(order.email, `Your Order Confirmation – ${order.id}`, buildConfirmationEmail(order));
+    // Push to admin/subscribers: new order (non-blocking)
+    notifyAllSafe(prisma, {
+      title: "New order received 🛍️",
+      body: `Order ${order.id} from ${order.customerName} — ₦${Number(order.total).toLocaleString("en-NG")}`,
+      link: "/admin/orders",
+      data: { type: "order.created", orderId: order.id },
+    });
     res.status(201).json(order);
   } catch (err) {
     console.error(err);
@@ -545,6 +570,8 @@ app.patch("/api/orders/:id/status", requireAdminAuth, async (req, res) => {
         sendEmail(order.email, "Your Order Has Arrived! We'd Love Your Feedback 💛", buildDeliveryEmail(order));
       }
     }
+    // Per-customer status push requires linking FID to a customer identity (not stored yet).
+    // Manual broadcasts remain available in Admin → Notifications.
     res.json(order);
   } catch (err) {
     console.error(err);
@@ -762,6 +789,147 @@ app.delete("/api/categories/:name", requireAdminAuth, async (req, res) => {
     res.status(500).json({ error: "Failed to delete category" });
   }
 });
+
+
+// ─── PUSH NOTIFICATIONS ───────────────────────────────────────────────────────
+
+app.post("/api/notifications/register", registerLimiter, async (req, res) => {
+  try {
+    const { installationId, token, userAgent, platform } = req.body || {};
+    const fid = typeof installationId === "string" ? installationId.trim() : "";
+    if (!fid || fid.length < 8 || fid.length > 256) {
+      return res.status(400).json({ error: "Valid installationId is required" });
+    }
+    const ua = typeof userAgent === "string" ? userAgent.slice(0, 500) : null;
+    const plat = typeof platform === "string" ? platform.slice(0, 80) : null;
+    const tok = typeof token === "string" && token.trim() ? token.trim().slice(0, 512) : null;
+
+    const sub = await prisma.pushSubscription.upsert({
+      where: { installationId: fid },
+      update: {
+        enabled: true,
+        lastSeenAt: new Date(),
+        userAgent: ua || undefined,
+        platform: plat || undefined,
+        ...(tok ? { token: tok } : {}),
+      },
+      create: {
+        installationId: fid,
+        token: tok,
+        userAgent: ua,
+        platform: plat,
+        enabled: true,
+      },
+    });
+    res.json({ ok: true, id: sub.id });
+  } catch (err) {
+    console.error("[notify register]", err);
+    res.status(500).json({ error: "Failed to register for notifications" });
+  }
+});
+
+app.post("/api/notifications/unregister", registerLimiter, async (req, res) => {
+  try {
+    const { installationId } = req.body || {};
+    const fid = typeof installationId === "string" ? installationId.trim() : "";
+    if (!fid) return res.status(400).json({ error: "installationId is required" });
+    await prisma.pushSubscription.updateMany({
+      where: { installationId: fid },
+      data: { enabled: false },
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("[notify unregister]", err);
+    res.status(500).json({ error: "Failed to unregister" });
+  }
+});
+
+app.get("/api/admin/notifications/stats", requireAdminAuth, async (req, res) => {
+  try {
+    const [total, active, recent] = await Promise.all([
+      prisma.pushSubscription.count(),
+      prisma.pushSubscription.count({ where: { enabled: true } }),
+      prisma.notificationLog.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 20,
+      }),
+    ]);
+    res.json({
+      totalSubscribers: total,
+      activeSubscribers: active,
+      configured: !!getMessaging(),
+      recent,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to load notification stats" });
+  }
+});
+
+app.get("/api/admin/notifications", requireAdminAuth, async (req, res) => {
+  try {
+    const logs = await prisma.notificationLog.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    });
+    res.json(logs);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to load notifications" });
+  }
+});
+
+app.post("/api/admin/notifications/send", requireAdminAuth, notifyLimiter, async (req, res) => {
+  try {
+    let { title, body, audience } = req.body || {};
+    title = typeof title === "string" ? title.trim().slice(0, 100) : "";
+    body = typeof body === "string" ? body.trim().slice(0, 500) : "";
+    audience = typeof audience === "string" ? audience.trim() : "all";
+
+    if (!title || !body) {
+      return res.status(400).json({ error: "Title and message are required" });
+    }
+    // Strip obvious HTML/script
+    title = title.replace(/<[^>]*>/g, "");
+    body = body.replace(/<[^>]*>/g, "");
+
+    if (audience !== "all") {
+      return res.status(400).json({ error: "Only audience 'all' is supported currently" });
+    }
+
+    const result = await sendToAllActive(prisma, {
+      title,
+      body,
+      link: "/",
+      data: { type: "broadcast" },
+    });
+
+    if (result.error) {
+      return res.status(503).json({ error: result.error });
+    }
+
+    const log = await prisma.notificationLog.create({
+      data: {
+        title,
+        body,
+        audience: "all",
+        sentCount: result.sent,
+        failedCount: result.failed,
+      },
+    });
+
+    res.json({
+      ok: true,
+      sent: result.sent,
+      failed: result.failed,
+      log,
+    });
+  } catch (err) {
+    console.error("[notify send]", err);
+    res.status(500).json({ error: "Failed to send notification" });
+  }
+});
+
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });

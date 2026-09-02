@@ -68,7 +68,8 @@
     "cors": "^2.8.5",
     "express": "^4.21.0",
     "express-rate-limit": "^8.5.2",
-    "resend": "^4.0.0"
+    "resend": "^4.0.0",
+    "firebase": "^12.18.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.1.12",

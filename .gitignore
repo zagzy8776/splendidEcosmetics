@@ -10,3 +10,9 @@ backend/.env
 .DS_Store
 .cursor/
 .vercel
+
+# Firebase service account keys (never commit)
+*-firebase-adminsdk-*.json
+firebase-service-account*.json
+serviceAccountKey.json
+**/serviceAccount*.json
