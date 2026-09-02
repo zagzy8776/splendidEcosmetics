@@ -870,24 +870,37 @@ app.post("/api/notifications/unregister", registerLimiter, async (req, res) => {
 
 app.get("/api/admin/notifications/stats", requireAdminAuth, async (req, res) => {
   try {
-    const [total, active, recent] = await Promise.all([
-      prisma.pushSubscription.count(),
-      prisma.pushSubscription.count({ where: { enabled: true } }),
-      prisma.notificationLog.findMany({
-        orderBy: { createdAt: "desc" },
-        take: 20,
-      }),
-    ]);
     const push = await loadPush();
-    const messaging = await push.ensureMessaging();
-    const configDetail = push.getFirebaseConfigStatus
-      ? await push.getFirebaseConfigStatus()
-      : null;
+    let messaging = null;
+    let configDetail = null;
+    try {
+      messaging = await push.ensureMessaging();
+      configDetail = push.getFirebaseConfigStatus
+        ? await push.getFirebaseConfigStatus()
+        : null;
+    } catch (e) {
+      console.error("[push stats] firebase init", e?.message || e);
+      configDetail = { lastError: e?.message || String(e) };
+    }
+
+    let total = 0, active = 0, recent = [], dbError = null;
+    try {
+      [total, active, recent] = await Promise.all([
+        prisma.pushSubscription.count(),
+        prisma.pushSubscription.count({ where: { enabled: true } }),
+        prisma.notificationLog.findMany({ orderBy: { createdAt: "desc" }, take: 20 }),
+      ]);
+    } catch (e) {
+      dbError = e?.message || String(e);
+      console.error("[push stats] db", dbError);
+    }
+
     res.json({
       totalSubscribers: total,
       activeSubscribers: active,
       configured: !!messaging,
       configDetail,
+      dbError,
       recent,
     });
   } catch (err) {

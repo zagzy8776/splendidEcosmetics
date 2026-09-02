@@ -25,6 +25,7 @@ type Stats = {
     initialized?: boolean;
     lastError?: string | null;
   };
+  dbError?: string | null;
   recent: Array<{
     id: string;
     title: string;
@@ -126,6 +127,7 @@ export default function NotificationsPage() {
               privateKey={String(stats.configDetail.hasPrivateKey)} ·
               package={String(stats.configDetail.packageOk)}
               {stats.configDetail.lastError ? ` · ${stats.configDetail.lastError}` : ""}
+              {stats.dbError ? ` · DB: ${stats.dbError}` : ""}
             </p>
           )}
         </div>

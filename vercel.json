@@ -1,6 +1,6 @@
 {
   "framework": "vite",
-  "buildCommand": "npx prisma generate --schema=backend/prisma/schema.prisma && npm run build",
+  "buildCommand": "npx prisma generate --schema=backend/prisma/schema.prisma && npx prisma db push --schema=backend/prisma/schema.prisma --skip-generate && npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "rewrites": [
