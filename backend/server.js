@@ -10,11 +10,19 @@ async function loadPush() {
   try {
     const fa = await import("./services/firebaseAdmin.js");
     const ns = await import("./services/notificationService.js");
-    return { getMessaging: fa.getMessaging, sendToAllActive: ns.sendToAllActive, notifyAllSafe: ns.notifyAllSafe };
+    return {
+      getMessaging: fa.getMessaging,
+      ensureMessaging: fa.ensureMessaging,
+      getFirebaseConfigStatus: fa.getFirebaseConfigStatus,
+      sendToAllActive: ns.sendToAllActive,
+      notifyAllSafe: ns.notifyAllSafe,
+    };
   } catch (err) {
     console.error("[Push] unavailable:", err?.message || err);
     return {
       getMessaging: () => null,
+      ensureMessaging: async () => null,
+      getFirebaseConfigStatus: async () => ({ lastError: String(err?.message || err) }),
       sendToAllActive: async () => ({ sent: 0, failed: 0, error: "unavailable" }),
       notifyAllSafe: () => {},
     };
@@ -871,12 +879,10 @@ app.get("/api/admin/notifications/stats", requireAdminAuth, async (req, res) => 
       }),
     ]);
     const push = await loadPush();
-    const messaging = push.getMessaging();
-    let configDetail = null;
-    try {
-      const fa = await import("./services/firebaseAdmin.js");
-      configDetail = fa.getFirebaseConfigStatus ? fa.getFirebaseConfigStatus() : null;
-    } catch (_) {}
+    const messaging = await push.ensureMessaging();
+    const configDetail = push.getFirebaseConfigStatus
+      ? await push.getFirebaseConfigStatus()
+      : null;
     res.json({
       totalSubscribers: total,
       activeSubscribers: active,

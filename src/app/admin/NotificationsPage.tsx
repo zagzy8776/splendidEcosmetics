@@ -20,6 +20,7 @@ type Stats = {
     hasProjectId?: boolean;
     hasClientEmail?: boolean;
     hasPrivateKey?: boolean;
+    hasServiceAccountJson?: boolean;
     packageOk?: boolean;
     initialized?: boolean;
     lastError?: string | null;
