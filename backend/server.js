@@ -940,7 +940,8 @@ app.post("/api/admin/notifications/send", requireAdminAuth, notifyLimiter, async
       return res.status(400).json({ error: "Only audience 'all' is supported currently" });
     }
 
-    const result = await sendToAllActive(prisma, {
+    const push = await loadPush();
+    const result = await push.sendToAllActive(prisma, {
       title,
       body,
       link: "/",
@@ -951,25 +952,34 @@ app.post("/api/admin/notifications/send", requireAdminAuth, notifyLimiter, async
       return res.status(503).json({ error: result.error });
     }
 
-    const log = await prisma.notificationLog.create({
-      data: {
-        title,
-        body,
-        audience: "all",
-        sentCount: result.sent,
-        failedCount: result.failed,
-      },
-    });
+    let log = null;
+    try {
+      log = await prisma.notificationLog.create({
+        data: {
+          title,
+          body,
+          audience: "all",
+          sentCount: result.sent,
+          failedCount: result.failed,
+        },
+      });
+    } catch (logErr) {
+      console.error("[notify send] log write failed:", logErr?.message || logErr);
+    }
 
     res.json({
       ok: true,
       sent: result.sent,
       failed: result.failed,
       log,
+      message:
+        result.sent === 0 && result.failed === 0
+          ? "No active subscribers yet. Open the store on a phone/browser and enable notifications first."
+          : undefined,
     });
   } catch (err) {
     console.error("[notify send]", err);
-    res.status(500).json({ error: "Failed to send notification" });
+    res.status(500).json({ error: err?.message || "Failed to send notification" });
   }
 });
 
