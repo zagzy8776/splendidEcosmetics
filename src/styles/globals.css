@@ -156,3 +156,17 @@ button:active, .smooth-tap:active {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ── iOS admin: prevent auto-zoom on input focus (requires >= 16px) ───────── */
+.admin-no-zoom input,
+.admin-no-zoom select,
+.admin-no-zoom textarea,
+.admin-no-zoom button {
+  font-size: 16px !important;
+  touch-action: manipulation;
+}
+
+.admin-no-zoom {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}

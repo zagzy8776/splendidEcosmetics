@@ -14,6 +14,19 @@ export default function AdminLogin() {
     if (getAdminToken()) navigate("/admin", { replace: true });
   }, [navigate]);
 
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) return;
+    const previous = meta.getAttribute("content");
+    meta.setAttribute(
+      "content",
+      "width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover"
+    );
+    return () => {
+      if (previous) meta.setAttribute("content", previous);
+    };
+  }, []);
+
   async function handleLogin(e?: React.FormEvent) {
     e?.preventDefault();
     if (!pw.trim()) { setErr("Please enter your password."); return; }
@@ -28,7 +41,7 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-dvh bg-[#1A0F0A] flex items-center justify-center p-6 relative overflow-hidden font-[Raleway,sans-serif]">
+    <div className="admin-no-zoom min-h-dvh bg-[#1A0F0A] flex items-center justify-center p-6 relative overflow-hidden font-[Raleway,sans-serif]">
       <div className="absolute -top-32 -right-24 w-96 h-96 rounded-full bg-[#F2B8A8]/10 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-40 -left-20 w-80 h-80 rounded-full bg-[#C9A227]/10 blur-3xl pointer-events-none" />
       <div className="relative w-full max-w-md">
@@ -45,7 +58,7 @@ export default function AdminLogin() {
           <label className="block text-xs font-semibold text-[#5C3D2E] mb-1.5 tracking-wide uppercase">Password</label>
           <div className="relative mb-4">
             <input type={showPw ? "text" : "password"} value={pw} onChange={(e) => setPw(e.target.value)} placeholder="Enter admin password" autoFocus
-              className="w-full rounded-xl border border-[#F9DEDA] bg-[#FAF7F5] px-4 py-3 pr-11 text-[#1A0F0A] text-sm outline-none focus:border-[#C9A227] focus:ring-2 focus:ring-[#C9A227]/20 transition" />
+              className="w-full rounded-xl border border-[#F9DEDA] bg-[#FAF7F5] px-4 py-3 pr-11 text-[#1A0F0A] text-base outline-none focus:border-[#C9A227] focus:ring-2 focus:ring-[#C9A227]/20 transition" style={{ fontSize: 16 }} />
             <button type="button" onClick={() => setShowPw((s) => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A7A6E] hover:text-[#1A0F0A]">
               {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>

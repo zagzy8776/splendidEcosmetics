@@ -26,6 +26,30 @@ export default function AdminLayout() {
 
   useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
 
+  // iPhone: lock viewport scale while in admin so forms never auto-zoom
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) return;
+    const previous = meta.getAttribute("content");
+    meta.setAttribute(
+      "content",
+      "width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover"
+    );
+    // Prevent double-tap zoom on iOS
+    const preventGesture = (e: Event) => e.preventDefault();
+    document.addEventListener("gesturestart", preventGesture, { passive: false } as any);
+    return () => {
+      if (previous) meta.setAttribute("content", previous);
+      else {
+        meta.setAttribute(
+          "content",
+          "width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover"
+        );
+      }
+      document.removeEventListener("gesturestart", preventGesture as any);
+    };
+  }, []);
+
   async function handleLogout() {
     if (!window.confirm("Log out of admin panel?")) return;
     await adminLogout();
@@ -34,7 +58,7 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="min-h-dvh flex bg-[#FAF7F5] font-[Raleway,sans-serif]">
+    <div className="admin-no-zoom min-h-dvh flex bg-[#FAF7F5] font-[Raleway,sans-serif]">
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
