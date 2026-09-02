@@ -16,6 +16,14 @@ type Stats = {
   totalSubscribers: number;
   activeSubscribers: number;
   configured: boolean;
+  configDetail?: {
+    hasProjectId?: boolean;
+    hasClientEmail?: boolean;
+    hasPrivateKey?: boolean;
+    packageOk?: boolean;
+    initialized?: boolean;
+    lastError?: string | null;
+  };
   recent: Array<{
     id: string;
     title: string;
@@ -104,8 +112,21 @@ export default function NotificationsPage() {
       </div>
 
       {!stats?.configured && (
-        <div className="mb-5 rounded-xl bg-amber-50 border border-amber-100 px-4 py-3 text-sm text-amber-800">
-          Push is not fully configured on the server yet. Add Firebase Admin environment variables to enable sending.
+        <div className="mb-5 rounded-xl bg-amber-50 border border-amber-100 px-4 py-3 text-sm text-amber-800 space-y-1">
+          <p className="font-semibold">Push is not ready on the server yet.</p>
+          <p>
+            After adding env vars you must <strong>Redeploy</strong> on Vercel (Deployments → … → Redeploy).
+            Env vars only apply after a new deploy.
+          </p>
+          {stats?.configDetail && (
+            <p className="text-xs mt-1 opacity-90">
+              Check: projectId={String(stats.configDetail.hasProjectId)} ·
+              clientEmail={String(stats.configDetail.hasClientEmail)} ·
+              privateKey={String(stats.configDetail.hasPrivateKey)} ·
+              package={String(stats.configDetail.packageOk)}
+              {stats.configDetail.lastError ? ` · ${stats.configDetail.lastError}` : ""}
+            </p>
+          )}
         </div>
       )}
 

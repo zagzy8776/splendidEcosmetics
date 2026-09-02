@@ -6,18 +6,61 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 let admin = null;
-let initTried = false;
+let packageLoadTried = false;
+let lastInitError = null;
 
 function tryLoadAdmin() {
-  if (initTried) return admin;
-  initTried = true;
+  if (packageLoadTried) return admin;
+  packageLoadTried = true;
   try {
     admin = require("firebase-admin");
   } catch (err) {
+    lastInitError = "firebase-admin package missing on server";
     console.error("[Firebase Admin] not installed:", err?.message || err);
     admin = null;
   }
   return admin;
+}
+
+/** Normalize private key from Vercel / .env paste formats */
+function normalizePrivateKey(raw) {
+  if (!raw || typeof raw !== "string") return null;
+  let k = raw.trim();
+  // Strip wrapping quotes Vercel sometimes adds
+  if (
+    (k.startsWith('"') && k.endsWith('"')) ||
+    (k.startsWith("'") && k.endsWith("'"))
+  ) {
+    k = k.slice(1, -1).trim();
+  }
+  // Convert escaped newlines to real newlines (repeat for double-escape)
+  k = k.replace(/\\n/g, "\n");
+  if (k.includes("\\n")) k = k.replace(/\\n/g, "\n");
+  // Some pastes use literal "\n" mixed with real breaks
+  k = k.replace(/\r\n/g, "\n");
+  return k;
+}
+
+export function getFirebaseConfigStatus() {
+  const hasProjectId = !!process.env.FIREBASE_PROJECT_ID;
+  const hasClientEmail = !!process.env.FIREBASE_CLIENT_EMAIL;
+  const hasPrivateKey = !!process.env.FIREBASE_PRIVATE_KEY;
+  const mod = tryLoadAdmin();
+  const packageOk = !!mod;
+  let initialized = false;
+  if (mod && mod.apps && mod.apps.length) initialized = true;
+  else if (hasProjectId && hasClientEmail && hasPrivateKey && packageOk) {
+    // try init
+    initialized = !!getFirebaseAdmin();
+  }
+  return {
+    hasProjectId,
+    hasClientEmail,
+    hasPrivateKey,
+    packageOk,
+    initialized,
+    lastError: lastInitError,
+  };
 }
 
 export function getFirebaseAdmin() {
@@ -28,15 +71,20 @@ export function getFirebaseAdmin() {
     return mod.app();
   }
 
-  const projectId = process.env.FIREBASE_PROJECT_ID;
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+  const projectId = (process.env.FIREBASE_PROJECT_ID || "").trim();
+  const clientEmail = (process.env.FIREBASE_CLIENT_EMAIL || "").trim();
+  const privateKey = normalizePrivateKey(process.env.FIREBASE_PRIVATE_KEY);
 
   if (!projectId || !clientEmail || !privateKey) {
+    lastInitError = "Missing FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, or FIREBASE_PRIVATE_KEY";
     return null;
   }
 
-  privateKey = privateKey.replace(/\\n/g, "\n");
+  if (!privateKey.includes("BEGIN PRIVATE KEY") && !privateKey.includes("BEGIN RSA PRIVATE KEY")) {
+    lastInitError = "FIREBASE_PRIVATE_KEY does not look like a PEM private key (missing BEGIN line)";
+    console.error("[Firebase Admin]", lastInitError);
+    return null;
+  }
 
   try {
     mod.initializeApp({
@@ -46,9 +94,11 @@ export function getFirebaseAdmin() {
         privateKey,
       }),
     });
+    lastInitError = null;
     return mod.app();
   } catch (err) {
-    console.error("[Firebase Admin] init failed:", err?.message || err);
+    lastInitError = err?.message || "Firebase credential init failed";
+    console.error("[Firebase Admin] init failed:", lastInitError);
     return null;
   }
 }
@@ -60,7 +110,8 @@ export function getMessaging() {
   try {
     return mod.messaging();
   } catch (err) {
-    console.error("[Firebase Admin] messaging failed:", err?.message || err);
+    lastInitError = err?.message || "messaging() failed";
+    console.error("[Firebase Admin] messaging failed:", lastInitError);
     return null;
   }
 }

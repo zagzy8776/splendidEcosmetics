@@ -870,10 +870,18 @@ app.get("/api/admin/notifications/stats", requireAdminAuth, async (req, res) => 
         take: 20,
       }),
     ]);
+    const push = await loadPush();
+    const messaging = push.getMessaging();
+    let configDetail = null;
+    try {
+      const fa = await import("./services/firebaseAdmin.js");
+      configDetail = fa.getFirebaseConfigStatus ? fa.getFirebaseConfigStatus() : null;
+    } catch (_) {}
     res.json({
       totalSubscribers: total,
       activeSubscribers: active,
-      configured: !!(await loadPush()).getMessaging(),
+      configured: !!messaging,
+      configDetail,
       recent,
     });
   } catch (err) {
