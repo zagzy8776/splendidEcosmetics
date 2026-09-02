@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Bell, Loader2, Send, Users } from "lucide-react";
+import { Bell, Loader2, Send, Users, Trash2 } from "lucide-react";
 import { getAdminToken } from "../../api";
 
 const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
@@ -57,6 +57,34 @@ export default function NotificationsPage() {
       setStats(null);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDeleteLog(id: string) {
+    if (!window.confirm("Delete this notification from history?")) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/notifications/${id}`, {
+        method: "DELETE",
+        headers: adminHeaders(),
+      });
+      if (!res.ok) throw new Error("Delete failed");
+      await load();
+    } catch (err: any) {
+      setMsg({ type: "err", text: err?.message || "Could not delete" });
+    }
+  }
+
+  async function handleClearLogs() {
+    if (!window.confirm("Clear all notification history?")) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/notifications`, {
+        method: "DELETE",
+        headers: adminHeaders(),
+      });
+      if (!res.ok) throw new Error("Clear failed");
+      await load();
+    } catch (err: any) {
+      setMsg({ type: "err", text: err?.message || "Could not clear history" });
     }
   }
 
@@ -210,22 +238,42 @@ export default function NotificationsPage() {
       </form>
 
       <div className="bg-white rounded-2xl border border-[#F9DEDA]/50 shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#F9DEDA]/40">
+        <div className="px-5 py-4 border-b border-[#F9DEDA]/40 flex items-center justify-between gap-3">
           <h2 className="font-bold text-[#1A0F0A] text-sm uppercase tracking-wider">Recent notifications</h2>
+          {!!stats?.recent?.length && (
+            <button
+              type="button"
+              onClick={handleClearLogs}
+              className="text-[11px] font-semibold text-red-600/80 hover:text-red-700"
+            >
+              Clear all
+            </button>
+          )}
         </div>
         {!stats?.recent?.length ? (
           <div className="p-8 text-center text-sm text-[#9A7A6E]">No notifications sent yet</div>
         ) : (
           <div className="divide-y divide-[#F9DEDA]/40">
             {stats.recent.map((n) => (
-              <div key={n.id} className="px-5 py-4">
-                <div className="font-semibold text-[#1A0F0A] text-sm">{n.title}</div>
-                <div className="text-xs text-[#5C3D2E]/80 mt-0.5 line-clamp-2">{n.body}</div>
-                <div className="text-[11px] text-[#9A7A6E] mt-2">
-                  {n.audience} · Sent {n.sentCount}
-                  {n.failedCount ? ` · Failed ${n.failedCount}` : ""} ·{" "}
-                  {new Date(n.createdAt).toLocaleString()}
+              <div key={n.id} className="px-5 py-4 flex items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-[#1A0F0A] text-sm">{n.title}</div>
+                  <div className="text-xs text-[#5C3D2E]/80 mt-0.5 line-clamp-2">{n.body}</div>
+                  <div className="text-[11px] text-[#9A7A6E] mt-2">
+                    {n.audience} · Sent {n.sentCount}
+                    {n.failedCount ? ` · Failed ${n.failedCount}` : ""} ·{" "}
+                    {new Date(n.createdAt).toLocaleString()}
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteLog(n.id)}
+                  className="p-2 rounded-lg text-[#9A7A6E] hover:text-red-600 hover:bg-red-50 shrink-0"
+                  title="Delete"
+                  aria-label="Delete notification"
+                >
+                  <Trash2 size={15} />
+                </button>
               </div>
             ))}
           </div>

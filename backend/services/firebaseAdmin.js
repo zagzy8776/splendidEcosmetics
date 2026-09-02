@@ -253,6 +253,7 @@ export function isUnregisteredError(code) {
     c.includes("invalid-argument") ||
     c.includes("invalid-payload") ||
     c.includes("not-found") ||
+    c.includes("notregistered") ||
     c.includes("unregistered") ||
     c.includes("no usable token")
   );

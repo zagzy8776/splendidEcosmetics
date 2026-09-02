@@ -926,6 +926,29 @@ app.get("/api/admin/notifications", requireAdminAuth, async (req, res) => {
   }
 });
 
+app.delete("/api/admin/notifications/:id", requireAdminAuth, async (req, res) => {
+  try {
+    const id = String(req.params.id || "").trim();
+    if (!id) return res.status(400).json({ error: "Missing id" });
+    await prisma.notificationLog.delete({ where: { id } });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("[notify delete]", err);
+    res.status(500).json({ error: "Failed to delete notification log" });
+  }
+});
+
+app.delete("/api/admin/notifications", requireAdminAuth, async (req, res) => {
+  try {
+    // Clear all logs
+    const result = await prisma.notificationLog.deleteMany({});
+    res.json({ ok: true, deleted: result.count });
+  } catch (err) {
+    console.error("[notify clear]", err);
+    res.status(500).json({ error: "Failed to clear notification logs" });
+  }
+});
+
 app.post("/api/admin/notifications/send", requireAdminAuth, notifyLimiter, async (req, res) => {
   try {
     let { title, body, audience } = req.body || {};

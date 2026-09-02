@@ -128,8 +128,7 @@ export async function enablePushNotifications(): Promise<{ ok: boolean; error?: 
   if (isIOS && !isStandalone) {
     return {
       ok: false,
-      error:
-        "On iPhone: open in Safari → Share → Add to Home Screen → open the app icon → then enable notifications.",
+      error: "On iPhone, open the Home Screen app (Share → Add to Home Screen), then enable notifications.",
     };
   }
 
