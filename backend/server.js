@@ -5,8 +5,22 @@ import bcrypt from "bcrypt";
 import rateLimit from "express-rate-limit";
 import { PrismaClient } from "@prisma/client";
 import { Resend } from "resend";
-import { getMessaging } from "./services/firebaseAdmin.js";
-import { sendToAllActive, notifyAllSafe } from "./services/notificationService.js";
+
+async function loadPush() {
+  try {
+    const fa = await import("./services/firebaseAdmin.js");
+    const ns = await import("./services/notificationService.js");
+    return { getMessaging: fa.getMessaging, sendToAllActive: ns.sendToAllActive, notifyAllSafe: ns.notifyAllSafe };
+  } catch (err) {
+    console.error("[Push] unavailable:", err?.message || err);
+    return {
+      getMessaging: () => null,
+      sendToAllActive: async () => ({ sent: 0, failed: 0, error: "unavailable" }),
+      notifyAllSafe: () => {},
+    };
+  }
+}
+
 
 const prisma = new PrismaClient();
 const app = express();
@@ -537,12 +551,14 @@ app.post("/api/orders", orderLimiter, async (req, res) => {
     });
     sendEmail(order.email, `Your Order Confirmation – ${order.id}`, buildConfirmationEmail(order));
     // Push to admin/subscribers: new order (non-blocking)
-    notifyAllSafe(prisma, {
-      title: "New order received 🛍️",
-      body: `Order ${order.id} from ${order.customerName} — ₦${Number(order.total).toLocaleString("en-NG")}`,
-      link: "/admin/orders",
-      data: { type: "order.created", orderId: order.id },
-    });
+    loadPush().then(({ notifyAllSafe }) => {
+      notifyAllSafe(prisma, {
+        title: "New order received 🛍️",
+        body: `Order ${order.id} from ${order.customerName} — ₦${Number(order.total).toLocaleString("en-NG")}`,
+        link: "/admin/orders",
+        data: { type: "order.created", orderId: order.id },
+      });
+    }).catch(() => {});
     res.status(201).json(order);
   } catch (err) {
     console.error(err);
@@ -857,7 +873,7 @@ app.get("/api/admin/notifications/stats", requireAdminAuth, async (req, res) => 
     res.json({
       totalSubscribers: total,
       activeSubscribers: active,
-      configured: !!getMessaging(),
+      configured: !!(await loadPush()).getMessaging(),
       recent,
     });
   } catch (err) {
