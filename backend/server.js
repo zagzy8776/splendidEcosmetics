@@ -821,8 +821,12 @@ app.post("/api/notifications/register", registerLimiter, async (req, res) => {
   try {
     const { installationId, token, userAgent, platform } = req.body || {};
     const fid = typeof installationId === "string" ? installationId.trim() : "";
-    if (!fid || fid.length < 8 || fid.length > 256) {
+    // Real FCM tokens are long; FIDs are shorter but still substantial
+    if (!fid || fid.length < 16 || fid.length > 4096) {
       return res.status(400).json({ error: "Valid installationId is required" });
+    }
+    if (fid.startsWith("test-") || fid.includes("debug")) {
+      return res.status(400).json({ error: "Invalid installationId" });
     }
     const ua = typeof userAgent === "string" ? userAgent.slice(0, 500) : null;
     const plat = typeof platform === "string" ? platform.slice(0, 80) : null;
