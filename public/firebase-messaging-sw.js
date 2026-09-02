@@ -17,10 +17,14 @@ try {
       (payload.data && payload.data.body) ||
       "";
     const data = payload.data || {};
-    self.registration.showNotification(title, {
+    return self.registration.showNotification(title, {
       body,
       icon: "/logo.jpg",
+      badge: "/favicon.svg",
       data,
+      tag: "splendid-push",
+      renotify: true,
+      requireInteraction: true,
     });
   });
 } catch (err) {
@@ -43,6 +47,33 @@ self.addEventListener("notificationclick", (event) => {
         }
       }
       if (self.clients.openWindow) return self.clients.openWindow(url);
+    })
+  );
+});
+
+self.addEventListener("push", (event) => {
+  // Fallback if firebase handler does not run
+  let title = "Splendid Empire";
+  let body = "";
+  let data = {};
+  try {
+    const json = event.data ? event.data.json() : {};
+    title = (json.notification && json.notification.title) || (json.data && json.data.title) || title;
+    body = (json.notification && json.notification.body) || (json.data && json.data.body) || body;
+    data = json.data || {};
+  } catch (_) {
+    try {
+      body = event.data ? event.data.text() : "";
+    } catch (_) {}
+  }
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      icon: "/logo.jpg",
+      data,
+      tag: "splendid-push",
+      renotify: true,
+      requireInteraction: true,
     })
   );
 });

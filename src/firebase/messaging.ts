@@ -197,9 +197,15 @@ export function listenForeground(handler: (title: string, body: string) => void)
   const messaging = getMessagingSafe();
   if (!messaging) return () => {};
   return onMessage(messaging, (payload) => {
-    const title = payload.notification?.title || "Splendid Empire";
-    const body = payload.notification?.body || "";
-    handler(title, body);
+    const title =
+      payload.notification?.title ||
+      (payload.data && (payload.data as any).title) ||
+      "Splendid Empire";
+    const body =
+      payload.notification?.body ||
+      (payload.data && (payload.data as any).body) ||
+      "";
+    handler(String(title), String(body));
   });
 }
 

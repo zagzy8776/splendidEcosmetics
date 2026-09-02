@@ -190,8 +190,6 @@ export async function sendToFid(fid, { title, body, data = {}, link = "/", token
     return { success: false, errorCode: "admin-not-configured" };
   }
 
-  // Web push requires a real FCM registration TOKEN (from client getToken()).
-  // Do NOT use fid here — invalid/unknown fields cause messaging/invalid-payload.
   let fcmToken = token && String(token).length > 80 ? String(token).trim() : null;
   if (!fcmToken && fid && String(fid).length > 80) {
     fcmToken = String(fid).trim();
@@ -205,13 +203,32 @@ export async function sendToFid(fid, { title, body, data = {}, link = "/", token
 
   const safeTitle = String(title || "Splendid Empire").slice(0, 100);
   const safeBody = String(body || "").slice(0, 500);
+  const site = (process.env.FRONTEND_URL || "https://www.splendidcosmetics.com.ng").replace(/\/$/, "");
+  const clickLink =
+    link && String(link).startsWith("http")
+      ? String(link)
+      : `${site}${String(link || "/").startsWith("/") ? link || "/" : "/" + (link || "")}`;
 
-  // Absolute minimal payload — this is the documented working shape
+  // Data-only message: service worker / foreground handler always shows the notification.
+  // (notification+web payloads often arrive silently when the tab is open)
   const message = {
     token: fcmToken,
-    notification: {
+    data: {
       title: safeTitle,
       body: safeBody,
+      click_url: clickLink,
+      ...Object.fromEntries(
+        Object.entries(data || {}).map(([k, v]) => [String(k), String(v ?? "")])
+      ),
+    },
+    webpush: {
+      fcmOptions: {
+        link: clickLink,
+      },
+      headers: {
+        Urgency: "high",
+        TTL: "86400",
+      },
     },
   };
 

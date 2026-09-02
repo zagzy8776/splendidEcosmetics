@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import NotificationPrompt from "./components/notifications/NotificationPrompt";
+import PushListener from "./components/notifications/PushListener";
 import { fetchProducts, createOrder, fetchOrders, updateOrderStatus, deleteOrder, updateOrder, createProduct, updateProduct, deleteProduct, adminLogin, adminLogout, getAdminToken, clearAdminToken, changeAdminPassword, cloudinaryUpload, fetchCategories, saveCategoryPhoto, deleteCategoryPhoto } from "../api";
 import {
   ShoppingBag, X, Menu, Instagram, Facebook, Phone, MapPin,
@@ -434,6 +435,7 @@ export default function App() {
       {/* Toast Notifications */}
       <ToastContainer toasts={toasts} />
       <NotificationPrompt />
+      <PushListener />
     </div>
   );
 }
