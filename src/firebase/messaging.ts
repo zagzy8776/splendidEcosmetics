@@ -127,13 +127,22 @@ export async function enablePushNotifications(): Promise<{ ok: boolean; error?: 
     return { ok: false, error: "Push is not configured on this site." };
   }
 
+  // If already denied, requestPermission() will not show a prompt on Chrome
+  if (Notification.permission === "denied") {
+    return {
+      ok: false,
+      error:
+        "Chrome blocked notifications for this site. Tap the lock icon next to the address → Permissions → Notifications → Allow, then reload.",
+    };
+  }
+
   const permission = await Notification.requestPermission();
   if (permission !== "granted") {
     return {
       ok: false,
       error:
         permission === "denied"
-          ? "Notifications are blocked. Enable them in browser settings for this site."
+          ? "Chrome blocked notifications for this site. Tap the lock icon next to the address → Permissions → Notifications → Allow, then reload."
           : "Permission was not granted.",
     };
   }

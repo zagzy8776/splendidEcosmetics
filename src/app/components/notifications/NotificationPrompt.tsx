@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Bell, X, Loader2 } from "lucide-react";
+import { Bell, X, Loader2, Settings } from "lucide-react";
 import {
   messagingSupported,
   permissionState,
@@ -15,6 +15,7 @@ export default function NotificationPrompt() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
+  const [blocked, setBlocked] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -23,16 +24,25 @@ export default function NotificationPrompt() {
       const supported = await messagingSupported();
       if (!supported || cancelled) return;
 
-      // Refresh registration if already granted
-      if (permissionState() === "granted") {
+      const perm = permissionState();
+      if (perm === "granted") {
         syncExistingRegistration().catch(() => {});
         return;
       }
 
-      if (permissionState() === "denied") return;
-      if (wasPromptDismissed()) return;
+      // If previously denied, still show a small helper so they can fix site settings
+      if (perm === "denied") {
+        if (wasPromptDismissed()) return;
+        setTimeout(() => {
+          if (!cancelled) {
+            setBlocked(true);
+            setVisible(true);
+          }
+        }, 2500);
+        return;
+      }
 
-      // Soft delay so it doesn't interrupt first paint
+      if (wasPromptDismissed()) return;
       setTimeout(() => {
         if (!cancelled) setVisible(true);
       }, 4000);
@@ -49,9 +59,17 @@ export default function NotificationPrompt() {
     setLoading(false);
     if (result.ok) {
       setDone(true);
-      setTimeout(() => setVisible(false), 1800);
+      setBlocked(false);
+      setTimeout(() => setVisible(false), 2000);
     } else {
-      setError(result.error || "Could not enable notifications.");
+      const msg = result.error || "Could not enable notifications.";
+      setError(msg);
+      if (
+        permissionState() === "denied" ||
+        /block|denied|permission/i.test(msg)
+      ) {
+        setBlocked(true);
+      }
     }
   }
 
@@ -63,7 +81,7 @@ export default function NotificationPrompt() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-[60] sm:left-auto sm:right-4 sm:max-w-sm animate-in fade-in slide-in-from-bottom-4">
+    <div className="fixed bottom-4 left-4 right-4 z-[60] sm:left-auto sm:right-4 sm:max-w-sm">
       <div className="rounded-2xl bg-white shadow-2xl border border-[#F9DEDA]/60 p-4 sm:p-5 font-[Raleway,sans-serif]">
         <div className="flex items-start gap-3">
           <div className="p-2.5 rounded-xl bg-[#F2B8A8]/25 shrink-0">
@@ -75,18 +93,53 @@ export default function NotificationPrompt() {
                 className="font-bold text-[#1A0F0A] text-sm"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
-                Stay updated with Splendid ✨
+                {blocked ? "Notifications blocked for this site" : "Stay updated with Splendid ✨"}
               </h3>
-              <button onClick={onDismiss} className="p-1 rounded-lg hover:bg-[#FAF7F5] text-[#9A7A6E]" aria-label="Close">
+              <button
+                onClick={onDismiss}
+                className="p-1 rounded-lg hover:bg-[#FAF7F5] text-[#9A7A6E]"
+                aria-label="Close"
+              >
                 <X size={16} />
               </button>
             </div>
-            <p className="text-xs text-[#5C3D2E]/80 mt-1 leading-relaxed">
-              Get notified about new arrivals, special offers and important order updates.
-            </p>
-            {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
+
+            {blocked ? (
+              <div className="text-xs text-[#5C3D2E]/90 mt-2 space-y-2 leading-relaxed">
+                <p>
+                  Chrome can block <strong>this website only</strong>, even when phone notifications
+                  look turned on.
+                </p>
+                <p className="font-semibold text-[#1A0F0A] flex items-center gap-1">
+                  <Settings size={12} /> Fix on Android Chrome:
+                </p>
+                <ol className="list-decimal pl-4 space-y-1">
+                  <li>Tap the lock icon (or tune icon) left of the website address</li>
+                  <li>Tap <strong>Permissions</strong> / <strong>Site settings</strong></li>
+                  <li>Find <strong>Notifications</strong></li>
+                  <li>Change from <strong>Block</strong> to <strong>Allow</strong></li>
+                  <li>Reload the page, then tap Enable again</li>
+                </ol>
+                <p className="text-[11px] text-[#9A7A6E]">
+                  Or: Chrome menu → Settings → Site settings → Notifications → allowed/blocked list →
+                  remove splendidcosmetics.com.ng from blocked.
+                </p>
+              </div>
+            ) : (
+              <p className="text-xs text-[#5C3D2E]/80 mt-1 leading-relaxed">
+                Get notified about new arrivals, special offers and important order updates.
+              </p>
+            )}
+
+            {error && !blocked && <p className="text-xs text-red-600 mt-2">{error}</p>}
+            {error && blocked && (
+              <p className="text-xs text-red-600 mt-2">{error}</p>
+            )}
+
             {done ? (
-              <p className="text-xs text-emerald-600 mt-3 font-semibold">You&apos;re all set! We&apos;ll keep you posted.</p>
+              <p className="text-xs text-emerald-600 mt-3 font-semibold">
+                You&apos;re all set! We&apos;ll keep you posted.
+              </p>
             ) : (
               <div className="flex gap-2 mt-3">
                 <button
@@ -95,7 +148,7 @@ export default function NotificationPrompt() {
                   className="flex-1 rounded-xl bg-[#1A0F0A] text-[#F2B8A8] text-xs font-semibold py-2.5 disabled:opacity-60 flex items-center justify-center gap-1.5"
                 >
                   {loading ? <Loader2 size={14} className="animate-spin" /> : null}
-                  Enable notifications
+                  {blocked ? "Try again after Allow" : "Enable notifications"}
                 </button>
                 <button
                   onClick={onDismiss}
