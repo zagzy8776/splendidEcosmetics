@@ -971,11 +971,14 @@ app.post("/api/admin/notifications/send", requireAdminAuth, notifyLimiter, async
       ok: true,
       sent: result.sent,
       failed: result.failed,
+      errors: result.errors || [],
       log,
       message:
         result.sent === 0 && result.failed === 0
           ? "No active subscribers yet. Open the store on a phone/browser and enable notifications first."
-          : undefined,
+          : result.sent === 0 && result.failed > 0
+            ? "Could not deliver. Subscriber may need to open the site and enable notifications again."
+            : undefined,
     });
   } catch (err) {
     console.error("[notify send]", err);

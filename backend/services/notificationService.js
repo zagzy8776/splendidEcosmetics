@@ -10,7 +10,7 @@ export async function sendToAllActive(prisma, { title, body, data, link }) {
   try {
     subs = await prisma.pushSubscription.findMany({
       where: { enabled: true },
-      select: { id: true, installationId: true },
+      select: { id: true, installationId: true, token: true },
     });
   } catch (err) {
     console.error("[FCM] cannot read subscriptions (table may be missing):", err?.message);
@@ -20,13 +20,20 @@ export async function sendToAllActive(prisma, { title, body, data, link }) {
   let sent = 0;
   let failed = 0;
   const toDisable = [];
+  const errors = [];
   const batchSize = 25;
 
   for (let i = 0; i < subs.length; i += batchSize) {
     const batch = subs.slice(i, i + batchSize);
     await Promise.all(
       batch.map(async (sub) => {
-        const result = await sendToFid(sub.installationId, { title, body, data, link });
+        const result = await sendToFid(sub.installationId, {
+          title,
+          body,
+          data,
+          link,
+          token: sub.token || null,
+        });
         if (result.success) {
           sent += 1;
           await prisma.pushSubscription
@@ -34,11 +41,19 @@ export async function sendToAllActive(prisma, { title, body, data, link }) {
             .catch(() => {});
         } else {
           failed += 1;
-          if (isUnregisteredError(result.errorCode)) toDisable.push(sub.id);
-          else {
+          if (errors.length < 5) errors.push(String(result.errorCode || "unknown"));
+          // Disable bad/test/invalid targets so they don't keep failing
+          if (isUnregisteredError(result.errorCode) || String(result.errorCode).includes("invalid") || String(result.errorCode).includes("not-found")) {
+            toDisable.push(sub.id);
+          } else {
             await prisma.pushSubscription
               .update({ where: { id: sub.id }, data: { failCount: { increment: 1 } } })
               .catch(() => {});
+            // After 3 failures, disable
+            try {
+              const row = await prisma.pushSubscription.findUnique({ where: { id: sub.id } });
+              if (row && row.failCount >= 3) toDisable.push(sub.id);
+            } catch { /* ignore */ }
           }
         }
       })
@@ -51,7 +66,7 @@ export async function sendToAllActive(prisma, { title, body, data, link }) {
       .catch(() => {});
   }
 
-  return { sent, failed };
+  return { sent, failed, errors, totalTargets: subs.length };
 }
 
 export function notifyAllSafe(prisma, payload) {

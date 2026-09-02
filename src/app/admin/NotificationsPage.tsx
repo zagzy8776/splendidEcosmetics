@@ -80,9 +80,13 @@ export default function NotificationsPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Send failed");
+      const errHint = Array.isArray(data.errors) && data.errors.length
+        ? ` (${data.errors[0]})`
+        : "";
+      const extra = data.message ? ` ${data.message}` : "";
       setMsg({
-        type: "ok",
-        text: `Sent to ${data.sent} device${data.sent === 1 ? "" : "s"}${data.failed ? ` · ${data.failed} failed` : ""}.`,
+        type: data.sent > 0 ? "ok" : "err",
+        text: `Sent to ${data.sent} device${data.sent === 1 ? "" : "s"}${data.failed ? ` · ${data.failed} failed` : ""}${errHint}.${extra}`,
       });
       setTitle("");
       setBody("");

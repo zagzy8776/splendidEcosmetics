@@ -184,14 +184,13 @@ export function getFirebaseAdmin() {
   return null;
 }
 
-export async function sendToFid(fid, { title, body, data = {}, link = "/" }) {
+export async function sendToFid(fid, { title, body, data = {}, link = "/", token = null }) {
   const messaging = await ensureMessaging();
   if (!messaging) {
     return { success: false, errorCode: "admin-not-configured" };
   }
 
-  const message = {
-    fid,
+  const base = {
     notification: {
       title: String(title).slice(0, 100),
       body: String(body).slice(0, 500),
@@ -212,14 +211,23 @@ export async function sendToFid(fid, { title, body, data = {}, link = "/" }) {
     ),
   };
 
-  try {
-    await messaging.send(message);
-    return { success: true };
-  } catch (err) {
-    const code = err?.code || err?.errorInfo?.code || "unknown";
-    console.error("[FCM send error]", code, err?.message);
-    return { success: false, errorCode: code };
+  // Prefer web registration token when present (most reliable for browsers)
+  const targets = [];
+  if (token) targets.push({ token });
+  if (fid && fid !== token) targets.push({ fid });
+  if (!targets.length && fid) targets.push({ fid });
+
+  let lastCode = "unknown";
+  for (const target of targets) {
+    try {
+      await messaging.send({ ...base, ...target });
+      return { success: true };
+    } catch (err) {
+      lastCode = err?.code || err?.errorInfo?.code || err?.message || "unknown";
+      console.error("[FCM send error]", lastCode, err?.message);
+    }
   }
+  return { success: false, errorCode: lastCode };
 }
 
 export function isUnregisteredError(code) {
