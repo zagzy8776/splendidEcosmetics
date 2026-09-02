@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { Plus, Search, Pencil, Trash2, Loader2, X, Upload, Check } from "lucide-react";
 import {
   fetchProducts,
@@ -34,6 +35,7 @@ const EMPTY: PForm = {
 };
 
 export default function ProductsPage() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -167,8 +169,12 @@ export default function ProductsPage() {
       }
       setShowForm(false);
       setEditId(null);
-    } catch {
-      setFErr("Failed to save product. Try again.");
+    } catch (err: any) {
+      const msg = err?.message || "Failed to save product. Try again.";
+      setFErr(msg);
+      if (String(msg).toLowerCase().includes("session expired")) {
+        setTimeout(() => navigate("/admin/login"), 1500);
+      }
     } finally {
       setSaving(false);
     }

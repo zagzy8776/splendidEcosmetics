@@ -45,6 +45,20 @@ function adminHeaders(): Record<string, string> {
   };
 }
 
+async function handleAdminResponse(res: Response, fallbackMsg: string) {
+  if (res.status === 401) {
+    clearAdminToken();
+    throw new Error("Session expired. Please log in again.");
+  }
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error((data as any).error || fallbackMsg);
+  }
+  return res.json();
+}
+
+
+
 export interface ProductData {
   id: string;
   name: string;
@@ -168,7 +182,11 @@ export async function createProduct(data: ProductData) {
     headers: adminHeaders(),
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Failed to create product");
+  if (res.status === 401) { clearAdminToken(); throw new Error("Session expired. Please log in again."); }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to create product");
+  }
   return res.json();
 }
 
@@ -178,7 +196,11 @@ export async function updateProduct(id: string, data: Partial<ProductData>) {
     headers: adminHeaders(),
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Failed to update product");
+  if (res.status === 401) { clearAdminToken(); throw new Error("Session expired. Please log in again."); }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to update product");
+  }
   return res.json();
 }
 
@@ -187,7 +209,11 @@ export async function deleteProduct(id: string) {
     method: "DELETE",
     headers: adminHeaders(),
   });
-  if (!res.ok) throw new Error("Failed to delete product");
+  if (res.status === 401) { clearAdminToken(); throw new Error("Session expired. Please log in again."); }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to delete product");
+  }
   return res.json();
 }
 
@@ -234,6 +260,10 @@ export async function cloudinaryUpload(file: File): Promise<string> {
     method: "POST",
     headers: adminHeaders(),
   });
+  if (sigRes.status === 401) {
+    clearAdminToken();
+    throw new Error("Session expired. Please log in again.");
+  }
   if (!sigRes.ok) {
     const err = await sigRes.json().catch(() => ({}));
     throw new Error(err.error || `Failed to get upload signature (HTTP ${sigRes.status})`);
@@ -267,6 +297,21 @@ export async function cloudinaryUpload(file: File): Promise<string> {
   return json.eager?.[0]?.secure_url ?? json.secure_url;
 }
 
+export async function fetchCategoriesList(): Promise<Array<{ name: string; image: string | null }>> {
+  try {
+    const res = await fetchWithRetry(`${API_BASE}/api/categories?list=1`, {
+      headers: { Accept: "application/json+list" },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (Array.isArray(data)) return data;
+    // fallback if server returned map
+    return Object.entries(data || {}).map(([name, image]) => ({ name, image: image as string }));
+  } catch {
+    return [];
+  }
+}
+
 export async function fetchCategories(): Promise<Record<string, string>> {
   try {
     const res = await fetchWithRetry(`${API_BASE}/api/categories`);
@@ -282,9 +327,13 @@ export async function saveCategoryPhoto(name: string, image: string | null) {
   const res = await fetch(`${API_BASE}/api/categories`, {
     method: "POST",
     headers: adminHeaders(),
-    body: JSON.stringify({ name, image }),
+    body: JSON.stringify({ name, image: image || null }),
   });
-  if (!res.ok) throw new Error("Failed to save category photo");
+  if (res.status === 401) { clearAdminToken(); throw new Error("Session expired. Please log in again."); }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to save category");
+  }
   return res.json();
 }
 

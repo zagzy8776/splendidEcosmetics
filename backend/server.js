@@ -281,7 +281,7 @@ function b64url(buf) {
 
 function signToken(sessionVersion) {
   const payload = JSON.stringify({
-    exp: Date.now() + 8 * 60 * 60 * 1000,
+    exp: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days — so all-day posting never dies
     v: sessionVersion,
   });
   const payloadB64 = b64url(payload);
@@ -713,11 +713,18 @@ app.post("/api/admin/cloudinary-upload-signature", requireAdminAuth, async (req,
 
 app.get("/api/categories", async (req, res) => {
   try {
-    const categories = await prisma.category.findMany();
+    const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
+    // Always return array for admin; also include images map for storefront compatibility
     const map = {};
     for (const c of categories) {
       if (c.image) map[c.name] = c.image;
     }
+    const accept = (req.headers["accept"] || "").toLowerCase();
+    const wantList = req.query.list === "1" || accept.includes("application/json+list");
+    if (wantList) {
+      return res.json(categories.map(c => ({ name: c.name, image: c.image || null })));
+    }
+    // Default: map (storefront) — if empty map but categories exist without images, still ok
     res.json(map);
   } catch (err) {
     console.error(err);
