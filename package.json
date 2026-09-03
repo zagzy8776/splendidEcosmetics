@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "vite"
+    "dev": "vite",
+    "postinstall": "npx prisma generate --schema=backend/prisma/schema.prisma",
+    "db:push": "npx prisma db push --schema=backend/prisma/schema.prisma",
+    "db:ensure-inventory": "node backend/scripts/ensure-inventory-columns.mjs"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
