@@ -1365,6 +1365,28 @@ app.post("/api/admin/notifications/send", requireAdminAuth, notifyLimiter, async
 });
 
 
+
+app.get(["/api/sitemap-products.xml", "/sitemap-products.xml"], async (req, res) => {
+  try {
+    const products = await prisma.product.findMany({
+      where: { inStock: true },
+      select: { id: true, name: true, updatedAt: true },
+      orderBy: { updatedAt: "desc" },
+      take: 2000,
+    });
+    const body = products.map((p) => {
+      const last = p.updatedAt ? new Date(p.updatedAt).toISOString().slice(0, 10) : "2026-09-03";
+      const loc = "https://www.splendidcosmetics.com.ng/product/" + encodeURIComponent(p.id);
+      return "  <url><loc>" + loc + "</loc><lastmod>" + last + "</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>";
+    }).join("\n");
+    res.setHeader("Content-Type", "application/xml; charset=utf-8");
+    res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n" + body + "\n</urlset>");
+  } catch (err) {
+    console.error("[sitemap-products]", err?.message || err);
+    res.status(500).type("text/plain").send("sitemap unavailable");
+  }
+});
+
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
