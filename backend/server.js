@@ -1156,6 +1156,16 @@ app.post("/api/notifications/register", registerLimiter, async (req, res) => {
         enabled: true,
       },
     });
+    if (tok) {
+      await prisma.pushSubscription.updateMany({
+        where: {
+          enabled: true,
+          id: { not: sub.id },
+          OR: [{ token: tok }, { installationId: tok }],
+        },
+        data: { enabled: false },
+      }).catch(() => {});
+    }
     res.json({ ok: true, id: sub.id });
   } catch (err) {
     console.error("[notify register]", err);
