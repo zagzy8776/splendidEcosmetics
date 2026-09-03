@@ -405,3 +405,23 @@ export async function fetchPublicOrder(id: string) {
   }
   return res.json();
 }
+
+export async function fetchVisitorAnalytics(range = "today") {
+  const token = getAdminToken();
+  const res = await fetch(`${API_BASE}/api/admin/analytics/summary?range=${encodeURIComponent(range)}`, {
+    headers: { Authorization: token ? `Bearer ${token}` : "", Accept: "application/json" },
+  });
+  if (res.status === 401) { clearAdminToken(); throw new Error("Session expired. Please log in again."); }
+  if (!res.ok) throw new Error("Failed to load visitor analytics");
+  return res.json();
+}
+
+export async function fetchLiveVisitors() {
+  const token = getAdminToken();
+  const res = await fetch(`${API_BASE}/api/admin/analytics/live`, {
+    headers: { Authorization: token ? `Bearer ${token}` : "", Accept: "application/json" },
+  });
+  if (res.status === 401) { clearAdminToken(); throw new Error("Session expired. Please log in again."); }
+  if (!res.ok) throw new Error("Failed to load live visitors");
+  return res.json();
+}
