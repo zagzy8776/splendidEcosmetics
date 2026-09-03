@@ -29,7 +29,7 @@ try {
       image,
       data,
       tag: data.tag || data.orderId || "splendid-push",
-      renotify: true,
+      renotify: false,
       requireInteraction: true,
     });
   });
@@ -64,34 +64,6 @@ self.addEventListener("notificationclick", (event) => {
         }
       }
       if (self.clients.openWindow) return self.clients.openWindow(url);
-    })
-  );
-});
-
-self.addEventListener("push", (event) => {
-  let title = "Splendid Empire";
-  let body = "";
-  let data = {};
-  try {
-    const json = event.data ? event.data.json() : {};
-    title = (json.notification && json.notification.title) || (json.data && json.data.title) || title;
-    body = (json.notification && json.notification.body) || (json.data && json.data.body) || body;
-    data = json.data || {};
-  } catch (_) {
-    try {
-      body = event.data ? event.data.text() : "";
-    } catch (_) {}
-  }
-  event.waitUntil(
-    self.registration.showNotification(title, {
-      body,
-      icon: data.icon || DEFAULT_ICON,
-      badge: DEFAULT_BADGE,
-      image: data.image || undefined,
-      data,
-      tag: data.tag || data.orderId || "splendid-push",
-      renotify: true,
-      requireInteraction: true,
     })
   );
 });
