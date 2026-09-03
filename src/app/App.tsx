@@ -136,6 +136,30 @@ export default function App() {
     // Orders are fetched inside AdminPanel after authentication
   }, []);
 
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [checkoutStep, setCheckoutStep] = useState<CheckoutStep | null>(null);
+  const [activeCategory, setActiveCategory] = useState<Category>("All");
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [orderId, setOrderId] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [toasts, setToasts] = useState<{ id: number; msg: string }[]>([]);
+  const toastCounter = useRef(0);
+  function addToast(msg: string) {
+    const id = ++toastCounter.current;
+    setToasts(prev => [...prev, { id, msg }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 2800);
+  }
+
+  // Premium Features & Hidden Admin States
+  const [adminPromptOpen, setAdminPromptOpen] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [quizOpen, setQuizOpen] = useState(false);
+
   useEffect(() => {
     startPresenceHeartbeat();
     trackStoreEvent("page_view", { section: "home" });
@@ -164,30 +188,6 @@ export default function App() {
       setPresenceContext(cartOpen ? "cart" : checkoutStep ? "checkout" : "home");
     }
   }, [quickViewProduct, cartOpen, checkoutStep]);
-
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [checkoutStep, setCheckoutStep] = useState<CheckoutStep | null>(null);
-  const [activeCategory, setActiveCategory] = useState<Category>("All");
-  const [customerName, setCustomerName] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
-  const [orderId, setOrderId] = useState("");
-  const [copied, setCopied] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [toasts, setToasts] = useState<{ id: number; msg: string }[]>([]);
-  const toastCounter = useRef(0);
-  function addToast(msg: string) {
-    const id = ++toastCounter.current;
-    setToasts(prev => [...prev, { id, msg }]);
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 2800);
-  }
-
-  // Premium Features & Hidden Admin States
-  const [adminPromptOpen, setAdminPromptOpen] = useState(false);
-  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
-  const [quizOpen, setQuizOpen] = useState(false);
 
   // Prevent background scroll when any overlay modal or sidebar is active
   useEffect(() => {
