@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Search, RefreshCw, Pencil, Trash2, Loader2, X, Check } from "lucide-react";
+import { useSearchParams } from "react-router";
 import { fetchOrders, updateOrderStatus, updateOrder, deleteOrder } from "../../api";
 import { fmt, type Order, type OrderStatus } from "./types";
 
@@ -14,6 +15,8 @@ const statusStyle: Record<string, string> = {
 };
 
 export default function OrdersPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedOrderId = searchParams.get("order");
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -54,7 +57,7 @@ export default function OrdersPage() {
   }
 
   useEffect(() => {
-    loadOrders();
+    void loadOrders();
   }, []);
 
   async function advanceStatus(order: Order) {
@@ -78,6 +81,14 @@ export default function OrdersPage() {
     setEditStatus(order.status);
     setEditErr("");
   }
+
+  useEffect(() => {
+    if (!requestedOrderId || loading || editing) return;
+    const requested = orders.find((order) => order.id === requestedOrderId);
+    if (!requested) return;
+    openEdit(requested);
+    setSearchParams({}, { replace: true });
+  }, [requestedOrderId, orders, loading, editing, setSearchParams]);
 
   async function saveEdit(e: React.FormEvent) {
     e.preventDefault();
@@ -154,7 +165,7 @@ export default function OrdersPage() {
           </p>
         </div>
         <button
-          onClick={() => loadOrders(true)}
+          onClick={() => void loadOrders(true)}
           disabled={refreshing}
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#F9DEDA] bg-white text-sm font-medium text-[#1A0F0A] hover:border-[#C9A227]/50 transition"
         >
