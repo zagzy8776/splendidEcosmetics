@@ -67,7 +67,10 @@ export default function AdminLayout() {
           aria-hidden="true"
         />
       )}
-      <aside className={`fixed lg:sticky top-0 left-0 z-[110] h-dvh w-64 flex flex-col bg-[#1A0F0A] text-white transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
+      <aside
+        id="admin-mobile-navigation"
+        className={`fixed lg:sticky top-0 left-0 z-[110] h-dvh w-64 flex flex-col bg-[#1A0F0A] text-white transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
+      >
         <div className="px-5 py-6 border-b border-white/10 flex items-center justify-between">
           <div>
             <div className="text-[#F2B8A8] font-bold tracking-[0.15em] text-sm" style={{ fontFamily: "'Playfair Display', serif" }}>SPLENDID EMPIRE</div>
@@ -101,7 +104,7 @@ export default function AdminLayout() {
         </div>
       </aside>
       <div className="flex-1 flex flex-col min-w-0 min-h-dvh">
-        <header className="lg:hidden sticky top-0 z-[100] relative bg-white border-b border-[#F9DEDA]/40 px-4 py-3 flex items-center gap-3 pointer-events-auto">
+        <header className="lg:hidden sticky top-0 z-[100] bg-white border-b border-[#F9DEDA]/40 px-4 py-3 flex items-center gap-3 pointer-events-auto">
           <button
             type="button"
             aria-label="Open admin navigation"
