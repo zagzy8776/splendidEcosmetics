@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import NotificationPrompt from "./components/notifications/NotificationPrompt";
 import { getStoredToken } from "../firebase/messaging";
 import PushListener from "./components/notifications/PushListener";
+import { trackStoreEvent, trackProductView, startPresenceHeartbeat, setPresenceContext } from "../lib/storefrontAnalytics";
 import { fetchProducts, createOrder, fetchOrders, updateOrderStatus, deleteOrder, updateOrder, createProduct, updateProduct, deleteProduct, adminLogin, adminLogout, getAdminToken, clearAdminToken, changeAdminPassword, cloudinaryUpload, fetchCategories, saveCategoryPhoto, deleteCategoryPhoto } from "../api";
 import {
   ShoppingBag, X, Menu, Instagram, Facebook, Phone, MapPin,
@@ -134,6 +135,36 @@ export default function App() {
     }).finally(() => setLoading(false));
     // Orders are fetched inside AdminPanel after authentication
   }, []);
+
+  useEffect(() => {
+    startPresenceHeartbeat();
+    trackStoreEvent("page_view", { section: "home" });
+    setPresenceContext("home");
+  }, []);
+
+  useEffect(() => {
+    if (activeCategory && activeCategory !== "All") {
+      trackStoreEvent("view_item_list", { category: activeCategory, section: "shop" });
+    }
+  }, [activeCategory]);
+
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) return;
+    const t = setTimeout(() => {
+      trackStoreEvent("search", { searchTerm: q, section: "shop" });
+    }, 800);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (quickViewProduct) {
+      trackProductView(quickViewProduct);
+    } else {
+      setPresenceContext(cartOpen ? "cart" : checkoutStep ? "checkout" : "home");
+    }
+  }, [quickViewProduct, cartOpen, checkoutStep]);
+
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
@@ -183,11 +214,32 @@ export default function App() {
       if (ex) return prev.map(i => i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i);
       return [...prev, { product, quantity: 1 }];
     });
+    trackStoreEvent("add_to_cart", {
+      productId: product.id,
+      productName: product.name,
+      category: product.category,
+      price: product.price,
+      quantity: 1,
+      currency: "NGN",
+    });
     const label = product.name.length > 28 ? product.name.slice(0, 28) + "\u2026" : product.name;
     addToast(`${label} added to cart \uD83D\uDECD\uFE0F`);
   }
 
-  function removeFromCart(id: string) { setCart(prev => prev.filter(i => i.product.id !== id)); }
+  function removeFromCart(id: string) {
+    const item = cart.find(i => i.product.id === id);
+    setCart(prev => prev.filter(i => i.product.id !== id));
+    if (item) {
+      trackStoreEvent("remove_from_cart", {
+        productId: item.product.id,
+        productName: item.product.name,
+        category: item.product.category,
+        price: item.product.price,
+        quantity: item.quantity,
+        currency: "NGN",
+      });
+    }
+  }
 
   function updateQty(id: string, delta: number) {
     setCart(prev => prev.flatMap(i => {
@@ -201,6 +253,8 @@ export default function App() {
     setOrderId(genId());
     setCheckoutStep("info");
     setCartOpen(false);
+    setPresenceContext("checkout");
+    trackStoreEvent("begin_checkout", { section: "checkout", currency: "NGN", price: cartTotal });
   }
 
   function placeOrder() {
@@ -295,7 +349,7 @@ export default function App() {
     <div style={{ fontFamily: "'Raleway', sans-serif", backgroundColor: "#FFF6F3", minHeight: "100dvh", overflowX: "hidden" }}>
       <Navbar
         cartCount={cartCount}
-        onCartOpen={() => setCartOpen(true)}
+        onCartOpen={() => { setCartOpen(true); setPresenceContext("cart"); trackStoreEvent("page_view", { section: "cart" }); }}
         onAdminRequest={() => navigate("/admin/login")}
         onSearch={(q) => {
           setSearchQuery(q);
