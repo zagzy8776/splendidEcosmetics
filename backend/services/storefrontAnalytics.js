@@ -1,3 +1,11 @@
+import {
+  THRESHOLDS,
+  pct,
+  classifyProduct,
+  classifySource,
+  classifyInventoryDemand,
+} from "./analyticsIntelligence.js";
+
 const ALLOWED_EVENTS = new Set([
   "page_view",
   "view_item",
@@ -102,7 +110,22 @@ export async function ingestEvents(prisma, body) {
   }
   if (!rows.length) return { accepted: 0 };
   await prisma.analyticsEvent.createMany({ data: rows });
+  await rememberSession(prisma, body).catch(() => {});
   return { accepted: rows.length };
+}
+
+export async function rememberSession(prisma, body) {
+  const sessionId = cleanId(body?.sessionId);
+  const visitorId = cleanId(body?.visitorId);
+  if (!sessionId || !visitorId) return;
+  const source = classifySource(body?.source, body?.referrer);
+  const medium = cleanText(body?.medium, 40);
+  const campaign = cleanText(body?.campaign, 80);
+  const existing = await prisma.analyticsSession.findUnique({ where: { sessionId } }).catch(() => null);
+  if (existing) return;
+  await prisma.analyticsSession.create({
+    data: { sessionId, visitorId, source, medium, campaign, createdAt: new Date() },
+  });
 }
 
 export async function recordPurchase(prisma, order) {
@@ -137,6 +160,7 @@ export async function upsertPresence(prisma, body) {
   const sessionId = cleanId(body?.sessionId);
   const visitorId = cleanId(body?.visitorId);
   if (!sessionId || !visitorId) return { ok: false };
+  await rememberSession(prisma, body).catch(() => {});
   await prisma.visitorPresence.upsert({
     where: { sessionId },
     create: {
@@ -249,6 +273,13 @@ export async function summarizeAnalytics(prisma, rangeKey = "today") {
     topPurchasedFromOrders(prisma, start, end),
   ]);
 
+  const revenue = Number(salesAgg._sum.total || 0);
+  const [productPerformance, abandoned, traffic, demand] = await Promise.all([
+    productIntelligence(prisma, start, end),
+    abandonedIntelligence(prisma, start, end, ordersPlaced),
+    trafficIntelligence(prisma, start, end),
+    inventoryDemandIntelligence(prisma, start, end),
+  ]);
   return {
     range: label,
     start: start.toISOString(),
@@ -261,11 +292,224 @@ export async function summarizeAnalytics(prisma, rangeKey = "today") {
     checkouts,
     purchases,
     orders: ordersPlaced,
-    revenue: Number(salesAgg._sum.total || 0),
+    revenue,
+    conversionRate: pct(ordersPlaced, visitors),
     topViewed: mostViewed,
     topAddedToCart: mostCarted,
     topPurchased: mostPurchased,
+    productPerformance,
+    needsAttention: productPerformance.filter((p) => p.tone === "alert" || p.tone === "warn").slice(0, 5),
+    abandoned,
+    traffic,
+    demand,
+    thresholds: THRESHOLDS,
   };
+}
+
+async function countByProduct(prisma, eventType, start, end) {
+  const rows = await prisma.analyticsEvent.groupBy({
+    by: ["productId"],
+    where: { eventType, createdAt: { gte: start, lt: end }, productId: { not: null } },
+    _count: { _all: true },
+  });
+  return Object.fromEntries(rows.map((r) => [r.productId, r._count._all]));
+}
+
+async function productIntelligence(prisma, start, end) {
+  const [views, carts, paid] = await Promise.all([
+    countByProduct(prisma, "view_item", start, end),
+    countByProduct(prisma, "add_to_cart", start, end),
+    prisma.order.findMany({
+      where: { createdAt: { gte: start, lt: end }, status: { in: ["confirmed", "dispatched", "delivered"] } },
+      select: { items: { select: { productId: true, name: true, quantity: true, price: true } } },
+    }),
+  ]);
+  const units = {};
+  const revenue = {};
+  const names = {};
+  for (const order of paid) {
+    for (const item of order.items || []) {
+      const id = item.productId;
+      units[id] = (units[id] || 0) + Number(item.quantity || 0);
+      revenue[id] = (revenue[id] || 0) + Number(item.price || 0) * Number(item.quantity || 0);
+      names[id] = item.name;
+    }
+  }
+  const ids = new Set([...Object.keys(views), ...Object.keys(carts), ...Object.keys(units)]);
+  const products = ids.size
+    ? await prisma.product.findMany({ where: { id: { in: [...ids] } }, select: { id: true, name: true } })
+    : [];
+  for (const p of products) names[p.id] = p.name;
+  const rows = [...ids].map((id) => {
+    const v = views[id] || 0;
+    const c = carts[id] || 0;
+    const u = units[id] || 0;
+    const tag = classifyProduct({ views: v, carts: c, purchases: u });
+    return {
+      productId: id,
+      name: names[id] || id,
+      views: v,
+      carts: c,
+      purchases: u,
+      units: u,
+      revenue: revenue[id] || 0,
+      viewToCart: pct(c, v),
+      cartToPurchase: pct(u, c),
+      viewToPurchase: pct(u, v),
+      label: tag.label,
+      tone: tag.tone,
+    };
+  });
+  return rows.sort((a, b) => b.views - a.views || b.revenue - a.revenue).slice(0, 30);
+}
+
+async function abandonedIntelligence(prisma, start, end, purchaseCount) {
+  const created = { createdAt: { gte: start, lt: end } };
+  const [cartSess, checkSess, cartEvents, checkEvents] = await Promise.all([
+    prisma.analyticsEvent.findMany({ where: { ...created, eventType: "add_to_cart" }, distinct: ["sessionId"], select: { sessionId: true } }),
+    prisma.analyticsEvent.findMany({ where: { ...created, eventType: "begin_checkout" }, distinct: ["sessionId"], select: { sessionId: true } }),
+    prisma.analyticsEvent.findMany({ where: { ...created, eventType: "add_to_cart" }, select: { sessionId: true, payload: true } }),
+    prisma.analyticsEvent.findMany({ where: { ...created, eventType: "begin_checkout" }, select: { sessionId: true, payload: true } }),
+  ]);
+  const checkoutSet = new Set(checkSess.map((s) => s.sessionId));
+  let abandonedCartValue = 0;
+  const seenCart = new Set();
+  for (const ev of cartEvents) {
+    if (checkoutSet.has(ev.sessionId) || seenCart.has(ev.sessionId)) continue;
+    seenCart.add(ev.sessionId);
+    try {
+      const payload = JSON.parse(ev.payload || "{}");
+      abandonedCartValue += Number(payload.price || 0) * Number(payload.quantity || 1);
+    } catch {}
+  }
+  let checkoutDropValue = 0;
+  const seenCheck = new Set();
+  for (const ev of checkEvents) {
+    if (seenCheck.has(ev.sessionId)) continue;
+    seenCheck.add(ev.sessionId);
+    try {
+      const payload = JSON.parse(ev.payload || "{}");
+      checkoutDropValue += Number(payload.price || 0);
+    } catch {}
+  }
+  return {
+    cartsCreated: cartSess.length,
+    checkoutStarts: checkSess.length,
+    purchases: purchaseCount,
+    abandonedBeforeCheckout: Math.max(0, cartSess.length - checkSess.length),
+    abandonedAfterCheckout: Math.max(0, checkSess.length - purchaseCount),
+    estimatedAbandonedCartValue: abandonedCartValue,
+    estimatedCheckoutDropValue: checkoutDropValue,
+    note: "Checkout drop-off is estimated against orders in the same dates. Sessions are anonymous.",
+  };
+}
+
+async function trafficIntelligence(prisma, start, end) {
+  const sessions = await prisma.analyticsSession.findMany({
+    where: { createdAt: { gte: start, lt: end } },
+    select: { sessionId: true, source: true },
+  }).catch(() => []);
+  const bySource = new Map();
+  for (const s of sessions) {
+    const key = s.source || "Direct";
+    if (!bySource.has(key)) bySource.set(key, { source: key, sessionIds: new Set() });
+    bySource.get(key).sessionIds.add(s.sessionId);
+  }
+  const rows = [];
+  for (const row of bySource.values()) {
+    const ids = [...row.sessionIds];
+    const [views, carts, checkouts] = await Promise.all([
+      prisma.analyticsEvent.count({ where: { sessionId: { in: ids }, eventType: "view_item", createdAt: { gte: start, lt: end } } }),
+      prisma.analyticsEvent.count({ where: { sessionId: { in: ids }, eventType: "add_to_cart", createdAt: { gte: start, lt: end } } }),
+      prisma.analyticsEvent.count({ where: { sessionId: { in: ids }, eventType: "begin_checkout", createdAt: { gte: start, lt: end } } }),
+    ]);
+    const paid = await prisma.order.aggregate({
+      where: {
+        createdAt: { gte: start, lt: end },
+        attributionSource: row.source,
+        status: { in: ["confirmed", "dispatched", "delivered"] },
+      },
+      _count: { _all: true },
+      _sum: { total: true },
+    });
+    const orders = paid._count._all;
+    const revenue = Number(paid._sum.total || 0);
+    rows.push({
+      source: row.source,
+      visitors: ids.length,
+      productViews: views,
+      carts,
+      checkouts,
+      orders,
+      revenue,
+      conversionRate: ids.length ? Math.round((orders / ids.length) * 1000) / 10 : 0,
+    });
+  }
+  const unknown = await prisma.order.aggregate({
+    where: {
+      createdAt: { gte: start, lt: end },
+      attributionSource: null,
+    },
+    _count: { _all: true },
+    _sum: { total: true },
+  });
+  if (unknown._count._all) {
+    rows.push({
+      source: "Unknown",
+      visitors: 0,
+      productViews: 0,
+      carts: 0,
+      checkouts: 0,
+      orders: unknown._count._all,
+      revenue: Number(unknown._sum.total || 0),
+      conversionRate: 0,
+    });
+  }
+  return rows.sort((a, b) => b.visitors - a.visitors || b.orders - a.orders);
+}
+
+async function inventoryDemandIntelligence(prisma, start, end) {
+  const [views, carts, products, paid] = await Promise.all([
+    countByProduct(prisma, "view_item", start, end),
+    countByProduct(prisma, "add_to_cart", start, end),
+    prisma.product.findMany({
+      select: { id: true, name: true, stockQuantity: true, lowStockThreshold: true, inStock: true },
+    }),
+    prisma.order.findMany({
+      where: { createdAt: { gte: start, lt: end }, status: { in: ["confirmed", "dispatched", "delivered"] } },
+      select: { items: { select: { productId: true, quantity: true } } },
+    }),
+  ]);
+  const units = {};
+  for (const order of paid) {
+    for (const item of order.items || []) {
+      units[item.productId] = (units[item.productId] || 0) + Number(item.quantity || 0);
+    }
+  }
+  return products.map((p) => {
+    const v = views[p.id] || 0;
+    const c = carts[p.id] || 0;
+    const u = units[p.id] || 0;
+    const tag = classifyInventoryDemand({
+      views: v,
+      carts: c,
+      purchases: u,
+      stockQuantity: p.stockQuantity,
+      lowStockThreshold: p.lowStockThreshold,
+      inStock: p.inStock,
+    });
+    return {
+      productId: p.id,
+      name: p.name,
+      views: v,
+      carts: c,
+      purchases: u,
+      stockQuantity: p.stockQuantity,
+      lowStockThreshold: p.lowStockThreshold,
+      label: tag.label,
+      tone: tag.tone,
+    };
+  }).filter((p) => p.tone !== "neutral" && p.tone !== "ok").slice(0, 20);
 }
 
 async function topPurchasedFromOrders(prisma, start, end, take = 5) {
@@ -289,11 +533,28 @@ async function topPurchasedFromOrders(prisma, start, end, take = 5) {
 }
 
 export function formatDailyReport(summary) {
-  const top = summary.topViewed?.[0];
-  const topLine = top ? `\n🔥 Most viewed: ${top.name} — ${top.count} views` : "";
+  const lines = [
+    `👥 Visitors: ${summary.visitors ?? 0}`,
+    `👀 Page views: ${summary.pageViews ?? 0}`,
+    `🛍️ Product views: ${summary.productViews ?? 0}`,
+    `🛒 Add-to-carts: ${summary.addToCarts ?? 0}`,
+    `💳 Checkouts: ${summary.checkouts ?? 0}`,
+    `💰 Orders: ${summary.orders ?? 0}`,
+    `💵 Revenue: ₦${Number(summary.revenue || 0).toLocaleString("en-NG")}`,
+  ];
+  const viewed = summary.topViewed?.[0];
+  if (viewed) lines.push(`🔥 Most viewed: ${viewed.name} — ${viewed.count} views`);
+  const carted = summary.topAddedToCart?.[0];
+  if (carted) lines.push(`🛒 Most added: ${carted.name} — ${carted.count} carts`);
+  const bought = summary.topPurchased?.[0];
+  if (bought) lines.push(`💰 Most purchased: ${bought.name} — ${bought.count} units`);
+  const attention = summary.needsAttention?.[0];
+  if (attention) lines.push(`⚠️ Needs attention: ${attention.name} — ${attention.views} views, ${attention.purchases} purchases`);
+  const traffic = summary.traffic?.[0];
+  if (traffic) lines.push(`📈 Top source: ${traffic.source} — ${traffic.visitors} visitors`);
   return {
-    title: "📊 Splendid E-Cosmetics — Daily Report",
-    body: `${summary.visitors} visitors\n${summary.pageViews} page views\n${summary.productViews} product views\n${summary.addToCarts} add-to-carts\n${summary.checkouts} checkouts\n${summary.orders} orders${topLine}`,
+    title: "📊 Splendid E-Cosmetics",
+    body: `Yesterday\n\n${lines.join("\n")}`,
   };
 }
 
