@@ -1,5 +1,21 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+Disallow: /order/
 
-# Primary sitemap
-Sitemap: https://splendidcosmetics.com.ng/sitemap.xml
+User-agent: Googlebot
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: https://www.splendidcosmetics.com.ng/sitemap.xml
+Sitemap: https://www.splendidcosmetics.com.ng/sitemap-pages.xml
