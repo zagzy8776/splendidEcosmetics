@@ -4,6 +4,34 @@ import { getAdminToken, fetchProducts } from "../../api";
 
 const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 
+const MESSAGE_TEMPLATES: { label: string; title: string; body: string }[] = [
+  {
+    label: "Happy New Month",
+    title: "Happy New Month lovelies 💛",
+    body: "At Splendid Cosmetics we celebrate more than anything — we love you all. Enjoy a beautiful new month!",
+  },
+  {
+    label: "New arrivals",
+    title: "New arrivals are here ✨",
+    body: "Fresh beauty products just landed. Come see what’s new at Splendid.",
+  },
+  {
+    label: "Weekend special",
+    title: "Weekend glow special ✨",
+    body: "Treat yourself this weekend — shop your favourites from Splendid Empire Cosmetics.",
+  },
+  {
+    label: "Thank you",
+    title: "Thank you for shopping with us 💛",
+    body: "We’re grateful for you. Stay glowing with Splendid Empire Cosmetics.",
+  },
+  {
+    label: "Blank",
+    title: "",
+    body: "",
+  },
+];
+
 function adminHeaders() {
   const token = getAdminToken();
   return {
@@ -227,6 +255,32 @@ export default function NotificationsPage() {
           Send notification
         </h2>
 
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[#5C3D2E] mb-2">
+            Quick messages (optional)
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {MESSAGE_TEMPLATES.map((tpl) => (
+              <button
+                key={tpl.label}
+                type="button"
+                onClick={() => {
+                  setTitle(tpl.title);
+                  setBody(tpl.body);
+                  setAttachPhoto(false);
+                  setSelectedProductId("");
+                }}
+                className="px-3 py-1.5 rounded-full text-xs font-semibold border border-[#F9DEDA] bg-[#FAF7F5] text-[#5C3D2E] hover:border-[#C9A227]/50 hover:bg-white transition"
+              >
+                {tpl.label}
+              </button>
+            ))}
+          </div>
+          <p className="text-[11px] text-[#9A7A6E] mt-2">
+            Photo is optional — greetings like “Happy New Month” look great with just text and the Splendid logo.
+          </p>
+        </div>
+
         <div className="flex items-center gap-3 p-3 rounded-xl bg-[#FAF7F5] border border-[#F9DEDA]/40">
           <img src="/icon-192.png" alt="Splendid" className="w-12 h-12 rounded-xl object-cover" />
           <div className="min-w-0">
@@ -289,7 +343,7 @@ export default function NotificationsPage() {
               }}
               className="rounded border-[#C9A227]"
             />
-            <span className="text-sm font-semibold text-[#1A0F0A]">Add a product photo</span>
+            <span className="text-sm font-semibold text-[#1A0F0A]">Add a product photo <span className="font-normal text-[#9A7A6E]">(optional)</span></span>
           </label>
           {attachPhoto && (
             <div>
