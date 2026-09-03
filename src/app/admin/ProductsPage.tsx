@@ -8,7 +8,7 @@ import {
   deleteProduct,
   cloudinaryUpload,
 } from "../../api";
-import { fmt, type Product } from "./types";
+import { fmt, stockLabel, type Product } from "./types";
 
 type PForm = {
   name: string;
@@ -20,6 +20,8 @@ type PForm = {
   description: string;
   badge: string;
   inStock: boolean;
+  stockQuantity: string;
+  lowStockThreshold: string;
 };
 
 const EMPTY: PForm = {
@@ -32,6 +34,8 @@ const EMPTY: PForm = {
   description: "",
   badge: "",
   inStock: true,
+  stockQuantity: "",
+  lowStockThreshold: "3",
 };
 
 export default function ProductsPage() {
@@ -83,6 +87,8 @@ export default function ProductsPage() {
       description: p.description,
       badge: p.badge || "",
       inStock: p.inStock,
+      stockQuantity: p.stockQuantity === null || p.stockQuantity === undefined ? "" : String(p.stockQuantity),
+      lowStockThreshold: String(p.lowStockThreshold ?? 3),
     });
     setEditId(p.id);
     setCustomCat("");
@@ -150,6 +156,8 @@ export default function ProductsPage() {
       description: form.description.trim(),
       badge: form.badge.trim() || undefined,
       inStock: form.inStock,
+      stockQuantity: form.stockQuantity.trim() === "" ? null : Number(form.stockQuantity),
+      lowStockThreshold: form.lowStockThreshold.trim() === "" ? 3 : Number(form.lowStockThreshold),
     };
 
     try {
@@ -193,10 +201,16 @@ export default function ProductsPage() {
 
   async function toggleStock(p: Product) {
     try {
-      const updated = await updateProduct(p.id, { inStock: !p.inStock });
-      setProducts((prev) =>
-        prev.map((item) => (item.id === p.id ? { ...item, inStock: updated.inStock } : item))
-      );
+      const tracked = p.stockQuantity !== null && p.stockQuantity !== undefined;
+      const payload = tracked
+        ? { stockQuantity: p.stockQuantity > 0 ? 0 : p.stockQuantity }
+        : { inStock: !p.inStock };
+      if (tracked && p.stockQuantity === 0) {
+        showToast("Set a stock quantity to restock this product.");
+        return;
+      }
+      const updated = await updateProduct(p.id, payload);
+      setProducts((prev) => prev.map((item) => (item.id === p.id ? { ...item, ...updated } : item)));
     } catch {
       showToast("Failed to update stock");
     }
@@ -277,6 +291,11 @@ export default function ProductsPage() {
                 <div className="text-[#C9A227] font-bold mt-1" style={{ fontFamily: "'Playfair Display', serif" }}>
                   {fmt(p.price)}
                 </div>
+                {(() => {
+                  const stock = stockLabel(p);
+                  const cls = stock.tone === "out" ? "text-red-600" : stock.tone === "low" ? "text-amber-700" : stock.tone === "ok" ? "text-emerald-700" : "text-[#9A7A6E]";
+                  return <div className={`mt-1 text-[11px] font-semibold ${cls}`}>{stock.text}</div>;
+                })()}
                 <div className="mt-auto pt-3 flex items-center gap-2">
                   <button
                     onClick={() => toggleStock(p)}
@@ -401,6 +420,15 @@ export default function ProductsPage() {
               <Field label="Badge (optional)" value={form.badge} onChange={(v) => setForm((f) => ({ ...f, badge: v }))} placeholder="NEW, SALE, SET..." />
               <Field label="Video URL (optional)" value={form.videoUrl} onChange={(v) => setForm((f) => ({ ...f, videoUrl: v }))} placeholder="Instagram / TikTok link" />
 
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Stock quantity" value={form.stockQuantity} onChange={(v) => setForm((f) => ({ ...f, stockQuantity: v }))} type="number" placeholder="Leave blank if not tracked" />
+                <Field label="Low-stock alert" value={form.lowStockThreshold} onChange={(v) => setForm((f) => ({ ...f, lowStockThreshold: v }))} type="number" placeholder="3" />
+              </div>
+              {form.stockQuantity.trim() === "" ? (
+                <p className="text-[11px] text-[#9A7A6E]">Inventory is not tracked for this product yet. Leave quantity blank to keep the current In stock / Out of stock switch.</p>
+              ) : (
+                <p className="text-[11px] text-[#9A7A6E]">Quantity controls availability automatically. 0 marks the product out of stock.</p>
+              )}
               <label className="flex items-center gap-2 cursor-pointer">
                 <button
                   type="button"
