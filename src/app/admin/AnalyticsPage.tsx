@@ -378,6 +378,72 @@ export default function AnalyticsPage() {
         </div>
       </section>
 
+
+      <section className="mb-6 rounded-3xl border border-[#F1DDD7] bg-white p-5 shadow-sm">
+        <h2 className="text-base font-bold text-[#1A0F0A]">Product performance</h2>
+        <p className="mt-1 text-xs text-[#9A7A6E]">From storefront views, carts and paid orders in this date range.</p>
+        <div className="mt-3 space-y-2">
+          {(visitorStats?.productPerformance || []).slice(0, 8).map((p: any) => (
+            <div key={p.productId} className="rounded-2xl bg-[#FFF8F6] px-3 py-3 text-sm">
+              <div className="flex items-center justify-between gap-2">
+                <strong className="text-[#1A0F0A]">{p.name}</strong>
+                <span className="text-[10px] font-bold uppercase text-[#B5784A]">{p.label}</span>
+              </div>
+              <div className="mt-1 text-xs text-[#5C3D2E]">
+                Views {p.views} · Carts {p.carts} · Purchased {p.purchases} · {fmt(p.revenue || 0)} · View→purchase {p.viewToPurchase}%
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {(visitorStats?.needsAttention || []).length > 0 && (
+        <section className="mb-6 rounded-3xl border border-[#F1DDD7] bg-white p-5 shadow-sm">
+          <h2 className="text-base font-bold text-[#1A0F0A]">Needs attention</h2>
+          <p className="mt-1 text-xs text-[#9A7A6E]">Customers are looking, but purchases are not following. Possible areas to review: price, product photos, description, availability or offer.</p>
+          {(visitorStats.needsAttention || []).map((p: any) => (
+            <div key={p.productId} className="mt-2 text-sm text-[#1A0F0A]">{p.name} — {p.views} views, {p.carts} carts, {p.purchases} purchases</div>
+          ))}
+        </section>
+      )}
+
+      <section className="mb-6 rounded-3xl border border-[#F1DDD7] bg-white p-5 shadow-sm">
+        <h2 className="text-base font-bold text-[#1A0F0A]">Abandoned carts</h2>
+        <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4 text-sm">
+          <div>Carts {visitorStats?.abandoned?.cartsCreated ?? "—"}</div>
+          <div>Checkouts {visitorStats?.abandoned?.checkoutStarts ?? "—"}</div>
+          <div>Before checkout {visitorStats?.abandoned?.abandonedBeforeCheckout ?? "—"}</div>
+          <div>After checkout {visitorStats?.abandoned?.abandonedAfterCheckout ?? "—"}</div>
+        </div>
+        <p className="mt-2 text-xs text-[#9A7A6E]">{visitorStats?.abandoned?.note}</p>
+      </section>
+
+      <section className="mb-6 rounded-3xl border border-[#F1DDD7] bg-white p-5 shadow-sm">
+        <h2 className="text-base font-bold text-[#1A0F0A]">Traffic sources</h2>
+        {(visitorStats?.traffic || []).length === 0 ? (
+          <p className="mt-2 text-xs text-[#9A7A6E]">Sources appear after visitors arrive with a link or UTM tag.</p>
+        ) : (
+          (visitorStats.traffic || []).map((t: any) => (
+            <div key={t.source} className="mt-2 text-sm text-[#1A0F0A]">
+              {t.source} — {t.visitors} visitors · {t.carts} carts · {t.orders} orders · {fmt(t.revenue || 0)} · {t.conversionRate}%
+            </div>
+          ))
+        )}
+      </section>
+
+      <section className="mb-6 rounded-3xl border border-[#F1DDD7] bg-white p-5 shadow-sm">
+        <h2 className="text-base font-bold text-[#1A0F0A]">Inventory + demand</h2>
+        {(visitorStats?.demand || []).length === 0 ? (
+          <p className="mt-2 text-xs text-[#9A7A6E]">No stock/demand alerts in this range.</p>
+        ) : (
+          (visitorStats.demand || []).map((d: any) => (
+            <div key={d.productId} className="mt-2 text-sm text-[#1A0F0A]">
+              {d.label}: {d.name} — views {d.views}, carts {d.carts}, stock {d.stockQuantity ?? "untracked"}
+            </div>
+          ))
+        )}
+      </section>
+
 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
         {kpis.map((k) => (
           <div
