@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
-import ProductSeoSync from "./ProductSeoSync";
 import NotificationPrompt from "./components/notifications/NotificationPrompt";
 import { getStoredToken } from "../firebase/messaging";
 import PushListener from "./components/notifications/PushListener";
-import { trackStoreEvent, trackProductView, startPresenceHeartbeat, setPresenceContext } from "../lib/storefrontAnalytics";
+import { trackStoreEvent, trackProductView, startPresenceHeartbeat, setPresenceContext, getSessionId } from "../lib/storefrontAnalytics";
 import { fetchProducts, createOrder, fetchOrders, updateOrderStatus, deleteOrder, updateOrder, createProduct, updateProduct, deleteProduct, adminLogin, adminLogout, getAdminToken, clearAdminToken, changeAdminPassword, cloudinaryUpload, fetchCategories, saveCategoryPhoto, deleteCategoryPhoto } from "../api";
 import {
   ShoppingBag, X, Menu, Instagram, Facebook, Phone, MapPin,
@@ -273,6 +272,7 @@ export default function App() {
       })),
       // Optional: link this browser to order status push (never required for checkout)
       ...(pushToken ? { installationId: pushToken } : {}),
+      analyticsSessionId: getSessionId(),
     };
 
     createOrder(payload)
@@ -348,7 +348,6 @@ export default function App() {
 
   return (
     <div style={{ fontFamily: "'Raleway', sans-serif", backgroundColor: "#FFF6F3", minHeight: "100dvh", overflowX: "hidden" }}>
-      <ProductSeoSync products={products} onOpen={setQuickViewProduct} />
       <Navbar
         cartCount={cartCount}
         onCartOpen={() => { setCartOpen(true); setPresenceContext("cart"); trackStoreEvent("page_view", { section: "cart" }); }}
