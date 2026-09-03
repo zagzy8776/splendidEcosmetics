@@ -4,6 +4,15 @@ import crypto from "crypto";
 import bcrypt from "bcrypt";
 import rateLimit from "express-rate-limit";
 import { PrismaClient } from "@prisma/client";
+import {
+  ingestEvents,
+  upsertPresence,
+  listLiveVisitors,
+  summarizeAnalytics,
+  recordPurchase,
+  runDailyReport,
+} from "./services/storefrontAnalytics.js";
+
 import { Resend } from "resend";
 import {
   InsufficientStockError,
@@ -23,6 +32,7 @@ async function loadPush() {
       getMessaging: fa.getMessaging,
       ensureMessaging: fa.ensureMessaging,
       getFirebaseConfigStatus: fa.getFirebaseConfigStatus,
+      sendToFid: fa.sendToFid,
       sendToAllActive: ns.sendToAllActive,
       notifyAllSafe: ns.notifyAllSafe,
       notifyOrderSafe: ns.notifyOrderSafe,
@@ -35,6 +45,7 @@ async function loadPush() {
       getMessaging: () => null,
       ensureMessaging: async () => null,
       getFirebaseConfigStatus: async () => ({ lastError: String(err?.message || err) }),
+      sendToFid: async () => ({ success: false }),
       sendToAllActive: async () => ({ sent: 0, failed: 0, error: "unavailable" }),
       notifyAllSafe: () => {},
       notifyOrderSafe: () => {},
@@ -739,6 +750,7 @@ app.post("/api/orders", orderLimiter, async (req, res) => {
       },
       include: { items: true },
     });
+    recordPurchase(prisma, order).catch(() => {});
     sendEmail(order.email, `Your Order Confirmation – ${order.id}`, buildConfirmationEmail(order));
 
     // Link this browser's push subscription to the order (optional, non-blocking)
@@ -1358,7 +1370,93 @@ app.get("/api/health", (req, res) => {
 });
 
 if (!process.env.VERCEL) {
-  app.listen(PORT, async () => {
+  
+app.post("/api/analytics/events", async (req, res) => {
+  try {
+    const result = await ingestEvents(prisma, req.body || {});
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json({ ok: true, accepted: result.accepted });
+  } catch (err) {
+    console.error("[analytics events]", err?.message || err);
+    res.json({ ok: false });
+  }
+});
+
+app.post("/api/analytics/heartbeat", async (req, res) => {
+  try {
+    await upsertPresence(prisma, req.body || {});
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("[analytics heartbeat]", err?.message || err);
+    res.json({ ok: false });
+  }
+});
+
+app.get("/api/admin/analytics/summary", requireAdminAuth, async (req, res) => {
+  try {
+    const range = String(req.query.range || "today");
+    const summary = await summarizeAnalytics(prisma, range);
+    res.json(summary);
+  } catch (err) {
+    console.error("[admin analytics summary]", err?.message || err);
+    res.status(500).json({ error: "Failed to load visitor analytics" });
+  }
+});
+
+app.get("/api/admin/analytics/live", requireAdminAuth, async (req, res) => {
+  try {
+    const visitors = await listLiveVisitors(prisma);
+    res.json({ active: visitors.length, visitors });
+  } catch (err) {
+    console.error("[admin analytics live]", err?.message || err);
+    res.status(500).json({ error: "Failed to load live visitors" });
+  }
+});
+
+async function runDailyAnalyticsReportHttp(req, res) {
+  try {
+    const secret = process.env.CRON_SECRET;
+    const hdr = String(req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+    const query = String(req.query.secret || "");
+    if (!secret || (hdr !== secret && query !== secret)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const site = String(process.env.FRONTEND_URL || "https://www.splendidcosmetics.com.ng").replace(/\/$/, "");
+    await Promise.allSettled([
+      fetch(`${site}/api/health`, { method: "GET" }),
+      fetch(site, { method: "GET" }),
+    ]);
+    const push = await loadPush();
+    const result = await runDailyReport(prisma, async (copy) => {
+      const subs = await prisma.pushSubscription.findMany({
+        where: { enabled: true, platform: { in: ["admin", "owner"] } },
+        select: { installationId: true, token: true },
+      });
+      let sent = 0;
+      for (const sub of subs) {
+        try {
+          const r = await push.sendToFid(sub.installationId, {
+            title: copy.title,
+            body: copy.body,
+            link: "/admin/analytics",
+            token: sub.token,
+          });
+          if (r?.success) sent += 1;
+        } catch {}
+      }
+      return { sent };
+    });
+    res.json(result);
+  } catch (err) {
+    console.error("[daily analytics report]", err?.message || err);
+    res.status(500).json({ error: "Failed to run daily report" });
+  }
+}
+
+app.get("/api/cron/daily-analytics-report", runDailyAnalyticsReportHttp);
+app.post("/api/cron/daily-analytics-report", runDailyAnalyticsReportHttp);
+
+app.listen(PORT, async () => {
     await ensureAdminPassword().catch(err => console.error("[Auth Seed Error]", err));
     console.log(`Splendid Empire API running on port ${PORT}`);
   });
