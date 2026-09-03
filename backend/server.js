@@ -5,6 +5,15 @@ import bcrypt from "bcrypt";
 import rateLimit from "express-rate-limit";
 import { PrismaClient } from "@prisma/client";
 import { Resend } from "resend";
+import {
+  InsufficientStockError,
+  parseStockQuantity,
+  parseLowStockThreshold,
+  syncInStockFromQuantity,
+  productIsAvailable,
+  canFulfill,
+  applyOrderStatusWithStock,
+} from "./services/inventory.js";
 
 async function loadPush() {
   try {
@@ -436,6 +445,16 @@ app.post("/api/products", requireAdminAuth, async (req, res) => {
     } else if (data.videoUrl === "") {
       data.videoUrl = null;
     }
+    let stockQuantity;
+    let lowStockThreshold;
+    try {
+      stockQuantity = parseStockQuantity(data.stockQuantity);
+      lowStockThreshold = parseLowStockThreshold(data.lowStockThreshold);
+    } catch (e) {
+      return res.status(400).json({ error: e.message || "Invalid stock values" });
+    }
+    delete data.stockQuantity;
+    delete data.lowStockThreshold;
     const safeData = {
       ...data,
       name: sanitiseString(data.name, 200),
@@ -444,6 +463,12 @@ app.post("/api/products", requireAdminAuth, async (req, res) => {
       badge: data.badge ? sanitiseString(data.badge, 50) : undefined,
       price,
     };
+    if (stockQuantity !== undefined) {
+      safeData.stockQuantity = stockQuantity;
+      if (typeof safeData.inStock !== "boolean") safeData.inStock = true;
+      safeData.inStock = syncInStockFromQuantity(stockQuantity, safeData.inStock);
+    }
+    if (lowStockThreshold !== undefined) safeData.lowStockThreshold = lowStockThreshold;
     const product = await prisma.product.create({ data: safeData });
     res.status(201).json({
       ...product,
@@ -458,6 +483,20 @@ app.post("/api/products", requireAdminAuth, async (req, res) => {
 app.patch("/api/products/:id", requireAdminAuth, async (req, res) => {
   try {
     const { id, createdAt, updatedAt, ...safeData } = req.body;
+    try {
+      if (Object.prototype.hasOwnProperty.call(safeData, "stockQuantity")) {
+        safeData.stockQuantity = parseStockQuantity(safeData.stockQuantity);
+        if (safeData.stockQuantity !== undefined) {
+          const currentInStock = typeof safeData.inStock === "boolean" ? safeData.inStock : true;
+          safeData.inStock = syncInStockFromQuantity(safeData.stockQuantity, currentInStock);
+        }
+      }
+      if (Object.prototype.hasOwnProperty.call(safeData, "lowStockThreshold")) {
+        safeData.lowStockThreshold = parseLowStockThreshold(safeData.lowStockThreshold);
+      }
+    } catch (e) {
+      return res.status(400).json({ error: e.message || "Invalid stock values" });
+    }
     if (safeData.price !== undefined) {
       const price = Number(safeData.price);
       if (isNaN(price) || price <= 0) return res.status(400).json({ error: "Invalid price" });
@@ -549,7 +588,7 @@ app.get("/api/admin/dashboard-summary", requireAdminAuth, async (req, res) => {
     const { start, end } = nigeriaDayBounds();
     const salesStatuses = ["confirmed", "dispatched", "delivered"];
 
-    const [statusGroups, todaysPlaced, todaysSalesAgg, recentOrders, needsVerifying, needsConfirmed, needsPending] = await Promise.all([
+    const [statusGroups, todaysPlaced, todaysSalesAgg, recentOrders, needsVerifying, needsConfirmed, needsPending, inventoryCounts] = await Promise.all([
       prisma.order.groupBy({
         by: ["status"],
         _count: { _all: true },
@@ -588,6 +627,18 @@ app.get("/api/admin/dashboard-summary", requireAdminAuth, async (req, res) => {
         take: 12,
         select: DASHBOARD_ORDER_SELECT,
       }),
+      prisma.$queryRaw`
+        SELECT
+          COUNT(*) FILTER (
+            WHERE stock_quantity IS NOT NULL
+              AND stock_quantity > 0
+              AND stock_quantity <= low_stock_threshold
+          )::int AS low_stock,
+          COUNT(*) FILTER (
+            WHERE stock_quantity = 0
+          )::int AS out_of_stock
+        FROM products
+      `,
     ]);
 
     const statusCounts = {
@@ -619,6 +670,8 @@ app.get("/api/admin/dashboard-summary", requireAdminAuth, async (req, res) => {
       statusCounts,
       recentOrders,
       needsAttention,
+      lowStockProductCount: Number(inventoryCounts?.[0]?.low_stock || 0),
+      outOfStockProductCount: Number(inventoryCounts?.[0]?.out_of_stock || 0),
     });
   } catch (err) {
     console.error("[dashboard-summary]", err?.message || err);
@@ -648,6 +701,31 @@ app.post("/api/orders", orderLimiter, async (req, res) => {
     if (!Array.isArray(items) || items.length === 0 || items.length > 50) {
       return res.status(400).json({ error: "Invalid items" });
     }
+    const normalizedItems = [];
+    for (const item of items) {
+      const productId = item?.product?.id || item?.productId;
+      const quantity = Number(item?.quantity);
+      if (!productId || typeof productId !== "string") {
+        return res.status(400).json({ error: "Each item must reference a product" });
+      }
+      if (!Number.isFinite(quantity) || quantity <= 0 || quantity > 1000) {
+        return res.status(400).json({ error: "Invalid item quantity" });
+      }
+      const product = await prisma.product.findUnique({ where: { id: productId } });
+      if (!product) {
+        return res.status(400).json({ error: "One or more products are no longer available" });
+      }
+      if (!canFulfill(product, quantity)) {
+        const label = product.name || "A product";
+        return res.status(400).json({ error: `${label} is unavailable or does not have enough stock` });
+      }
+      normalizedItems.push({
+        productId: product.id,
+        name: product.name,
+        price: Number(product.price),
+        quantity,
+      });
+    }
     const order = await prisma.order.create({
       data: {
         customerName: sanitiseString(customerName, 100),
@@ -656,12 +734,7 @@ app.post("/api/orders", orderLimiter, async (req, res) => {
         total: parsedTotal,
         status: "pending",
         items: {
-          create: items.map((item) => ({
-            productId: item.product.id,
-            name: item.product.name,
-            price: Number(item.product.price),
-            quantity: Number(item.quantity),
-          })),
+          create: normalizedItems,
         },
       },
       include: { items: true },
@@ -715,18 +788,15 @@ app.patch("/api/orders/:id/status", requireAdminAuth, async (req, res) => {
       return res.status(400).json({ error: `Invalid status. Must be one of: ${ALLOWED_STATUSES.join(", ")}` });
     }
 
-    const existing = await prisma.order.findUnique({ where: { id: req.params.id } });
-    if (!existing) {
+    const result = await applyOrderStatusWithStock(prisma, req.params.id, status);
+    if (result.kind === "missing") {
       return res.status(404).json({ error: "Order not found" });
     }
-    const previousStatus = existing.status;
-    const statusChanged = previousStatus !== status;
-
-    const order = await prisma.order.update({
-      where: { id: req.params.id },
-      data: { status },
-      include: { items: true },
-    });
+    if (result.kind === "stock") {
+      return res.status(409).json({ error: result.error });
+    }
+    const order = result.order;
+    const statusChanged = result.statusChanged;
 
     if (order.email && statusChanged) {
       if (status === "dispatched") {
@@ -786,13 +856,30 @@ app.patch("/api/orders/:id", requireAdminAuth, async (req, res) => {
       return res.status(404).json({ error: "Order not found" });
     }
     const previousStatus = existing.status;
-    const statusChanged = data.status !== undefined && data.status !== previousStatus;
-
-    const order = await prisma.order.update({
-      where: { id: req.params.id },
-      data,
-      include: { items: true },
-    });
+    let order;
+    let statusChanged = false;
+    if (data.status !== undefined) {
+      const nextStatus = data.status;
+      delete data.status;
+      if (Object.keys(data).length) {
+        await prisma.order.update({ where: { id: req.params.id }, data });
+      }
+      const result = await applyOrderStatusWithStock(prisma, req.params.id, nextStatus);
+      if (result.kind === "missing") {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      if (result.kind === "stock") {
+        return res.status(409).json({ error: result.error });
+      }
+      order = result.order;
+      statusChanged = result.statusChanged;
+    } else {
+      order = await prisma.order.update({
+        where: { id: req.params.id },
+        data,
+        include: { items: true },
+      });
+    }
 
     if (statusChanged) {
       if (order.email) {
