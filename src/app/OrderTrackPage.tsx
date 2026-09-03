@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import {
   ArrowLeft,
@@ -193,10 +193,9 @@ export default function OrderTrackPage() {
 
   const activeIndex = STATUS_STEPS.findIndex((step) => step.key === currentStatus);
   const currentStep = STATUS_STEPS[activeIndex];
-
-  const itemCount = useMemo(
-    () => order.items.reduce((sum, item) => sum + Math.max(0, Number(item.quantity) || 0), 0),
-    [order.items]
+  const itemCount = order.items.reduce(
+    (sum, item) => sum + Math.max(0, Number(item.quantity) || 0),
+    0
   );
 
   return (
