@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Loader2, Search, RefreshCw, Phone, Mail, ShoppingBag } from "lucide-react";
-import { fetchAdminCustomers } from "../../api";
+import { clearAdminToken, getAdminToken } from "../../api";
 import { fmt } from "./types";
 
 type Customer = {
@@ -16,6 +16,27 @@ type Customer = {
   lastStatus: string;
 };
 
+const API_BASE = (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL.trim() !== ""
+  ? import.meta.env.VITE_API_URL.trim().replace(/\/$/, "")
+  : "");
+
+async function loadCustomers(): Promise<Customer[]> {
+  const token = getAdminToken();
+  const res = await fetch(`${API_BASE}/api/admin/customers`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+  if (res.status === 401) {
+    clearAdminToken();
+    throw new Error("Session expired. Please log in again.");
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Failed to load customers");
+  return data as Customer[];
+}
+
 export default function CustomersPage() {
   const navigate = useNavigate();
   const [rows, setRows] = useState<Customer[]>([]);
@@ -29,7 +50,7 @@ export default function CustomersPage() {
     else setLoading(true);
     setError("");
     try {
-      setRows(await fetchAdminCustomers());
+      setRows(await loadCustomers());
     } catch (err: any) {
       setError(err?.message || "Failed to load customers");
     } finally {
