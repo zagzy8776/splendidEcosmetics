@@ -68,6 +68,8 @@ export interface AdminDashboardSummary {
   todaysSales: number;
   todaysOrderCount: number;
   averageOrderValue: number;
+  lowStockProductCount?: number;
+  outOfStockProductCount?: number;
   statusCounts: {
     pending: number;
     verifying: number;
@@ -101,6 +103,8 @@ export interface ProductData {
   videoUrl?: string;
   description: string;
   inStock: boolean;
+  stockQuantity?: number | null;
+  lowStockThreshold?: number;
   badge?: string;
   rating?: number;
   reviews?: number;
