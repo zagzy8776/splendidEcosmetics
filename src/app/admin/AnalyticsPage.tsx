@@ -5,7 +5,7 @@ import {
 import {
   TrendingUp, ShoppingBag, Package, Users, Clock, Loader2, Calendar, Crown, ArrowUpRight,
 } from "lucide-react";
-import { fetchOrders, fetchProducts } from "../../api";
+import { fetchOrders, fetchProducts, fetchVisitorAnalytics, fetchLiveVisitors } from "../../api";
 import { fmt, type Order, type Product, type OrderStatus } from "./types";
 
 type Range = "today" | "yesterday" | "week" | "month" | "lifetime";
@@ -70,6 +70,20 @@ export default function AnalyticsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState<Range>("month");
+  const [visitorStats, setVisitorStats] = useState<any>(null);
+  const [live, setLive] = useState<{ active: number; visitors: any[] }>({ active: 0, visitors: [] });
+
+  useEffect(() => {
+    fetchVisitorAnalytics(range).then(setVisitorStats).catch(() => setVisitorStats(null));
+  }, [range]);
+
+  useEffect(() => {
+    let alive = true;
+    const loadLive = () => fetchLiveVisitors().then((d) => { if (alive) setLive(d); }).catch(() => {});
+    loadLive();
+    const t = setInterval(loadLive, 20000);
+    return () => { alive = false; clearInterval(t); };
+  }, []);
 
   useEffect(() => {
     Promise.all([fetchOrders().catch(() => []), fetchProducts().catch(() => [])]).then(
@@ -300,7 +314,71 @@ export default function AnalyticsPage() {
       </div>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+      
+      <section className="mb-6 rounded-3xl border border-[#F1DDD7] bg-white p-5 shadow-sm">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-base font-bold text-[#1A0F0A]">Live visitors</h2>
+          <span className="text-sm font-semibold text-emerald-700">🟢 {live.active} active</span>
+        </div>
+        <div className="mt-3 space-y-2">
+          {(live.visitors || []).length === 0 ? (
+            <p className="text-xs text-[#9A7A6E]">No shoppers on the storefront right now.</p>
+          ) : (
+            live.visitors.map((v: any) => (
+              <div key={v.sessionId} className="flex items-center justify-between rounded-xl bg-[#FFF8F6] px-3 py-2 text-xs">
+                <span className="font-mono text-[#B5784A]">{v.sessionId}</span>
+                <span className="text-[#5C3D2E]">{v.productName || v.section}{v.lastSeenAt ? ` · ${new Date(v.lastSeenAt).toLocaleTimeString("en-NG", { hour: "numeric", minute: "2-digit" })}` : ""}</span>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+
+      <section className="mb-6 rounded-3xl border border-[#F1DDD7] bg-white p-5 shadow-sm">
+        <h2 className="text-base font-bold text-[#1A0F0A]">Visitor overview</h2>
+        <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
+          {[
+            ["Visitors", visitorStats?.visitors],
+            ["Page views", visitorStats?.pageViews],
+            ["Product views", visitorStats?.productViews],
+            ["Searches", visitorStats?.searches],
+            ["Add to cart", visitorStats?.addToCarts],
+            ["Checkouts", visitorStats?.checkouts],
+            ["Orders", visitorStats?.orders],
+            ["Revenue", visitorStats ? fmt(visitorStats.revenue || 0) : "—"],
+          ].map(([label, value]) => (
+            <div key={String(label)} className="rounded-2xl bg-[#FFF8F6] px-3 py-3">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-[#9A7A6E]">{label}</div>
+              <div className="mt-1 text-lg font-bold text-[#1A0F0A]">{value ?? "—"}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-5 grid gap-4 md:grid-cols-3">
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wide text-[#9A7A6E]">Most viewed</h3>
+            {(visitorStats?.topViewed || []).map((p: any) => (
+              <div key={p.productId} className="mt-1 text-sm text-[#1A0F0A]">{p.name} — {p.count}</div>
+            ))}
+          </div>
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wide text-[#9A7A6E]">Most added to cart</h3>
+            {(visitorStats?.topAddedToCart || []).map((p: any) => (
+              <div key={p.productId} className="mt-1 text-sm text-[#1A0F0A]">{p.name} — {p.count}</div>
+            ))}
+          </div>
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wide text-[#9A7A6E]">Most purchased</h3>
+            {(visitorStats?.topPurchased || []).map((p: any) => (
+              <div key={p.productId || p.name} className="mt-1 text-sm text-[#1A0F0A]">{p.name} — {p.count}</div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-5 text-xs leading-6 text-[#7D645A]">
+          Funnel: {visitorStats?.visitors ?? 0} visitors → {visitorStats?.productViews ?? 0} product views → {visitorStats?.addToCarts ?? 0} add to cart → {visitorStats?.checkouts ?? 0} checkout → {visitorStats?.purchases ?? visitorStats?.orders ?? 0} purchase
+        </div>
+      </section>
+
+<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
         {kpis.map((k) => (
           <div
             key={k.label}
