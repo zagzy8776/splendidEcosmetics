@@ -57,7 +57,33 @@ async function handleAdminResponse(res: Response, fallbackMsg: string) {
   return res.json();
 }
 
-
+export interface AdminDashboardData {
+  generatedAt: string;
+  metrics: {
+    ordersToProcess: number;
+    paymentReview: number;
+    readyToDispatch: number;
+    dispatched: number;
+    todaySales: number;
+    todayOrders: number;
+    averageOrderValue: number;
+  };
+  statusCounts: Record<string, number>;
+  needsAttention: Array<{
+    id: string;
+    customerName: string;
+    total: number;
+    status: string;
+    createdAt: string;
+  }>;
+  todaysOrders: Array<{
+    id: string;
+    customerName: string;
+    total: number;
+    status: string;
+    createdAt: string;
+  }>;
+}
 
 export interface ProductData {
   id: string;
@@ -99,7 +125,6 @@ export async function fetchProducts(): Promise<ProductData[]> {
 
 export async function createOrder(order: OrderData & { installationId?: string | null }) {
   const payload: Record<string, unknown> = { ...order };
-  // Optional: associate this browser's push subscription with the order
   if (order.installationId) {
     payload.installationId = order.installationId;
   } else {
@@ -136,6 +161,13 @@ export async function fetchOrders() {
       quantity: i.quantity
     }))
   }));
+}
+
+export async function fetchAdminDashboard(): Promise<AdminDashboardData> {
+  const res = await fetch(`${API_BASE}/api/admin/dashboard`, {
+    headers: adminHeaders(),
+  });
+  return handleAdminResponse(res, "Failed to load dashboard");
 }
 
 export async function updateOrderStatus(id: string, status: string) {
@@ -245,7 +277,7 @@ export async function adminLogout() {
     await fetch(`${API_BASE}/api/admin/logout`, {
       method: "POST",
       headers: adminHeaders(),
-    }).catch(() => {}); // best-effort
+    }).catch(() => {});
   }
   clearAdminToken();
 }
@@ -262,7 +294,6 @@ export async function changeAdminPassword(currentPassword: string, newPassword: 
 }
 
 export async function cloudinaryUpload(file: File): Promise<string> {
-  // Step 1: get a signed signature from our backend (never exposes secret to browser)
   const sigRes = await fetch(`${API_BASE}/api/admin/cloudinary-upload-signature`, {
     method: "POST",
     headers: adminHeaders(),
@@ -277,7 +308,6 @@ export async function cloudinaryUpload(file: File): Promise<string> {
   }
   const { signature, timestamp, api_key, cloud_name, folder, eager, eager_async } = await sigRes.json();
 
-  // Step 2: upload directly to Cloudinary with the signed params
   const form = new FormData();
   form.append("file", file);
   form.append("api_key", api_key);
@@ -293,14 +323,11 @@ export async function cloudinaryUpload(file: File): Promise<string> {
   });
   const json = await upRes.json();
   if (json.error) {
-    // Provide a detailed error so the admin knows exactly what's wrong
     const detail = json.error.message || JSON.stringify(json.error);
     console.error(`[Cloudinary Upload Failed] HTTP ${upRes.status}: ${detail}`);
-    throw new Error(`Image upload rejected by Cloudinary (${upRes.status}): ${detail}. 
-      Check that CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET are correctly set in the backend environment variables.`);
+    throw new Error(`Image upload rejected by Cloudinary (${upRes.status}): ${detail}. \n      Check that CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET are correctly set in the backend environment variables.`);
   }
 
-  // Prefer the eager-transformed URL (clean 800×800 square), fall back to original
   return json.eager?.[0]?.secure_url ?? json.secure_url;
 }
 
@@ -312,7 +339,6 @@ export async function fetchCategoriesList(): Promise<Array<{ name: string; image
     if (!res.ok) return [];
     const data = await res.json();
     if (Array.isArray(data)) return data;
-    // fallback if server returned map
     return Object.entries(data || {}).map(([name, image]) => ({ name, image: image as string }));
   } catch {
     return [];
