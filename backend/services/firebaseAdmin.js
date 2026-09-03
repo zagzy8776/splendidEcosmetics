@@ -220,23 +220,19 @@ export async function sendToFid(fid, { title, body, data = {}, link = "/", token
     body: safeBody,
     click_url: clickLink,
     icon: iconUrl,
+    tag: String((data && data.tag) || `push-${Date.now()}`),
   };
   if (imageUrl) dataPayload.image = imageUrl;
   for (const [k, v] of Object.entries(data || {})) {
     if (v !== undefined && v !== null) dataPayload[String(k)] = String(v);
   }
 
+  // Data-only web push. Do NOT also send webpush.notification — the SW would
+  // show the same message a second/third time.
   const message = {
     token: fcmToken,
     data: dataPayload,
     webpush: {
-      notification: {
-        title: safeTitle,
-        body: safeBody,
-        icon: iconUrl,
-        badge: `${site}/icon-96.png`,
-        ...(imageUrl ? { image: imageUrl } : {}),
-      },
       fcmOptions: {
         link: clickLink,
       },
