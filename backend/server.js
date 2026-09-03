@@ -692,7 +692,7 @@ app.get("/api/admin/dashboard-summary", requireAdminAuth, async (req, res) => {
 
 app.post("/api/orders", orderLimiter, async (req, res) => {
   try {
-    const { customerName, phone, email, total, items, installationId } = req.body;
+    const { customerName, phone, email, total, items, installationId, analyticsSessionId } = req.body;
     if (!customerName || !phone || !email || !total || !items?.length) {
       return res.status(400).json({ error: "Missing required order fields" });
     }
@@ -737,19 +737,48 @@ app.post("/api/orders", orderLimiter, async (req, res) => {
         quantity,
       });
     }
-    const order = await prisma.order.create({
-      data: {
-        customerName: sanitiseString(customerName, 100),
-        phone: sanitiseString(phone, 20),
-        email: email.trim().toLowerCase().slice(0, 254),
-        total: parsedTotal,
-        status: "pending",
-        items: {
-          create: normalizedItems,
-        },
+    let attributionSource = null;
+    let safeSessionId = null;
+    if (typeof analyticsSessionId === "string") {
+      const sid = analyticsSessionId.trim();
+      if (/^[A-Za-z0-9_-]{8,80}$/.test(sid)) {
+        const sess = await prisma.analyticsSession.findUnique({
+          where: { sessionId: sid },
+          select: { sessionId: true, source: true },
+        }).catch(() => null);
+        if (sess) {
+          safeSessionId = sess.sessionId;
+          attributionSource = sess.source || null;
+        }
+      }
+    }
+
+    const orderBase = {
+      customerName: sanitiseString(customerName, 100),
+      phone: sanitiseString(phone, 20),
+      email: email.trim().toLowerCase().slice(0, 254),
+      total: parsedTotal,
+      status: "pending",
+      items: {
+        create: normalizedItems,
       },
-      include: { items: true },
-    });
+    };
+    let order;
+    try {
+      order = await prisma.order.create({
+        data: {
+          ...orderBase,
+          analyticsSessionId: safeSessionId,
+          attributionSource,
+        },
+        include: { items: true },
+      });
+    } catch (err) {
+      order = await prisma.order.create({
+        data: orderBase,
+        include: { items: true },
+      });
+    }
     recordPurchase(prisma, order).catch(() => {});
     sendEmail(order.email, `Your Order Confirmation – ${order.id}`, buildConfirmationEmail(order));
 
@@ -1364,28 +1393,6 @@ app.post("/api/admin/notifications/send", requireAdminAuth, notifyLimiter, async
   }
 });
 
-
-
-app.get(["/api/sitemap-products.xml", "/sitemap-products.xml"], async (req, res) => {
-  try {
-    const products = await prisma.product.findMany({
-      where: { inStock: true },
-      select: { id: true, name: true, updatedAt: true },
-      orderBy: { updatedAt: "desc" },
-      take: 2000,
-    });
-    const body = products.map((p) => {
-      const last = p.updatedAt ? new Date(p.updatedAt).toISOString().slice(0, 10) : "2026-09-03";
-      const loc = "https://www.splendidcosmetics.com.ng/product/" + encodeURIComponent(p.id);
-      return "  <url><loc>" + loc + "</loc><lastmod>" + last + "</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>";
-    }).join("\n");
-    res.setHeader("Content-Type", "application/xml; charset=utf-8");
-    res.send("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n" + body + "\n</urlset>");
-  } catch (err) {
-    console.error("[sitemap-products]", err?.message || err);
-    res.status(500).type("text/plain").send("sitemap unavailable");
-  }
-});
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
