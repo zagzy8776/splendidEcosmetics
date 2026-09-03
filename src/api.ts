@@ -45,6 +45,37 @@ function adminHeaders(): Record<string, string> {
   };
 }
 
+export interface AdminDashboardSummary {
+  ordersToProcess: number;
+  paymentReview: number;
+  readyToDispatch: number;
+  dispatched: number;
+  todaysSales: number;
+  todaysOrderCount: number;
+  averageOrderValue: number;
+  statusCounts: {
+    pending: number;
+    verifying: number;
+    confirmed: number;
+    dispatched: number;
+    delivered: number;
+  };
+  recentOrders: Array<{
+    id: string;
+    customerName: string;
+    total: number;
+    status: string;
+    createdAt: string;
+  }>;
+  needsAttention: Array<{
+    id: string;
+    customerName: string;
+    total: number;
+    status: string;
+    createdAt: string;
+  }>;
+}
+
 export interface ProductData {
   id: string;
   name: string;
@@ -121,6 +152,19 @@ export async function fetchOrders() {
       quantity: i.quantity
     }))
   }));
+}
+
+export async function fetchAdminDashboardSummary(): Promise<AdminDashboardSummary> {
+  const res = await fetch(`${API_BASE}/api/admin/dashboard-summary`, {
+    headers: adminHeaders(),
+  });
+  if (res.status === 401) {
+    clearAdminToken();
+    throw new Error("Session expired. Please log in again.");
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Failed to load dashboard");
+  return data as AdminDashboardSummary;
 }
 
 export async function updateOrderStatus(id: string, status: string) {
