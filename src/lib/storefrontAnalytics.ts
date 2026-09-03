@@ -50,9 +50,14 @@ function flush() {
   }
   if (!queue.length) return;
   const events = queue.splice(0, 20);
+  const attr = getAttribution();
   const body = JSON.stringify({
     visitorId: getVisitorId(),
     sessionId: getSessionId(),
+    source: attr.source,
+    medium: attr.medium,
+    campaign: attr.campaign,
+    referrer: attr.referrer,
     events,
   });
   fetch(`${API_BASE}/api/analytics/events`, {
@@ -118,6 +123,7 @@ function sendHeartbeat() {
       section: presence.section,
       productId: presence.productId,
       productName: presence.productName,
+      ...getAttribution(),
     }),
     keepalive: true,
   }).catch(() => {});
@@ -131,4 +137,22 @@ export function startPresenceHeartbeat() {
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") sendHeartbeat();
   });
+}
+
+function getAttribution() {
+  try {
+    const stored = sessionStorage.getItem("se_src");
+    if (stored) return JSON.parse(stored);
+    const q = new URLSearchParams(window.location.search);
+    const utm = (q.get("utm_source") || "").slice(0, 40);
+    const medium = (q.get("utm_medium") || "").slice(0, 40);
+    const campaign = (q.get("utm_campaign") || "").slice(0, 80);
+    const referrer = String(document.referrer || "").slice(0, 180);
+    const source = utm || referrer || "direct";
+    const attr = { source, medium, campaign, referrer };
+    sessionStorage.setItem("se_src", JSON.stringify(attr));
+    return attr;
+  } catch {
+    return { source: "direct", medium: "", campaign: "", referrer: "" };
+  }
 }
