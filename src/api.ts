@@ -45,46 +45,6 @@ function adminHeaders(): Record<string, string> {
   };
 }
 
-async function handleAdminResponse(res: Response, fallbackMsg: string) {
-  if (res.status === 401) {
-    clearAdminToken();
-    throw new Error("Session expired. Please log in again.");
-  }
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error((data as any).error || fallbackMsg);
-  }
-  return res.json();
-}
-
-export interface AdminDashboardData {
-  generatedAt: string;
-  metrics: {
-    ordersToProcess: number;
-    paymentReview: number;
-    readyToDispatch: number;
-    dispatched: number;
-    todaySales: number;
-    todayOrders: number;
-    averageOrderValue: number;
-  };
-  statusCounts: Record<string, number>;
-  needsAttention: Array<{
-    id: string;
-    customerName: string;
-    total: number;
-    status: string;
-    createdAt: string;
-  }>;
-  todaysOrders: Array<{
-    id: string;
-    customerName: string;
-    total: number;
-    status: string;
-    createdAt: string;
-  }>;
-}
-
 export interface ProductData {
   id: string;
   name: string;
@@ -161,13 +121,6 @@ export async function fetchOrders() {
       quantity: i.quantity
     }))
   }));
-}
-
-export async function fetchAdminDashboard(): Promise<AdminDashboardData> {
-  const res = await fetch(`${API_BASE}/api/admin/dashboard`, {
-    headers: adminHeaders(),
-  });
-  return handleAdminResponse(res, "Failed to load dashboard");
 }
 
 export async function updateOrderStatus(id: string, status: string) {
