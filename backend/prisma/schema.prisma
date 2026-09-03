@@ -40,7 +40,10 @@ model Order {
   updatedAt    DateTime    @updatedAt @map("updated_at")
   items        OrderItem[]
   notificationRecipients OrderNotificationRecipient[]
+  analyticsSessionId String? @map("analytics_session_id")
+  attributionSource  String? @map("attribution_source")
 
+  @@index([attributionSource, createdAt])
   @@map("orders")
 }
 
@@ -152,4 +155,17 @@ model VisitorPresence {
 
   @@index([lastSeenAt])
   @@map("visitor_presence")
+}
+
+model AnalyticsSession {
+  sessionId String   @id @map("session_id")
+  visitorId String   @map("visitor_id")
+  source    String   @default("Direct")
+  medium    String?
+  campaign  String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([source, createdAt])
+  @@index([createdAt])
+  @@map("analytics_sessions")
 }
