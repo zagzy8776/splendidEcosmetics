@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Bell, Loader2, Send, Users, Trash2, Image as ImageIcon, Link2 } from "lucide-react";
-import { getAdminToken } from "../../api";
+import { Bell, Loader2, Send, Users, Trash2 } from "lucide-react";
+import { getAdminToken, fetchProducts } from "../../api";
 
 const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 
@@ -42,8 +42,10 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [link, setLink] = useState("/");
-  const [image, setImage] = useState("");
+  const [tapTarget, setTapTarget] = useState<"home" | "shop">("home");
+  const [attachPhoto, setAttachPhoto] = useState(false);
+  const [products, setProducts] = useState<Array<{ id: string; name: string; image: string }>>([]);
+  const [selectedProductId, setSelectedProductId] = useState("");
   const [sending, setSending] = useState(false);
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
@@ -64,6 +66,17 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     load();
+    fetchProducts()
+      .then((list) =>
+        setProducts(
+          (list || []).map((p: any) => ({
+            id: p.id,
+            name: p.name,
+            image: p.image,
+          }))
+        )
+      )
+      .catch(() => {});
   }, []);
 
   async function handleDeleteLog(id: string) {
@@ -110,8 +123,11 @@ export default function NotificationsPage() {
           title: title.trim(),
           body: body.trim(),
           audience: "all",
-          link: link.trim() || "/",
-          image: image.trim() || undefined,
+          link: tapTarget === "shop" ? "/#shop" : "/",
+          image:
+            attachPhoto && selectedProductId
+              ? products.find((p) => p.id === selectedProductId)?.image
+              : undefined,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -127,7 +143,8 @@ export default function NotificationsPage() {
       });
       setTitle("");
       setBody("");
-      setImage("");
+      setAttachPhoto(false);
+      setSelectedProductId("");
       await load();
     } catch (err: any) {
       setMsg({ type: "err", text: err?.message || "Failed to send notification." });
@@ -248,27 +265,58 @@ export default function NotificationsPage() {
           />
         </div>
         <div>
-          <label className="text-[10px] font-bold uppercase tracking-wider text-[#5C3D2E] mb-1.5 flex items-center gap-1">
-            <Link2 size={12} /> Open link when tapped
+          <label className="text-[10px] font-bold uppercase tracking-wider text-[#5C3D2E] block mb-1.5">
+            When customer taps the notification
           </label>
-          <input
-            value={link}
-            onChange={(e) => setLink(e.target.value)}
-            placeholder="/ or https://www.splendidcosmetics.com.ng/"
-            className="w-full rounded-xl border border-[#F9DEDA] bg-[#FAF7F5] px-3 py-2.5 text-base outline-none focus:border-[#C9A227]"
-          />
+          <select
+            value={tapTarget}
+            onChange={(e) => setTapTarget(e.target.value as "home" | "shop")}
+            className="w-full rounded-xl border border-[#F9DEDA] bg-[#FAF7F5] px-3 py-2.5 text-base text-[#1A0F0A] outline-none focus:border-[#C9A227]"
+          >
+            <option value="home">Open the home page</option>
+            <option value="shop">Open the shop</option>
+          </select>
         </div>
-        <div>
-          <label className="text-[10px] font-bold uppercase tracking-wider text-[#5C3D2E] mb-1.5 flex items-center gap-1">
-            <ImageIcon size={12} /> Image URL (optional)
+
+        <div className="rounded-xl border border-[#F9DEDA]/60 bg-[#FAF7F5]/80 p-3 space-y-3">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={attachPhoto}
+              onChange={(e) => {
+                setAttachPhoto(e.target.checked);
+                if (!e.target.checked) setSelectedProductId("");
+              }}
+              className="rounded border-[#C9A227]"
+            />
+            <span className="text-sm font-semibold text-[#1A0F0A]">Add a product photo</span>
           </label>
-          <input
-            value={image}
-            onChange={(e) => setImage(e.target.value)}
-            placeholder="https://... product photo"
-            className="w-full rounded-xl border border-[#F9DEDA] bg-[#FAF7F5] px-3 py-2.5 text-base outline-none focus:border-[#C9A227]"
-          />
-          <p className="text-[11px] text-[#9A7A6E] mt-1">Must be https. Shows under the message on supported phones.</p>
+          {attachPhoto && (
+            <div>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-[#5C3D2E] block mb-1.5">
+                Choose product
+              </label>
+              <select
+                value={selectedProductId}
+                onChange={(e) => setSelectedProductId(e.target.value)}
+                className="w-full rounded-xl border border-[#F9DEDA] bg-white px-3 py-2.5 text-base text-[#1A0F0A] outline-none focus:border-[#C9A227]"
+              >
+                <option value="">Select a product…</option>
+                {products.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+              {selectedProductId && products.find((p) => p.id === selectedProductId)?.image && (
+                <img
+                  src={products.find((p) => p.id === selectedProductId)!.image}
+                  alt=""
+                  className="mt-2 h-20 w-20 rounded-xl object-cover border border-[#F9DEDA]"
+                />
+              )}
+            </div>
+          )}
         </div>
         <div>
           <label className="text-[10px] font-bold uppercase tracking-wider text-[#5C3D2E] block mb-1.5">
