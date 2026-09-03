@@ -1,6 +1,6 @@
 import { sendToFid, isUnregisteredError, ensureMessaging } from "./firebaseAdmin.js";
 
-export async function sendToAllActive(prisma, { title, body, data, link }) {
+export async function sendToAllActive(prisma, { title, body, data, link, image }) {
   const messaging = await ensureMessaging();
   if (!messaging) {
     return { sent: 0, failed: 0, error: "Push notifications are not configured on the server." };
@@ -50,6 +50,7 @@ export async function sendToAllActive(prisma, { title, body, data, link }) {
           body,
           data,
           link,
+          image: image || null,
           token: sub.token || null,
         });
         if (result.success) {

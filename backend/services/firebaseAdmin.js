@@ -184,7 +184,7 @@ export function getFirebaseAdmin() {
   return null;
 }
 
-export async function sendToFid(fid, { title, body, data = {}, link = "/", token = null }) {
+export async function sendToFid(fid, { title, body, data = {}, link = "/", token = null, image = null }) {
   const messaging = await ensureMessaging();
   if (!messaging) {
     return { success: false, errorCode: "admin-not-configured" };
@@ -209,19 +209,34 @@ export async function sendToFid(fid, { title, body, data = {}, link = "/", token
       ? String(link)
       : `${site}${String(link || "/").startsWith("/") ? link || "/" : "/" + (link || "")}`;
 
-  // Data-only message: service worker / foreground handler always shows the notification.
-  // (notification+web payloads often arrive silently when the tab is open)
+  const iconUrl = `${site}/icon-192.png`;
+  const imageUrl =
+    image && String(image).startsWith("http")
+      ? String(image).slice(0, 2000)
+      : "";
+
+  const dataPayload = {
+    title: safeTitle,
+    body: safeBody,
+    click_url: clickLink,
+    icon: iconUrl,
+  };
+  if (imageUrl) dataPayload.image = imageUrl;
+  for (const [k, v] of Object.entries(data || {})) {
+    if (v !== undefined && v !== null) dataPayload[String(k)] = String(v);
+  }
+
   const message = {
     token: fcmToken,
-    data: {
-      title: safeTitle,
-      body: safeBody,
-      click_url: clickLink,
-      ...Object.fromEntries(
-        Object.entries(data || {}).map(([k, v]) => [String(k), String(v ?? "")])
-      ),
-    },
+    data: dataPayload,
     webpush: {
+      notification: {
+        title: safeTitle,
+        body: safeBody,
+        icon: iconUrl,
+        badge: `${site}/icon-96.png`,
+        ...(imageUrl ? { image: imageUrl } : {}),
+      },
       fcmOptions: {
         link: clickLink,
       },
@@ -236,7 +251,22 @@ export async function sendToFid(fid, { title, body, data = {}, link = "/", token
     await messaging.send(message);
     return { success: true };
   } catch (err) {
+    // Fallback: ultra-minimal if rich webpush rejected
     const code = err?.code || err?.errorInfo?.code || "unknown";
+    if (String(code).includes("invalid-payload") || String(code).includes("invalid-argument")) {
+      try {
+        await messaging.send({
+          token: fcmToken,
+          data: dataPayload,
+        });
+        return { success: true };
+      } catch (err2) {
+        const code2 = err2?.code || err2?.errorInfo?.code || "unknown";
+        const detail2 = err2?.message || "";
+        console.error("[FCM send error fallback]", code2, detail2);
+        return { success: false, errorCode: `${code2}${detail2 ? ": " + detail2 : ""}` };
+      }
+    }
     const detail = err?.message || err?.errorInfo?.message || "";
     console.error("[FCM send error]", code, detail);
     return { success: false, errorCode: `${code}${detail ? ": " + detail : ""}` };

@@ -3,6 +3,9 @@ importScripts("https://www.gstatic.com/firebasejs/12.18.0/firebase-app-compat.js
 importScripts("https://www.gstatic.com/firebasejs/12.18.0/firebase-messaging-compat.js");
 importScripts("/firebase-config.js");
 
+const DEFAULT_ICON = "/icon-192.png";
+const DEFAULT_BADGE = "/icon-96.png";
+
 try {
   firebase.initializeApp(self.__FIREBASE_CONFIG__);
   const messaging = firebase.messaging();
@@ -17,12 +20,15 @@ try {
       (payload.data && payload.data.body) ||
       "";
     const data = payload.data || {};
+    const icon = data.icon || DEFAULT_ICON;
+    const image = data.image || undefined;
     return self.registration.showNotification(title, {
       body,
-      icon: "/logo.jpg",
-      badge: "/favicon.svg",
+      icon,
+      badge: DEFAULT_BADGE,
+      image,
       data,
-      tag: "splendid-push",
+      tag: data.tag || "splendid-push",
       renotify: true,
       requireInteraction: true,
     });
@@ -52,7 +58,6 @@ self.addEventListener("notificationclick", (event) => {
 });
 
 self.addEventListener("push", (event) => {
-  // Fallback if firebase handler does not run
   let title = "Splendid Empire";
   let body = "";
   let data = {};
@@ -69,9 +74,11 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(title, {
       body,
-      icon: "/logo.jpg",
+      icon: data.icon || DEFAULT_ICON,
+      badge: DEFAULT_BADGE,
+      image: data.image || undefined,
       data,
-      tag: "splendid-push",
+      tag: data.tag || "splendid-push",
       renotify: true,
       requireInteraction: true,
     })

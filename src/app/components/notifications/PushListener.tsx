@@ -14,7 +14,7 @@ export default function PushListener() {
         if (typeof Notification !== "undefined" && Notification.permission === "granted") {
           const n = new Notification(title || "Splendid Empire", {
             body: body || "",
-            icon: "/logo.jpg",
+            icon: "/icon-192.png",
             tag: "splendid-push",
           });
           n.onclick = () => {

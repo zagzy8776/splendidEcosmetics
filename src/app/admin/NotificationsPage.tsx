@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Bell, Loader2, Send, Users, Trash2 } from "lucide-react";
+import { Bell, Loader2, Send, Users, Trash2, Image as ImageIcon, Link2 } from "lucide-react";
 import { getAdminToken } from "../../api";
 
 const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
@@ -42,6 +42,8 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [link, setLink] = useState("/");
+  const [image, setImage] = useState("");
   const [sending, setSending] = useState(false);
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
@@ -59,6 +61,10 @@ export default function NotificationsPage() {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    load();
+  }, []);
 
   async function handleDeleteLog(id: string) {
     if (!window.confirm("Delete this notification from history?")) return;
@@ -88,10 +94,6 @@ export default function NotificationsPage() {
     }
   }
 
-  useEffect(() => {
-    load();
-  }, []);
-
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
     setMsg(null);
@@ -104,20 +106,28 @@ export default function NotificationsPage() {
       const res = await fetch(`${API_BASE}/api/admin/notifications/send`, {
         method: "POST",
         headers: adminHeaders(),
-        body: JSON.stringify({ title: title.trim(), body: body.trim(), audience: "all" }),
+        body: JSON.stringify({
+          title: title.trim(),
+          body: body.trim(),
+          audience: "all",
+          link: link.trim() || "/",
+          image: image.trim() || undefined,
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Send failed");
-      const errHint = Array.isArray(data.errors) && data.errors.length
-        ? ` (${data.errors[0]})`
-        : "";
+      const errHint =
+        Array.isArray(data.errors) && data.errors.length ? ` (${data.errors[0]})` : "";
       const extra = data.message ? ` ${data.message}` : "";
       setMsg({
         type: data.sent > 0 ? "ok" : "err",
-        text: `Sent to ${data.sent} device${data.sent === 1 ? "" : "s"}${data.failed ? ` · ${data.failed} failed` : ""}${errHint}.${extra}`,
+        text: `Sent to ${data.sent} device${data.sent === 1 ? "" : "s"}${
+          data.failed ? ` · ${data.failed} failed` : ""
+        }${errHint}.${extra}`,
       });
       setTitle("");
       setBody("");
+      setImage("");
       await load();
     } catch (err: any) {
       setMsg({ type: "err", text: err?.message || "Failed to send notification." });
@@ -137,11 +147,14 @@ export default function NotificationsPage() {
   return (
     <div className="p-5 md:p-8 max-w-3xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-[#1A0F0A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h1
+          className="text-2xl md:text-3xl font-bold text-[#1A0F0A]"
+          style={{ fontFamily: "'Playfair Display', serif" }}
+        >
           Notifications
         </h1>
         <p className="text-[#5C3D2E]/70 text-sm mt-1">
-          Send updates to customers who enabled browser notifications
+          Reach customers who enabled browser notifications
         </p>
       </div>
 
@@ -149,15 +162,14 @@ export default function NotificationsPage() {
         <div className="mb-5 rounded-xl bg-amber-50 border border-amber-100 px-4 py-3 text-sm text-amber-800 space-y-1">
           <p className="font-semibold">Push is not ready on the server yet.</p>
           <p>
-            After adding env vars you must <strong>Redeploy</strong> on Vercel (Deployments → … → Redeploy).
-            Env vars only apply after a new deploy.
+            After adding env vars you must <strong>Redeploy</strong> on Vercel.
           </p>
           {stats?.configDetail && (
             <p className="text-xs mt-1 opacity-90">
-              Check: projectId={String(stats.configDetail.hasProjectId)} ·
-              clientEmail={String(stats.configDetail.hasClientEmail)} ·
-              privateKey={String(stats.configDetail.hasPrivateKey)} ·
-              package={String(stats.configDetail.packageOk)}
+              Check: projectId={String(stats.configDetail.hasProjectId)} · clientEmail=
+              {String(stats.configDetail.hasClientEmail)} · privateKey=
+              {String(stats.configDetail.hasPrivateKey)} · package=
+              {String(stats.configDetail.packageOk)}
               {stats.configDetail.lastError ? ` · ${stats.configDetail.lastError}` : ""}
               {stats.dbError ? ` · DB: ${stats.dbError}` : ""}
             </p>
@@ -170,7 +182,10 @@ export default function NotificationsPage() {
           <div className="flex items-center gap-2 text-[#9A7A6E] text-xs font-bold uppercase tracking-wider mb-2">
             <Users size={14} /> Subscribers
           </div>
-          <div className="text-2xl font-bold text-[#1A0F0A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <div
+            className="text-2xl font-bold text-[#1A0F0A]"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
             {stats?.totalSubscribers ?? 0}
           </div>
         </div>
@@ -178,42 +193,90 @@ export default function NotificationsPage() {
           <div className="flex items-center gap-2 text-[#9A7A6E] text-xs font-bold uppercase tracking-wider mb-2">
             <Bell size={14} /> Active
           </div>
-          <div className="text-2xl font-bold text-emerald-600" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <div
+            className="text-2xl font-bold text-emerald-600"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
             {stats?.activeSubscribers ?? 0}
           </div>
         </div>
       </div>
 
-      <form onSubmit={handleSend} className="bg-white rounded-2xl border border-[#F9DEDA]/50 p-5 shadow-sm mb-6 space-y-4">
+      <form
+        onSubmit={handleSend}
+        className="bg-white rounded-2xl border border-[#F9DEDA]/50 p-5 shadow-sm mb-6 space-y-4"
+      >
         <h2 className="font-bold text-[#1A0F0A]" style={{ fontFamily: "'Playfair Display', serif" }}>
           Send notification
         </h2>
+
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-[#FAF7F5] border border-[#F9DEDA]/40">
+          <img src="/icon-192.png" alt="Splendid" className="w-12 h-12 rounded-xl object-cover" />
+          <div className="min-w-0">
+            <div className="text-sm font-semibold text-[#1A0F0A] truncate">
+              {title || "Notification title"}
+            </div>
+            <div className="text-xs text-[#5C3D2E]/80 truncate">
+              {body || "Your message will appear here"}
+            </div>
+          </div>
+        </div>
+
         <div>
-          <label className="text-[10px] font-bold uppercase tracking-wider text-[#5C3D2E] block mb-1.5">Title</label>
+          <label className="text-[10px] font-bold uppercase tracking-wider text-[#5C3D2E] block mb-1.5">
+            Title
+          </label>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             maxLength={100}
             placeholder="New arrivals are here ✨"
-            className="w-full rounded-xl border border-[#F9DEDA] bg-[#FAF7F5] px-3 py-2.5 text-sm outline-none focus:border-[#C9A227]"
+            className="w-full rounded-xl border border-[#F9DEDA] bg-[#FAF7F5] px-3 py-2.5 text-base outline-none focus:border-[#C9A227]"
           />
         </div>
         <div>
-          <label className="text-[10px] font-bold uppercase tracking-wider text-[#5C3D2E] block mb-1.5">Message</label>
+          <label className="text-[10px] font-bold uppercase tracking-wider text-[#5C3D2E] block mb-1.5">
+            Message
+          </label>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             maxLength={500}
             rows={3}
             placeholder="Check out our latest beauty products..."
-            className="w-full rounded-xl border border-[#F9DEDA] bg-[#FAF7F5] px-3 py-2.5 text-sm outline-none focus:border-[#C9A227]"
+            className="w-full rounded-xl border border-[#F9DEDA] bg-[#FAF7F5] px-3 py-2.5 text-base outline-none focus:border-[#C9A227]"
           />
         </div>
         <div>
-          <label className="text-[10px] font-bold uppercase tracking-wider text-[#5C3D2E] block mb-1.5">Audience</label>
+          <label className="text-[10px] font-bold uppercase tracking-wider text-[#5C3D2E] mb-1.5 flex items-center gap-1">
+            <Link2 size={12} /> Open link when tapped
+          </label>
+          <input
+            value={link}
+            onChange={(e) => setLink(e.target.value)}
+            placeholder="/ or https://www.splendidcosmetics.com.ng/"
+            className="w-full rounded-xl border border-[#F9DEDA] bg-[#FAF7F5] px-3 py-2.5 text-base outline-none focus:border-[#C9A227]"
+          />
+        </div>
+        <div>
+          <label className="text-[10px] font-bold uppercase tracking-wider text-[#5C3D2E] mb-1.5 flex items-center gap-1">
+            <ImageIcon size={12} /> Image URL (optional)
+          </label>
+          <input
+            value={image}
+            onChange={(e) => setImage(e.target.value)}
+            placeholder="https://... product photo"
+            className="w-full rounded-xl border border-[#F9DEDA] bg-[#FAF7F5] px-3 py-2.5 text-base outline-none focus:border-[#C9A227]"
+          />
+          <p className="text-[11px] text-[#9A7A6E] mt-1">Must be https. Shows under the message on supported phones.</p>
+        </div>
+        <div>
+          <label className="text-[10px] font-bold uppercase tracking-wider text-[#5C3D2E] block mb-1.5">
+            Audience
+          </label>
           <select
             disabled
-            className="w-full rounded-xl border border-[#F9DEDA] bg-[#FAF7F5] px-3 py-2.5 text-sm text-[#5C3D2E]"
+            className="w-full rounded-xl border border-[#F9DEDA] bg-[#FAF7F5] px-3 py-2.5 text-base text-[#5C3D2E]"
           >
             <option>All subscribers</option>
           </select>
@@ -221,7 +284,9 @@ export default function NotificationsPage() {
         {msg && (
           <div
             className={`rounded-xl px-3 py-2.5 text-sm ${
-              msg.type === "ok" ? "bg-emerald-50 text-emerald-700 border border-emerald-100" : "bg-red-50 text-red-600 border border-red-100"
+              msg.type === "ok"
+                ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                : "bg-red-50 text-red-600 border border-red-100"
             }`}
           >
             {msg.text}
@@ -239,7 +304,9 @@ export default function NotificationsPage() {
 
       <div className="bg-white rounded-2xl border border-[#F9DEDA]/50 shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-[#F9DEDA]/40 flex items-center justify-between gap-3">
-          <h2 className="font-bold text-[#1A0F0A] text-sm uppercase tracking-wider">Recent notifications</h2>
+          <h2 className="font-bold text-[#1A0F0A] text-sm uppercase tracking-wider">
+            Recent notifications
+          </h2>
           {!!stats?.recent?.length && (
             <button
               type="button"
@@ -256,6 +323,11 @@ export default function NotificationsPage() {
           <div className="divide-y divide-[#F9DEDA]/40">
             {stats.recent.map((n) => (
               <div key={n.id} className="px-5 py-4 flex items-start gap-3">
+                <img
+                  src="/icon-96.png"
+                  alt=""
+                  className="w-10 h-10 rounded-lg object-cover shrink-0 mt-0.5"
+                />
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-[#1A0F0A] text-sm">{n.title}</div>
                   <div className="text-xs text-[#5C3D2E]/80 mt-0.5 line-clamp-2">{n.body}</div>

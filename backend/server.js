@@ -951,10 +951,12 @@ app.delete("/api/admin/notifications", requireAdminAuth, async (req, res) => {
 
 app.post("/api/admin/notifications/send", requireAdminAuth, notifyLimiter, async (req, res) => {
   try {
-    let { title, body, audience } = req.body || {};
+    let { title, body, audience, link, image } = req.body || {};
     title = typeof title === "string" ? title.trim().slice(0, 100) : "";
     body = typeof body === "string" ? body.trim().slice(0, 500) : "";
     audience = typeof audience === "string" ? audience.trim() : "all";
+    link = typeof link === "string" ? link.trim().slice(0, 500) : "/";
+    image = typeof image === "string" ? image.trim().slice(0, 2000) : "";
 
     if (!title || !body) {
       return res.status(400).json({ error: "Title and message are required" });
@@ -962,6 +964,14 @@ app.post("/api/admin/notifications/send", requireAdminAuth, notifyLimiter, async
     // Strip obvious HTML/script
     title = title.replace(/<[^>]*>/g, "");
     body = body.replace(/<[^>]*>/g, "");
+
+    if (image && !image.startsWith("https://")) {
+      return res.status(400).json({ error: "Image must be an https:// URL" });
+    }
+    if (link && link.startsWith("javascript:")) {
+      return res.status(400).json({ error: "Invalid link" });
+    }
+    if (!link) link = "/";
 
     if (audience !== "all") {
       return res.status(400).json({ error: "Only audience 'all' is supported currently" });
@@ -971,7 +981,8 @@ app.post("/api/admin/notifications/send", requireAdminAuth, notifyLimiter, async
     const result = await push.sendToAllActive(prisma, {
       title,
       body,
-      link: "/",
+      link,
+      image: image || null,
       data: { type: "broadcast" },
     });
 
