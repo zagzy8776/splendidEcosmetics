@@ -123,3 +123,33 @@ model NotificationLog {
   @@index([createdAt])
   @@map("notification_logs")
 }
+
+model AnalyticsEvent {
+  id            String   @id @default(cuid())
+  sessionId     String   @map("session_id")
+  visitorId     String   @map("visitor_id")
+  eventType     String   @map("event_type")
+  productId     String?  @map("product_id")
+  transactionId String?  @unique @map("transaction_id")
+  payload       String   @default("{}")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@index([eventType, createdAt])
+  @@index([productId, eventType, createdAt])
+  @@index([sessionId, createdAt])
+  @@index([visitorId, createdAt])
+  @@map("analytics_events")
+}
+
+model VisitorPresence {
+  sessionId   String   @id @map("session_id")
+  visitorId   String   @map("visitor_id")
+  section     String
+  productId   String?  @map("product_id")
+  productName String?  @map("product_name")
+  lastSeenAt  DateTime @map("last_seen_at")
+
+  @@index([lastSeenAt])
+  @@map("visitor_presence")
+}
