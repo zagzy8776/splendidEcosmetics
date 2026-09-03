@@ -27,7 +27,7 @@ export default function PushListener() {
           const n = new Notification(title || "Splendid Empire", {
             body: body || "",
             icon: "/icon-192.png",
-            tag: (data && (data.orderId || data.tag)) || "splendid-push",
+            tag: (data && (data.tag || data.orderId)) || `fg-${Date.now()}`,
             data: data || {},
           });
           n.onclick = () => {

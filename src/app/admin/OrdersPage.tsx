@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Search, RefreshCw, Pencil, Trash2, Loader2, X, Check } from "lucide-react";
+import { Search, RefreshCw, Pencil, Trash2, Loader2, X, Check, MessageCircle } from "lucide-react";
 import { useSearchParams } from "react-router";
 import { fetchOrders, updateOrderStatus, updateOrder, deleteOrder } from "../../api";
 import { fmt, type Order, type OrderStatus } from "./types";
@@ -13,6 +13,22 @@ const statusStyle: Record<string, string> = {
   dispatched: "bg-indigo-50 text-indigo-700 border-indigo-200",
   delivered: "bg-emerald-50 text-emerald-700 border-emerald-200",
 };
+
+function itemName(item: Order["items"][number]) {
+  return item.product?.name || "Item";
+}
+
+function itemPrice(item: Order["items"][number]) {
+  return Number(item.product?.price || 0) * item.quantity;
+}
+
+function whatsappUrl(phone: string, orderId: string, name: string) {
+  const digits = String(phone || "").replace(/\D/g, "");
+  if (digits.length < 7) return null;
+  const intl = digits.startsWith("0") ? `234${digits.slice(1)}` : digits;
+  const text = encodeURIComponent(`Hello ${name}, this is Splendid Empire Cosmetics regarding order ${orderId}.`);
+  return `https://wa.me/${intl}?text=${text}`;
+}
 
 export default function OrdersPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -48,8 +64,8 @@ export default function OrdersPage() {
           createdAt: o.createdAt instanceof Date ? o.createdAt : new Date(o.createdAt),
         }))
       );
-    } catch {
-      showToast("Failed to load orders");
+    } catch (err: any) {
+      showToast(err?.message || "Failed to load orders");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -211,7 +227,9 @@ export default function OrdersPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map((order) => (
+          {filtered.map((order) => {
+            const wa = whatsappUrl(order.phone, order.id, order.customerName);
+            return (
             <div key={order.id} className="bg-white rounded-2xl border border-[#F9DEDA]/50 p-4 md:p-5 shadow-sm">
               <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -228,7 +246,7 @@ export default function OrdersPage() {
                   <div className="mt-2 text-xs text-[#5C3D2E] space-y-0.5">
                     {order.items?.map((item, i) => (
                       <div key={i}>
-                        {item.quantity}x {item.product?.name || "Item"} - {fmt(Number(item.product?.price || 0) * item.quantity)}
+                        {item.quantity}x {itemName(item)} - {fmt(itemPrice(item))}
                       </div>
                     ))}
                   </div>
@@ -239,6 +257,17 @@ export default function OrdersPage() {
                       {fmt(Number(order.total))}
                     </div>
                   </div>
+                  {wa && (
+                    <a
+                      href={wa}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-1.5 rounded-lg border border-emerald-100 text-emerald-600 hover:bg-emerald-50 transition"
+                      title="WhatsApp customer"
+                    >
+                      <MessageCircle size={14} />
+                    </a>
+                  )}
                   {order.status !== "delivered" && (
                     <button
                       onClick={() => advanceStatus(order)}
@@ -263,7 +292,8 @@ export default function OrdersPage() {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

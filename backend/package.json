@@ -7,7 +7,8 @@
     "start": "node server.js",
     "db:push": "npx prisma db push",
     "db:seed": "node seed.js",
-    "build": "npx prisma generate && npx prisma db push"
+    "build": "npx prisma generate && npx prisma db push",
+    "db:ensure-inventory": "node scripts/ensure-inventory-columns.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.6.0",

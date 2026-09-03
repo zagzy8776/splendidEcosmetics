@@ -301,8 +301,18 @@ export default function Dashboard() {
               <Package size={16} className="text-[#B5784A]" />
               <h3 className="text-sm font-bold text-[#1A0F0A]">Inventory Attention</h3>
             </div>
-            <p className="text-xs leading-5 text-[#7D645A]">
-              The current product data only tracks <strong>In Stock / Out of Stock</strong>. Proper low-stock alerts need a quantity and reorder-threshold field; no fake stock numbers are shown here.
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-[#FFF8F6] px-4 py-3">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-[#9A7A6E]">Low stock</div>
+                <div className="mt-1 text-lg font-bold text-[#1A0F0A]">{summary.lowStockProductCount ?? 0}</div>
+              </div>
+              <div className="rounded-2xl bg-[#FFF8F6] px-4 py-3">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-[#9A7A6E]">Out of stock</div>
+                <div className="mt-1 text-lg font-bold text-[#1A0F0A]">{summary.outOfStockProductCount ?? 0}</div>
+              </div>
+            </div>
+            <p className="mt-3 text-xs leading-5 text-[#7D645A]">
+              Counts only products with a tracked quantity. Legacy products without a quantity are not listed here.
             </p>
           </div>
         </section>

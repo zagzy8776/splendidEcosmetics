@@ -10,6 +10,19 @@ import { getFirebaseApp, getVapidKey, isFirebaseConfigured } from "./config";
 
 const DISMISS_KEY = "splendid_push_dismissed_at";
 const TOKEN_KEY = "splendid_push_token";
+const DEVICE_KEY = "splendid_push_device_id";
+
+function getDeviceId(): string {
+  try {
+    let id = localStorage.getItem(DEVICE_KEY);
+    if (id && id.length >= 16) return id;
+    id = (crypto.randomUUID && crypto.randomUUID()) || `web-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem(DEVICE_KEY, id);
+    return id;
+  } catch {
+    return `web-${Date.now()}`;
+  }
+}
 
 let messagingInstance: Messaging | null = null;
 
@@ -76,8 +89,7 @@ async function postRegister(token: string) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      // Backend unique key — use token as installationId for web
-      installationId: token,
+      installationId: getDeviceId(),
       token,
       userAgent: navigator.userAgent,
       platform: navigator.platform || undefined,
@@ -91,11 +103,16 @@ async function postRegister(token: string) {
 
 async function postUnregister(token: string) {
   const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
-  await fetch(`${API_BASE}/api/notifications/unregister`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ installationId: token }),
-  }).catch(() => {});
+  const ids = Array.from(new Set([getDeviceId(), token].filter(Boolean)));
+  await Promise.all(
+    ids.map((installationId) =>
+      fetch(`${API_BASE}/api/notifications/unregister`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ installationId }),
+      }).catch(() => {})
+    )
+  );
 }
 
 async function ensureServiceWorker(): Promise<ServiceWorkerRegistration | null> {

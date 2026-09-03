@@ -24,17 +24,25 @@ async function fetchWithRetry(url: string, options?: RequestInit, retries = 3, d
 }
 
 // ─── AUTH TOKEN ───────────────────────────────────────────────────────────────
-// Stored in sessionStorage so it clears when the browser tab/session closes.
+// localStorage so the admin stays signed in across tabs and phone browser restarts.
+const ADMIN_TOKEN_KEY = "admin_token";
+
 export function getAdminToken(): string | null {
-  return sessionStorage.getItem("admin_token");
+  try {
+    return localStorage.getItem(ADMIN_TOKEN_KEY) || sessionStorage.getItem(ADMIN_TOKEN_KEY);
+  } catch {
+    return null;
+  }
 }
 
 function setAdminToken(token: string) {
-  sessionStorage.setItem("admin_token", token);
+  localStorage.setItem(ADMIN_TOKEN_KEY, token);
+  sessionStorage.removeItem(ADMIN_TOKEN_KEY);
 }
 
 export function clearAdminToken() {
-  sessionStorage.removeItem("admin_token");
+  localStorage.removeItem(ADMIN_TOKEN_KEY);
+  sessionStorage.removeItem(ADMIN_TOKEN_KEY);
 }
 
 function adminHeaders(): Record<string, string> {
@@ -45,6 +53,13 @@ function adminHeaders(): Record<string, string> {
   };
 }
 
+function assertAdminOk(res: Response) {
+  if (res.status === 401) {
+    clearAdminToken();
+    throw new Error("Session expired. Please log in again.");
+  }
+}
+
 export interface AdminDashboardSummary {
   ordersToProcess: number;
   paymentReview: number;
@@ -53,6 +68,8 @@ export interface AdminDashboardSummary {
   todaysSales: number;
   todaysOrderCount: number;
   averageOrderValue: number;
+  lowStockProductCount?: number;
+  outOfStockProductCount?: number;
   statusCounts: {
     pending: number;
     verifying: number;
@@ -86,6 +103,8 @@ export interface ProductData {
   videoUrl?: string;
   description: string;
   inStock: boolean;
+  stockQuantity?: number | null;
+  lowStockThreshold?: number;
   badge?: string;
   rating?: number;
   reviews?: number;
@@ -142,13 +161,14 @@ export async function fetchOrders() {
   const res = await fetch(`${API_BASE}/api/orders`, {
     headers: adminHeaders(),
   });
+  assertAdminOk(res);
   if (!res.ok) throw new Error("Failed to fetch orders");
   const data = await res.json();
   return data.map((o: any) => ({
     ...o,
     createdAt: new Date(o.createdAt),
-    items: o.items.map((i: any) => ({
-      product: { id: i.productId, name: i.name, price: Number(i.price) },
+    items: (o.items || []).map((i: any) => ({
+      product: { id: i.productId || i.product?.id, name: i.name || i.product?.name, price: Number(i.price ?? i.product?.price ?? 0) },
       quantity: i.quantity
     }))
   }));
@@ -158,10 +178,7 @@ export async function fetchAdminDashboardSummary(): Promise<AdminDashboardSummar
   const res = await fetch(`${API_BASE}/api/admin/dashboard-summary`, {
     headers: adminHeaders(),
   });
-  if (res.status === 401) {
-    clearAdminToken();
-    throw new Error("Session expired. Please log in again.");
-  }
+  assertAdminOk(res);
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || "Failed to load dashboard");
   return data as AdminDashboardSummary;
@@ -173,12 +190,13 @@ export async function updateOrderStatus(id: string, status: string) {
     headers: adminHeaders(),
     body: JSON.stringify({ status }),
   });
+  assertAdminOk(res);
   if (!res.ok) throw new Error("Failed to update order");
   const data = await res.json();
   return {
     ...data,
     createdAt: new Date(data.createdAt),
-    items: data.items.map((i: any) => ({
+    items: (data.items || []).map((i: any) => ({
       product: { id: i.productId, name: i.name, price: Number(i.price) },
       quantity: i.quantity
     }))
@@ -190,6 +208,7 @@ export async function deleteOrder(id: string) {
     method: "DELETE",
     headers: adminHeaders(),
   });
+  assertAdminOk(res);
   if (!res.ok) throw new Error("Failed to delete order");
   return res.json();
 }
@@ -200,12 +219,13 @@ export async function updateOrder(id: string, data: { customerName?: string; pho
     headers: adminHeaders(),
     body: JSON.stringify(data),
   });
+  assertAdminOk(res);
   if (!res.ok) throw new Error("Failed to update order");
   const updated = await res.json();
   return {
     ...updated,
     createdAt: new Date(updated.createdAt),
-    items: updated.items.map((i: any) => ({
+    items: (updated.items || []).map((i: any) => ({
       product: { id: i.productId, name: i.name, price: Number(i.price) },
       quantity: i.quantity,
     })),
@@ -218,7 +238,7 @@ export async function createProduct(data: ProductData) {
     headers: adminHeaders(),
     body: JSON.stringify(data),
   });
-  if (res.status === 401) { clearAdminToken(); throw new Error("Session expired. Please log in again."); }
+  assertAdminOk(res);
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error || "Failed to create product");
@@ -232,7 +252,7 @@ export async function updateProduct(id: string, data: Partial<ProductData>) {
     headers: adminHeaders(),
     body: JSON.stringify(data),
   });
-  if (res.status === 401) { clearAdminToken(); throw new Error("Session expired. Please log in again."); }
+  assertAdminOk(res);
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error || "Failed to update product");
@@ -245,7 +265,7 @@ export async function deleteProduct(id: string) {
     method: "DELETE",
     headers: adminHeaders(),
   });
-  if (res.status === 401) { clearAdminToken(); throw new Error("Session expired. Please log in again."); }
+  assertAdminOk(res);
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error || "Failed to delete product");
@@ -295,10 +315,7 @@ export async function cloudinaryUpload(file: File): Promise<string> {
     method: "POST",
     headers: adminHeaders(),
   });
-  if (sigRes.status === 401) {
-    clearAdminToken();
-    throw new Error("Session expired. Please log in again.");
-  }
+  assertAdminOk(sigRes);
   if (!sigRes.ok) {
     const err = await sigRes.json().catch(() => ({}));
     throw new Error(err.error || `Failed to get upload signature (HTTP ${sigRes.status})`);
@@ -359,7 +376,7 @@ export async function saveCategoryPhoto(name: string, image: string | null) {
     headers: adminHeaders(),
     body: JSON.stringify({ name, image: image || null }),
   });
-  if (res.status === 401) { clearAdminToken(); throw new Error("Session expired. Please log in again."); }
+  assertAdminOk(res);
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error || "Failed to save category");
@@ -372,6 +389,7 @@ export async function deleteCategoryPhoto(name: string) {
     method: "DELETE",
     headers: adminHeaders(),
   });
+  assertAdminOk(res);
   if (!res.ok) throw new Error("Failed to delete category photo");
   return res.json();
 }
