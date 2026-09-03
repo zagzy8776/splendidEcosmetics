@@ -37,6 +37,7 @@ model Order {
   createdAt    DateTime    @default(now()) @map("created_at")
   updatedAt    DateTime    @updatedAt @map("updated_at")
   items        OrderItem[]
+  notificationRecipients OrderNotificationRecipient[]
 
   @@map("orders")
 }
@@ -71,23 +72,40 @@ model Category {
 
   @@map("categories")
 }
+
 model PushSubscription {
-  id           String    @id @default(cuid())
-  /// Firebase Installation ID (FID) — primary targeting key for FCM
-  installationId String  @unique @map("installation_id")
-  /// Optional legacy FCM registration token if ever provided
-  token        String?   @unique
-  userAgent    String?   @map("user_agent") @db.Text
-  platform     String?
-  enabled      Boolean   @default(true)
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  lastSeenAt   DateTime  @default(now()) @map("last_seen_at")
-  lastSentAt   DateTime? @map("last_sent_at")
-  failCount    Int       @default(0) @map("fail_count")
+  id             String    @id @default(cuid())
+  /// Firebase Installation ID (FID) or web FCM token used as stable device key
+  installationId String    @unique @map("installation_id")
+  /// Optional FCM registration token (web); often same as installationId for web
+  token          String?   @unique
+  userAgent      String?   @map("user_agent") @db.Text
+  platform       String?
+  enabled        Boolean   @default(true)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  lastSeenAt     DateTime  @default(now()) @map("last_seen_at")
+  lastSentAt     DateTime? @map("last_sent_at")
+  failCount      Int       @default(0) @map("fail_count")
+  orderLinks     OrderNotificationRecipient[]
 
   @@index([enabled])
   @@map("push_subscriptions")
+}
+
+/// Join: one order ↔ many devices; one device ↔ many orders
+model OrderNotificationRecipient {
+  id                 String           @id @default(cuid())
+  orderId            String           @map("order_id")
+  pushSubscriptionId String           @map("push_subscription_id")
+  createdAt          DateTime         @default(now()) @map("created_at")
+  order              Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  pushSubscription   PushSubscription @relation(fields: [pushSubscriptionId], references: [id], onDelete: Cascade)
+
+  @@unique([orderId, pushSubscriptionId])
+  @@index([orderId])
+  @@index([pushSubscriptionId])
+  @@map("order_notification_recipients")
 }
 
 model NotificationLog {

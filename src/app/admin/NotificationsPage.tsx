@@ -63,6 +63,17 @@ type Stats = {
     failedCount: number;
     createdAt: string;
   }>;
+  ordersWithPush?: number;
+  orderRecipientLinks?: number;
+  recentOrderLogs?: Array<{
+    id: string;
+    title: string;
+    body: string;
+    audience: string;
+    sentCount: number;
+    failedCount: number;
+    createdAt: string;
+  }>;
 };
 
 export default function NotificationsPage() {
@@ -245,6 +256,47 @@ export default function NotificationsPage() {
             {stats?.activeSubscribers ?? 0}
           </div>
         </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-[#F9DEDA]/50 p-5 shadow-sm mb-6">
+        <h2 className="font-bold text-[#1A0F0A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+          Order notifications
+        </h2>
+        <p className="text-sm text-[#5C3D2E]/80 mt-2 leading-relaxed">
+          Customers receive automatic notifications when their order status changes
+          (payment confirmed, dispatched, delivered, and more). You do not need to send these manually.
+        </p>
+        <div className="grid grid-cols-2 gap-3 mt-4">
+          <div className="rounded-xl bg-[#FAF7F5] border border-[#F9DEDA]/40 p-3">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-[#9A7A6E]">Orders linked</div>
+            <div className="text-xl font-bold text-[#1A0F0A] mt-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+              {stats?.ordersWithPush ?? 0}
+            </div>
+          </div>
+          <div className="rounded-xl bg-[#FAF7F5] border border-[#F9DEDA]/40 p-3">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-[#9A7A6E]">Device links</div>
+            <div className="text-xl font-bold text-[#1A0F0A] mt-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+              {stats?.orderRecipientLinks ?? 0}
+            </div>
+          </div>
+        </div>
+        {(stats?.recentOrderLogs?.length ?? 0) > 0 && (
+          <div className="mt-4">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-[#9A7A6E] mb-2">
+              Recent order pushes
+            </div>
+            <ul className="space-y-2 max-h-48 overflow-y-auto">
+              {(stats?.recentOrderLogs || []).map((log) => (
+                <li key={log.id} className="text-xs text-[#5C3D2E] border-b border-[#F9DEDA]/30 pb-2">
+                  <span className="font-semibold text-[#1A0F0A]">{log.title}</span>
+                  <span className="text-[#9A7A6E]"> · sent {log.sentCount}</span>
+                  {log.failedCount ? <span className="text-red-500"> · {log.failedCount} failed</span> : null}
+                  <div className="text-[#9A7A6E] mt-0.5 truncate">{log.body}</div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       <form

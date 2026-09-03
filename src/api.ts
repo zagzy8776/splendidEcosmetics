@@ -97,11 +97,18 @@ export async function fetchProducts(): Promise<ProductData[]> {
   }));
 }
 
-export async function createOrder(order: OrderData) {
+export async function createOrder(order: OrderData & { installationId?: string | null }) {
+  const payload: Record<string, unknown> = { ...order };
+  // Optional: associate this browser's push subscription with the order
+  if (order.installationId) {
+    payload.installationId = order.installationId;
+  } else {
+    delete payload.installationId;
+  }
   const res = await fetch(`${API_BASE}/api/orders`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(order),
+    body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error("Failed to create order");
   const data = await res.json();
@@ -347,3 +354,13 @@ export async function deleteCategoryPhoto(name: string) {
 }
 
 export default API_BASE;
+
+/** Public order status (no auth) — used by /order/:id tracking page */
+export async function fetchPublicOrder(id: string) {
+  const res = await fetchWithRetry(`${API_BASE}/api/orders/${encodeURIComponent(id)}/public`);
+  if (!res.ok) {
+    if (res.status === 404) throw new Error("Order not found");
+    throw new Error("Failed to load order");
+  }
+  return res.json();
+}

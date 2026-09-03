@@ -28,7 +28,7 @@ try {
       badge: DEFAULT_BADGE,
       image,
       data,
-      tag: data.tag || "splendid-push",
+      tag: data.tag || data.orderId || "splendid-push",
       renotify: true,
       requireInteraction: true,
     });
@@ -39,16 +39,27 @@ try {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const path =
-    (event.notification.data && event.notification.data.click_url) || "/";
+  const data = event.notification.data || {};
+  const path = data.click_url || data.link || "/";
   const url = path.startsWith("http")
     ? path
     : self.location.origin + (path.startsWith("/") ? path : "/" + path);
+
   event.waitUntil(
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientsArr) => {
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (clientsArr) => {
       for (const c of clientsArr) {
-        if ("focus" in c) {
-          c.focus();
+        if (c.url && c.url.startsWith(self.location.origin) && "focus" in c) {
+          await c.focus();
+          try {
+            if ("navigate" in c && typeof c.navigate === "function") {
+              await c.navigate(url);
+              return;
+            }
+          } catch (_) {}
+          // Fallback: open target in this client via postMessage
+          try {
+            c.postMessage({ type: "NOTIFICATION_CLICK", url });
+          } catch (_) {}
           return;
         }
       }
@@ -78,7 +89,7 @@ self.addEventListener("push", (event) => {
       badge: DEFAULT_BADGE,
       image: data.image || undefined,
       data,
-      tag: data.tag || "splendid-push",
+      tag: data.tag || data.orderId || "splendid-push",
       renotify: true,
       requireInteraction: true,
     })

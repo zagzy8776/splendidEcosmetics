@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import NotificationPrompt from "./components/notifications/NotificationPrompt";
+import { getStoredToken } from "../firebase/messaging";
 import PushListener from "./components/notifications/PushListener";
 import { fetchProducts, createOrder, fetchOrders, updateOrderStatus, deleteOrder, updateOrder, createProduct, updateProduct, deleteProduct, adminLogin, adminLogout, getAdminToken, clearAdminToken, changeAdminPassword, cloudinaryUpload, fetchCategories, saveCategoryPhoto, deleteCategoryPhoto } from "../api";
 import {
@@ -203,6 +204,7 @@ export default function App() {
   }
 
   function placeOrder() {
+    const pushToken = getStoredToken();
     const payload = {
       id: orderId,
       customerName,
@@ -213,7 +215,9 @@ export default function App() {
       items: cart.map(i => ({
         product: { id: i.product.id, name: i.product.name, price: i.product.price },
         quantity: i.quantity
-      }))
+      })),
+      // Optional: link this browser to order status push (never required for checkout)
+      ...(pushToken ? { installationId: pushToken } : {}),
     };
 
     createOrder(payload)

@@ -16,6 +16,9 @@ async function loadPush() {
       getFirebaseConfigStatus: fa.getFirebaseConfigStatus,
       sendToAllActive: ns.sendToAllActive,
       notifyAllSafe: ns.notifyAllSafe,
+      notifyOrderSafe: ns.notifyOrderSafe,
+      orderStatusPushCopy: ns.orderStatusPushCopy,
+      linkInstallationToOrder: ns.linkInstallationToOrder,
     };
   } catch (err) {
     console.error("[Push] unavailable:", err?.message || err);
@@ -25,6 +28,9 @@ async function loadPush() {
       getFirebaseConfigStatus: async () => ({ lastError: String(err?.message || err) }),
       sendToAllActive: async () => ({ sent: 0, failed: 0, error: "unavailable" }),
       notifyAllSafe: () => {},
+      notifyOrderSafe: () => {},
+      orderStatusPushCopy: (orderId, status) => ({ title: "Order update", body: String(status || "") }),
+      linkInstallationToOrder: async () => false,
     };
   }
 }
@@ -519,7 +525,7 @@ app.get("/api/orders", requireAdminAuth, async (req, res) => {
 
 app.post("/api/orders", orderLimiter, async (req, res) => {
   try {
-    const { customerName, phone, email, total, items } = req.body;
+    const { customerName, phone, email, total, items, installationId } = req.body;
     if (!customerName || !phone || !email || !total || !items?.length) {
       return res.status(400).json({ error: "Missing required order fields" });
     }
@@ -558,15 +564,38 @@ app.post("/api/orders", orderLimiter, async (req, res) => {
       include: { items: true },
     });
     sendEmail(order.email, `Your Order Confirmation – ${order.id}`, buildConfirmationEmail(order));
-    // Push to admin/subscribers: new order (non-blocking)
-    loadPush().then(({ notifyAllSafe }) => {
-      notifyAllSafe(prisma, {
+
+    // Link this browser's push subscription to the order (optional, non-blocking)
+    // Then notify ONLY that customer's device(s) — never broadcast private order details.
+    loadPush().then(async (push) => {
+      try {
+        if (installationId && typeof installationId === "string") {
+          await push.linkInstallationToOrder(prisma, order.id, installationId);
+        }
+        const copy = push.orderStatusPushCopy(order.id, "pending");
+        push.notifyOrderSafe(prisma, order.id, {
+          title: copy.title,
+          body: copy.body,
+          link: `/order/${order.id}`,
+          data: {
+            orderId: order.id,
+            notificationType: "order_status",
+            status: "pending",
+            click_url: `/order/${order.id}`,
+          },
+        });
+      } catch (e) {
+        console.error("[order create push]", e?.message || e);
+      }
+      // Existing store-owner style broadcast (admin awareness) — keeps working
+      push.notifyAllSafe(prisma, {
         title: "New order received 🛍️",
         body: `Order ${order.id} from ${order.customerName} — ₦${Number(order.total).toLocaleString("en-NG")}`,
         link: "/admin/orders",
         data: { type: "order.created", orderId: order.id },
       });
     }).catch(() => {});
+
     res.status(201).json(order);
   } catch (err) {
     console.error(err);
@@ -582,20 +611,46 @@ app.patch("/api/orders/:id/status", requireAdminAuth, async (req, res) => {
     if (!ALLOWED_STATUSES.includes(status)) {
       return res.status(400).json({ error: `Invalid status. Must be one of: ${ALLOWED_STATUSES.join(", ")}` });
     }
+
+    const existing = await prisma.order.findUnique({ where: { id: req.params.id } });
+    if (!existing) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    const previousStatus = existing.status;
+    const statusChanged = previousStatus !== status;
+
     const order = await prisma.order.update({
       where: { id: req.params.id },
       data: { status },
       include: { items: true },
     });
-    if (order.email) {
+
+    if (order.email && statusChanged) {
       if (status === "dispatched") {
         sendEmail(order.email, "Your Splendid Package is On Its Way! 🚚", buildDispatchEmail(order));
       } else if (status === "delivered") {
         sendEmail(order.email, "Your Order Has Arrived! We'd Love Your Feedback 💛", buildDeliveryEmail(order));
       }
     }
-    // Per-customer status push requires linking FID to a customer identity (not stored yet).
-    // Manual broadcasts remain available in Admin → Notifications.
+
+    // Targeted FCM only when status actually changes — never broadcast to all subscribers
+    if (statusChanged) {
+      loadPush().then((push) => {
+        const copy = push.orderStatusPushCopy(order.id, status);
+        push.notifyOrderSafe(prisma, order.id, {
+          title: copy.title,
+          body: copy.body,
+          link: `/order/${order.id}`,
+          data: {
+            orderId: order.id,
+            notificationType: "order_status",
+            status: String(status),
+            click_url: `/order/${order.id}`,
+          },
+        });
+      }).catch(() => {});
+    }
+
     res.json(order);
   } catch (err) {
     console.error(err);
@@ -622,11 +677,44 @@ app.patch("/api/orders/:id", requireAdminAuth, async (req, res) => {
     if (phone !== undefined) data.phone = sanitiseString(phone, 20);
     if (email !== undefined) data.email = email.trim().toLowerCase().slice(0, 254);
     if (status !== undefined && ALLOWED_STATUSES.includes(status)) data.status = status;
+
+    const existing = await prisma.order.findUnique({ where: { id: req.params.id } });
+    if (!existing) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    const previousStatus = existing.status;
+    const statusChanged = data.status !== undefined && data.status !== previousStatus;
+
     const order = await prisma.order.update({
       where: { id: req.params.id },
       data,
       include: { items: true },
     });
+
+    if (statusChanged) {
+      if (order.email) {
+        if (order.status === "dispatched") {
+          sendEmail(order.email, "Your Splendid Package is On Its Way! 🚚", buildDispatchEmail(order));
+        } else if (order.status === "delivered") {
+          sendEmail(order.email, "Your Order Has Arrived! We'd Love Your Feedback 💛", buildDeliveryEmail(order));
+        }
+      }
+      loadPush().then((push) => {
+        const copy = push.orderStatusPushCopy(order.id, order.status);
+        push.notifyOrderSafe(prisma, order.id, {
+          title: copy.title,
+          body: copy.body,
+          link: `/order/${order.id}`,
+          data: {
+            orderId: order.id,
+            notificationType: "order_status",
+            status: String(order.status),
+            click_url: `/order/${order.id}`,
+          },
+        });
+      }).catch(() => {});
+    }
+
     res.json(order);
   } catch (err) {
     console.error(err);
@@ -815,6 +903,35 @@ app.delete("/api/categories/:name", requireAdminAuth, async (req, res) => {
 });
 
 
+
+// Public order status lookup (for notification click / tracking). No auth.
+// Does not expose phone/email. Order IDs are opaque cuids.
+app.get("/api/orders/:id/public", async (req, res) => {
+  try {
+    const id = String(req.params.id || "").trim();
+    if (!id || id.length > 64) {
+      return res.status(400).json({ error: "Invalid order id" });
+    }
+    const order = await prisma.order.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        status: true,
+        total: true,
+        customerName: true,
+        createdAt: true,
+        updatedAt: true,
+        items: { select: { name: true, quantity: true, price: true } },
+      },
+    });
+    if (!order) return res.status(404).json({ error: "Order not found" });
+    res.json(order);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to load order" });
+  }
+});
+
 // ─── PUSH NOTIFICATIONS ───────────────────────────────────────────────────────
 
 app.post("/api/notifications/register", registerLimiter, async (req, res) => {
@@ -888,11 +1005,19 @@ app.get("/api/admin/notifications/stats", requireAdminAuth, async (req, res) => 
     }
 
     let total = 0, active = 0, recent = [], dbError = null;
+    let ordersWithPush = 0, orderRecipientLinks = 0, recentOrderLogs = [];
     try {
-      [total, active, recent] = await Promise.all([
+      [total, active, recent, ordersWithPush, orderRecipientLinks, recentOrderLogs] = await Promise.all([
         prisma.pushSubscription.count(),
         prisma.pushSubscription.count({ where: { enabled: true } }),
         prisma.notificationLog.findMany({ orderBy: { createdAt: "desc" }, take: 20 }),
+        prisma.orderNotificationRecipient.groupBy({ by: ["orderId"] }).then((rows) => rows.length).catch(() => 0),
+        prisma.orderNotificationRecipient.count().catch(() => 0),
+        prisma.notificationLog.findMany({
+          where: { audience: { startsWith: "order:" } },
+          orderBy: { createdAt: "desc" },
+          take: 10,
+        }).catch(() => []),
       ]);
     } catch (e) {
       dbError = e?.message || String(e);
@@ -906,6 +1031,9 @@ app.get("/api/admin/notifications/stats", requireAdminAuth, async (req, res) => 
       configDetail,
       dbError,
       recent,
+      ordersWithPush,
+      orderRecipientLinks,
+      recentOrderLogs,
     });
   } catch (err) {
     console.error(err);

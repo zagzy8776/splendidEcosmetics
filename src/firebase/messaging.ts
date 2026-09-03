@@ -217,7 +217,9 @@ export async function disablePushNotifications(): Promise<void> {
   } catch { /* ignore */ }
 }
 
-export function listenForeground(handler: (title: string, body: string) => void) {
+export function listenForeground(
+  handler: (title: string, body: string, data?: Record<string, string>) => void
+) {
   const messaging = getMessagingSafe();
   if (!messaging) return () => {};
   return onMessage(messaging, (payload) => {
@@ -229,7 +231,8 @@ export function listenForeground(handler: (title: string, body: string) => void)
       payload.notification?.body ||
       (payload.data && (payload.data as any).body) ||
       "";
-    handler(String(title), String(body));
+    const data = (payload.data || {}) as Record<string, string>;
+    handler(String(title), String(body), data);
   });
 }
 
