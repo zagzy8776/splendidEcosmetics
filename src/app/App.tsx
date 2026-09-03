@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
+import ProductSeoSync from "./ProductSeoSync";
 import NotificationPrompt from "./components/notifications/NotificationPrompt";
 import { getStoredToken } from "../firebase/messaging";
 import PushListener from "./components/notifications/PushListener";
@@ -347,6 +348,7 @@ export default function App() {
 
   return (
     <div style={{ fontFamily: "'Raleway', sans-serif", backgroundColor: "#FFF6F3", minHeight: "100dvh", overflowX: "hidden" }}>
+      <ProductSeoSync products={products} onOpen={setQuickViewProduct} />
       <Navbar
         cartCount={cartCount}
         onCartOpen={() => { setCartOpen(true); setPresenceContext("cart"); trackStoreEvent("page_view", { section: "cart" }); }}
