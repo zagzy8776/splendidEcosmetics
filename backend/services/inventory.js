@@ -109,7 +109,7 @@ export async function applyOrderStatusWithStock(prisma, orderId, nextStatus) {
           UPDATE products
           SET
             stock_quantity = stock_quantity - ${qty},
-            in_stock = (stock_quantity - ${qty}) > 0
+            "inStock" = (stock_quantity - ${qty}) > 0
           WHERE id = ${product.id}
             AND stock_quantity IS NOT NULL
             AND stock_quantity >= ${qty}
