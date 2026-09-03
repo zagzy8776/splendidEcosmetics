@@ -1369,8 +1369,6 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-if (!process.env.VERCEL) {
-  
 app.post("/api/analytics/events", async (req, res) => {
   try {
     const result = await ingestEvents(prisma, req.body || {});
@@ -1456,7 +1454,8 @@ async function runDailyAnalyticsReportHttp(req, res) {
 app.get("/api/cron/daily-analytics-report", runDailyAnalyticsReportHttp);
 app.post("/api/cron/daily-analytics-report", runDailyAnalyticsReportHttp);
 
-app.listen(PORT, async () => {
+if (!process.env.VERCEL) {
+  app.listen(PORT, async () => {
     await ensureAdminPassword().catch(err => console.error("[Auth Seed Error]", err));
     console.log(`Splendid Empire API running on port ${PORT}`);
   });
