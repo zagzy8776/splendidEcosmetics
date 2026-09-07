@@ -91,14 +91,13 @@ model PushSubscription {
   updatedAt      DateTime  @updatedAt @map("updated_at")
   lastSeenAt     DateTime  @default(now()) @map("last_seen_at")
   lastSentAt     DateTime? @map("last_sent_at")
-  failCount      Int       @default(0) @map("fail_count")
+  failCount      Int       @default(0)
   orderLinks     OrderNotificationRecipient[]
 
   @@index([enabled])
   @@map("push_subscriptions")
 }
 
-/// Join: one order ↔ many devices; one device ↔ many orders
 model OrderNotificationRecipient {
   id                 String           @id @default(cuid())
   orderId            String           @map("order_id")
@@ -168,4 +167,80 @@ model AnalyticsSession {
   @@index([source, createdAt])
   @@index([createdAt])
   @@map("analytics_sessions")
+}
+
+/// Search/discovery geography. These are coverage areas, not claims of a physical branch.
+model SeoLocation {
+  id          String   @id @default(cuid())
+  state       String
+  capital     String
+  slug        String   @unique
+  country     String   @default("Nigeria")
+  region      String?
+  description String   @db.Text
+  isCapital   Boolean  @default(false) @map("is_capital")
+  priority    Int      @default(50)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([state, capital])
+  @@index([state, active])
+  @@index([capital, active])
+  @@map("seo_locations")
+}
+
+/// Commercial and informational search intents used to build useful landing/content pages.
+model SearchIntent {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  query       String
+  intentType  String   @map("intent_type")
+  topic       String
+  location    String?
+  description String?  @db.Text
+  priority    Int      @default(50)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([intentType, active])
+  @@index([topic, active])
+  @@index([location, active])
+  @@map("search_intents")
+}
+
+/// Editorial knowledge topics that can become genuinely useful guides/FAQs.
+model ContentTopic {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  title          String
+  summary        String   @db.Text
+  contentType    String   @map("content_type")
+  category       String?
+  audience       String?
+  searchQuestions String  @default("[]") @map("search_questions")
+  priority       Int      @default(50)
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([contentType, active])
+  @@index([category, active])
+  @@map("content_topics")
+}
+
+/// Brands stocked or explicitly supported by the storefront. Inventory claims remain separate from this registry.
+model SeoBrand {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String   @db.Text
+  active      Boolean  @default(true)
+  priority    Int      @default(50)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([active, priority])
+  @@map("seo_brands")
 }
