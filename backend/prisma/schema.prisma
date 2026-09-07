@@ -109,6 +109,7 @@ model OrderNotificationRecipient {
   @@unique([orderId, pushSubscriptionId])
   @@index([orderId])
   @@index([pushSubscriptionId])
+  @@map("order_notification_recipients")
 }
 
 model NotificationLog {
@@ -168,7 +169,6 @@ model AnalyticsSession {
   @@map("analytics_sessions")
 }
 
-/// Search/discovery geography. These are coverage areas, not claims of a physical branch.
 model SeoLocation {
   id          String   @id @default(cuid())
   state       String
@@ -189,7 +189,6 @@ model SeoLocation {
   @@map("seo_locations")
 }
 
-/// Commercial and informational search intents used to build useful landing/content pages.
 model SearchIntent {
   id          String   @id @default(cuid())
   slug        String   @unique
@@ -209,7 +208,6 @@ model SearchIntent {
   @@map("search_intents")
 }
 
-/// Editorial knowledge topics that can become genuinely useful guides/FAQs.
 model ContentTopic {
   id              String   @id @default(cuid())
   slug            String   @unique
@@ -229,7 +227,6 @@ model ContentTopic {
   @@map("content_topics")
 }
 
-/// Brands stocked or explicitly supported by the storefront. Inventory claims remain separate from this registry.
 model SeoBrand {
   id          String   @id @default(cuid())
   name        String   @unique
@@ -244,7 +241,6 @@ model SeoBrand {
   @@map("seo_brands")
 }
 
-/// Business claims approved for public SEO/content use. Keep only claims that can be substantiated.
 model SeoClaim {
   id          String   @id @default(cuid())
   key         String   @unique
