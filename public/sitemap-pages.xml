@@ -1,9 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://www.splendidcosmetics.com.ng/</loc>
-    <lastmod>2026-09-07</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
+  <url><loc>https://www.splendidcosmetics.com.ng/</loc><lastmod>2026-09-07</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
+
+  <url><loc>https://www.splendidcosmetics.com.ng/location/abia-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/adamawa-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/akwa-ibom-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/anambra-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/bauchi-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/bayelsa-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/benue-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/borno-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/cross-river-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/delta-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/ebonyi-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/edo-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/ekiti-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/enugu-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/gombe-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/imo-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/jigawa-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/kaduna-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/kano-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/katsina-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/kebbi-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/kogi-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/kwara-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/lagos-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/nasarawa-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/niger-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/ogun-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/ondo-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/osun-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/oyo-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/plateau-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/rivers-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/sokoto-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/taraba-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/yobe-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/zamfara-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/location/federal-capital-territory-nigeria</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+
+  <url><loc>https://www.splendidcosmetics.com.ng/guide/skincare</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/guide/foundation</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/guide/serum</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/guide/moisturizer</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/guide/lipstick</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.splendidcosmetics.com.ng/guide/perfume</loc><lastmod>2026-09-07</lastmod><changefreq>weekly</changefreq><priority>0.75</priority></url>
 </urlset>
