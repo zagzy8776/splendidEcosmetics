@@ -12,6 +12,7 @@ Allow: /product/
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/
+Disallow: /order/
 
 User-agent: Bingbot
 Allow: /
@@ -19,7 +20,6 @@ Allow: /product/
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/
+Disallow: /order/
 
 Sitemap: https://www.splendidcosmetics.com.ng/sitemap.xml
-Sitemap: https://www.splendidcosmetics.com.ng/sitemap-pages.xml
-Sitemap: https://www.splendidcosmetics.com.ng/sitemap-products.xml
