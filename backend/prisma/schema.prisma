@@ -79,10 +79,8 @@ model Category {
 }
 
 model PushSubscription {
-  id             String    @id @default(cuid())
-  /// Firebase Installation ID (FID) or web FCM token used as stable device key
+  id             String    @id
   installationId String    @unique @map("installation_id")
-  /// Optional FCM registration token (web); often same as installationId for web
   token          String?   @unique
   userAgent      String?   @map("user_agent") @db.Text
   platform       String?
@@ -212,18 +210,18 @@ model SearchIntent {
 
 /// Editorial knowledge topics that can become genuinely useful guides/FAQs.
 model ContentTopic {
-  id             String   @id @default(cuid())
-  slug           String   @unique
-  title          String
-  summary        String   @db.Text
-  contentType    String   @map("content_type")
-  category       String?
-  audience       String?
-  searchQuestions String  @default("[]") @map("search_questions")
-  priority       Int      @default(50)
-  active         Boolean  @default(true)
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  summary         String   @db.Text
+  contentType     String   @map("content_type")
+  category        String?
+  audience        String?
+  searchQuestions String   @default("[]") @map("search_questions")
+  priority        Int      @default(50)
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@index([contentType, active])
   @@index([category, active])
@@ -243,4 +241,23 @@ model SeoBrand {
 
   @@index([active, priority])
   @@map("seo_brands")
+}
+
+/// Business claims approved for public SEO/content use. Keep only claims that can be substantiated.
+model SeoClaim {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  claim       String   @db.Text
+  claimType   String   @map("claim_type")
+  value       String?
+  source      String?
+  verified    Boolean  @default(false)
+  active      Boolean  @default(true)
+  priority    Int      @default(50)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([claimType, active])
+  @@index([verified, active])
+  @@map("seo_claims")
 }
