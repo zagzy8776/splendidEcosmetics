@@ -9,6 +9,7 @@
     "postinstall": "npx prisma generate --schema=backend/prisma/schema.prisma",
     "db:push": "npx prisma db push --schema=backend/prisma/schema.prisma",
     "db:ensure-inventory": "node backend/scripts/ensure-inventory-columns.mjs",
+    "db:ensure-seo": "node backend/scripts/ensure-seo-schema.mjs",
     "db:seed-seo": "node backend/seed-seo.js && node backend/seed-claims.js"
   },
   "dependencies": {
