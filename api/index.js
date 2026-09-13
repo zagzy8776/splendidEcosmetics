@@ -56,6 +56,21 @@ app.get("/api/seo/location/:slug", async (req, res) => {
   }
 });
 
+app.get("/api/seo/area/:slug", async (req, res) => {
+  try {
+    const slug = String(req.params.slug || "").trim().toLowerCase();
+    if (!slug || slug.length > 160) return res.status(400).json({ error: "Invalid area slug" });
+    const area = await prisma.seoArea.findFirst({
+      where: { slug, active: true },
+      select: { state: true, capital: true, area: true, slug: true, description: true, priority: true },
+    });
+    if (!area) return res.status(404).json({ error: "Area not found" });
+    res.json(area);
+  } catch (err) {
+    sendSeoError(res, err);
+  }
+});
+
 app.get("/api/seo/search/:slug", async (req, res) => {
   try {
     const slug = String(req.params.slug || "").trim().toLowerCase();
@@ -99,8 +114,6 @@ app.get("/api/seo/brands", async (_req, res) => {
   }
 });
 
-// Crawl only high-priority national commercial intents. Location-specific
-// intents remain database-backed but are not mass-submitted as near-duplicates.
 app.get("/sitemap-search.xml", async (_req, res) => {
   try {
     let slugs = NATIONAL_SEARCH_SLUGS;
@@ -119,6 +132,21 @@ app.get("/sitemap-search.xml", async (_req, res) => {
     const urls = slugs
       .map((slug) => `  <url><loc>${escapeXml(`${SITE_URL}/search/${slug}`)}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>`)
       .join("\n");
+    res.type("application/xml").send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`);
+  } catch (err) {
+    sendSeoError(res, err);
+  }
+});
+
+app.get("/sitemap-areas.xml", async (_req, res) => {
+  try {
+    const areas = await prisma.seoArea.findMany({
+      where: { active: true },
+      select: { slug: true, updatedAt: true, priority: true },
+      orderBy: { priority: "desc" },
+      take: 1000,
+    });
+    const urls = areas.map(({ slug, updatedAt }) => `  <url><loc>${escapeXml(`${SITE_URL}/area/${slug}`)}</loc><lastmod>${new Date(updatedAt).toISOString().slice(0, 10)}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>`).join("\n");
     res.type("application/xml").send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`);
   } catch (err) {
     sendSeoError(res, err);
