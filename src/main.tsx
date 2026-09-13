@@ -6,15 +6,11 @@ import OrderTrackPage from "./app/OrderTrackPage.tsx";
 import ProductSeoSync from "./app/ProductSeoSync.tsx";
 import SeoDiscoveryPage from "./app/SeoDiscoveryPage.tsx";
 import SeoAreaPage from "./app/SeoAreaPage.tsx";
+import SeoBrandPage from "./app/SeoBrandPage.tsx";
 import "./styles/index.css";
 
 function ProductRoute() {
-  return (
-    <>
-      <ProductSeoSync />
-      <App />
-    </>
-  );
+  return <><ProductSeoSync /><App /></>;
 }
 
 createRoot(document.getElementById("root")!).render(
@@ -27,6 +23,7 @@ createRoot(document.getElementById("root")!).render(
       <Route path="/area/:areaSlug" element={<SeoAreaPage />} />
       <Route path="/search/:intentSlug" element={<SeoDiscoveryPage />} />
       <Route path="/guide/:topicSlug" element={<SeoDiscoveryPage />} />
+      <Route path="/brand/:brandSlug" element={<SeoBrandPage />} />
       <Route path="/*" element={<App />} />
     </Routes>
   </BrowserRouter>

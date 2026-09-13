@@ -10,7 +10,8 @@
     "db:push": "npx prisma db push --schema=backend/prisma/schema.prisma",
     "db:ensure-inventory": "node backend/scripts/ensure-inventory-columns.mjs",
     "db:ensure-seo": "node backend/scripts/ensure-seo-schema.mjs",
-    "db:seed-seo": "node backend/seed-seo.js && node backend/seed-seo-areas.js && node backend/seed-claims.js"
+    "db:seed-seo": "node backend/seed-seo.js && node backend/seed-seo-areas.js && node backend/seed-claims.js",
+    "seo:audit": "node scripts/seo-audit.mjs"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
@@ -82,8 +83,8 @@
   "devDependencies": {
     "@tailwindcss/vite": "4.1.12",
     "@vitejs/plugin-react": "4.7.0",
-    "prisma": "^6.6.0",
     "tailwindcss": "4.1.12",
+    "prisma": "^6.6.0",
     "vite": "6.3.5"
   },
   "pnpm": {
