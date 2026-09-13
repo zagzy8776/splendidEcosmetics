@@ -3,6 +3,38 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+const SITE_URL = "https://www.splendidcosmetics.com.ng";
+const NATIONAL_SEARCH_SLUGS = [
+  "buy-cosmetics-online-nigeria",
+  "online-cosmetics-store-nigeria",
+  "buy-skincare-products-nigeria",
+  "buy-makeup-products-nigeria",
+  "beauty-products-online-nigeria",
+  "cosmetics-store-nigeria",
+  "skincare-store-nigeria",
+  "makeup-store-nigeria",
+  "foundation-price-nigeria",
+  "concealer-price-nigeria",
+  "serum-price-nigeria",
+  "moisturizer-price-nigeria",
+  "lipstick-price-nigeria",
+  "lip-gloss-price-nigeria",
+  "perfume-price-nigeria",
+  "eyeliner-price-nigeria",
+  "best-skincare-products-nigeria",
+  "best-makeup-products-nigeria",
+  "authentic-skincare-products-nigeria",
+  "authentic-cosmetics-nigeria",
+  "beauty-products-delivery-nigeria",
+];
+
+const escapeXml = (value) => String(value)
+  .replaceAll("&", "&amp;")
+  .replaceAll("<", "&lt;")
+  .replaceAll(">", "&gt;")
+  .replaceAll('"', "&quot;")
+  .replaceAll("'", "&apos;");
+
 const sendSeoError = (res, err) => {
   console.error("[SEO API]", err?.message || err);
   res.status(503).json({ error: "SEO discovery data is temporarily unavailable" });
@@ -67,5 +99,30 @@ app.get("/api/seo/brands", async (_req, res) => {
   }
 });
 
-// Force production function refresh for analytics cron routes.
+// Crawl only high-priority national commercial intents. Location-specific
+// intents remain database-backed but are not mass-submitted as near-duplicates.
+app.get("/sitemap-search.xml", async (_req, res) => {
+  try {
+    let slugs = NATIONAL_SEARCH_SLUGS;
+    try {
+      const rows = await prisma.searchIntent.findMany({
+        where: { active: true, intentType: "commercial", priority: { gte: 80 }, location: null },
+        select: { slug: true },
+        orderBy: { priority: "desc" },
+        take: 1000,
+      });
+      if (rows.length) slugs = [...new Set(rows.map((row) => row.slug))];
+    } catch (err) {
+      console.warn("[SEO sitemap] database unavailable; using national fallback", err?.message || err);
+    }
+
+    const urls = slugs
+      .map((slug) => `  <url><loc>${escapeXml(`${SITE_URL}/search/${slug}`)}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>`)
+      .join("\n");
+    res.type("application/xml").send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`);
+  } catch (err) {
+    sendSeoError(res, err);
+  }
+});
+
 export default app;
