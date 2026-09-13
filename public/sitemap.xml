@@ -2,10 +2,14 @@
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
     <loc>https://www.splendidcosmetics.com.ng/sitemap-pages.xml</loc>
-    <lastmod>2026-09-03</lastmod>
+    <lastmod>2026-09-13</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://www.splendidcosmetics.com.ng/sitemap-products.xml</loc>
-    <lastmod>2026-09-03</lastmod>
+    <lastmod>2026-09-13</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://www.splendidcosmetics.com.ng/sitemap-search.xml</loc>
+    <lastmod>2026-09-13</lastmod>
   </sitemap>
 </sitemapindex>
