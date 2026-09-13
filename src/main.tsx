@@ -5,6 +5,7 @@ import AdminApp from "./app/admin/AdminApp.tsx";
 import OrderTrackPage from "./app/OrderTrackPage.tsx";
 import ProductSeoSync from "./app/ProductSeoSync.tsx";
 import SeoDiscoveryPage from "./app/SeoDiscoveryPage.tsx";
+import SeoAreaPage from "./app/SeoAreaPage.tsx";
 import "./styles/index.css";
 
 function ProductRoute() {
@@ -23,6 +24,7 @@ createRoot(document.getElementById("root")!).render(
       <Route path="/order/:orderId" element={<OrderTrackPage />} />
       <Route path="/product/:productId" element={<ProductRoute />} />
       <Route path="/location/:locationSlug" element={<SeoDiscoveryPage />} />
+      <Route path="/area/:areaSlug" element={<SeoAreaPage />} />
       <Route path="/search/:intentSlug" element={<SeoDiscoveryPage />} />
       <Route path="/guide/:topicSlug" element={<SeoDiscoveryPage />} />
       <Route path="/*" element={<App />} />
