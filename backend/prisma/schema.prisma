@@ -16,7 +16,7 @@ model Product {
   images             String?  @default("[]")
   videoUrl           String?
   description        String
-  inStock            Boolean  @default(true)
+  inStock             Boolean  @default(true)
   stockQuantity      Int?     @map("stock_quantity")
   lowStockThreshold  Int      @default(3) @map("low_stock_threshold")
   badge              String?
@@ -57,6 +57,7 @@ model OrderItem {
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product   Product @relation(fields: [productId], references: [id])
 
+  @@unique([orderId, productId])
   @@map("order_items")
 }
 
@@ -187,6 +188,24 @@ model SeoLocation {
   @@index([state, active])
   @@index([capital, active])
   @@map("seo_locations")
+}
+
+model SeoArea {
+  id          String   @id @default(cuid())
+  state       String
+  capital     String
+  area        String
+  slug        String   @unique
+  description String   @db.Text
+  priority    Int      @default(50)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([state, active])
+  @@index([capital, active])
+  @@index([area, active])
+  @@map("seo_areas")
 }
 
 model SearchIntent {
