@@ -26,6 +26,22 @@ const statements = [
   `CREATE INDEX IF NOT EXISTS "seo_locations_state_active_idx" ON "seo_locations" ("state", "active")`,
   `CREATE INDEX IF NOT EXISTS "seo_locations_capital_active_idx" ON "seo_locations" ("capital", "active")`,
 
+  `CREATE TABLE IF NOT EXISTS "seo_areas" (
+    "id" TEXT PRIMARY KEY,
+    "state" TEXT NOT NULL,
+    "capital" TEXT NOT NULL,
+    "area" TEXT NOT NULL,
+    "slug" TEXT NOT NULL UNIQUE,
+    "description" TEXT NOT NULL,
+    "priority" INTEGER NOT NULL DEFAULT 50,
+    "active" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE INDEX IF NOT EXISTS "seo_areas_state_active_idx" ON "seo_areas" ("state", "active")`,
+  `CREATE INDEX IF NOT EXISTS "seo_areas_capital_active_idx" ON "seo_areas" ("capital", "active")`,
+  `CREATE INDEX IF NOT EXISTS "seo_areas_area_active_idx" ON "seo_areas" ("area", "active")`,
+
   `CREATE TABLE IF NOT EXISTS "search_intents" (
     "id" TEXT PRIMARY KEY,
     "slug" TEXT NOT NULL UNIQUE,
@@ -100,33 +116,14 @@ async function tableExists(name) {
 async function main() {
   if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is not set");
 
-  const before = await Promise.all([
-    tableExists("seo_locations"),
-    tableExists("search_intents"),
-    tableExists("content_topics"),
-    tableExists("seo_brands"),
-    tableExists("seo_claims"),
-  ]);
-
+  const names = ["seo_locations", "seo_areas", "search_intents", "content_topics", "seo_brands", "seo_claims"];
+  const before = await Promise.all(names.map(tableExists));
   for (const sql of statements) await prisma.$executeRawUnsafe(sql);
-
-  const after = await Promise.all([
-    tableExists("seo_locations"),
-    tableExists("search_intents"),
-    tableExists("content_topics"),
-    tableExists("seo_brands"),
-    tableExists("seo_claims"),
-  ]);
+  const after = await Promise.all(names.map(tableExists));
 
   console.log(JSON.stringify({
     additiveOnly: true,
-    tables: {
-      seo_locations: { before: before[0], after: after[0] },
-      search_intents: { before: before[1], after: after[1] },
-      content_topics: { before: before[2], after: after[2] },
-      seo_brands: { before: before[3], after: after[3] },
-      seo_claims: { before: before[4], after: after[4] },
-    },
+    tables: Object.fromEntries(names.map((name, index) => [name, { before: before[index], after: after[index] }])),
   }, null, 2));
 }
 
