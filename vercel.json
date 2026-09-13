@@ -8,6 +8,7 @@
     { "source": "/sitemap-products.xml", "destination": "/api/index.js" },
     { "source": "/sitemap-search.xml", "destination": "/api/index.js" },
     { "source": "/sitemap-areas.xml", "destination": "/api/index.js" },
+    { "source": "/sitemap-brands.xml", "destination": "/api/index.js" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

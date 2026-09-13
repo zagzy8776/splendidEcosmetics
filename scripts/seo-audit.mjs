@@ -27,8 +27,7 @@ for (const ref of sitemapRefs) {
   const relative = ref.replace(`${SITE}/`, "");
   const file = path.join(PUBLIC, relative);
   if (!fs.existsSync(file)) {
-    // Dynamic API-backed sitemaps are intentionally served by Vercel.
-    if (!["sitemap-search.xml", "sitemap-areas.xml"].includes(relative)) fail(`sitemap index references missing file: ${relative}`);
+    if (!["sitemap-search.xml", "sitemap-areas.xml", "sitemap-brands.xml"].includes(relative)) fail(`sitemap index references missing file: ${relative}`);
     continue;
   }
   const xml = read(file);
@@ -57,6 +56,7 @@ const routePatterns = [
   "/search/:intentSlug",
   "/guide/:topicSlug",
   "/brand/:brandSlug",
+  "/brands",
 ];
 for (const route of routePatterns) {
   if (!main.includes(`path=\"${route}\"`)) fail(`expected route is missing from src/main.tsx: ${route}`);

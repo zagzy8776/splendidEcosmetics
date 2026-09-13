@@ -100,4 +100,12 @@ app.get("/sitemap-areas.xml", async (_req, res) => {
   } catch (err) { sendSeoError(res, err); }
 });
 
+app.get("/sitemap-brands.xml", async (_req, res) => {
+  try {
+    const brands = await prisma.seoBrand.findMany({ where: { active: true }, select: { slug: true, updatedAt: true, priority: true }, orderBy: { priority: "desc" }, take: 1000 });
+    const urls = brands.map(({ slug, updatedAt }) => `  <url><loc>${escapeXml(`${SITE_URL}/brand/${slug}`)}</loc><lastmod>${new Date(updatedAt).toISOString().slice(0, 10)}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>`).join("\n");
+    res.type("application/xml").send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`);
+  } catch (err) { sendSeoError(res, err); }
+});
+
 export default app;
